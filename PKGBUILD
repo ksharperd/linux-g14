@@ -1,7 +1,7 @@
 # Maintainer: Jan Alexander Steffens (heftig) <jan.steffens@gmail.com>
 
 pkgbase=linux-g14
-pkgver=5.14.9.arch2
+pkgver=5.14.14.arch1
 pkgrel=1
 pkgdesc='Linux'
 _srctag=v${pkgver%.*}-${pkgver##*.}
@@ -24,6 +24,7 @@ source=(
 
   "sys-kernel_arch-sources-g14_files-0004-5.8+--more-uarches-for-kernel.patch"::"https://raw.githubusercontent.com/graysky2/kernel_compiler_patch/a8d200f422f4b2abeaa6cfcfa37136b308e6e33e/more-uarches-for-kernel-5.8%2B.patch"
   "sys-kernel_arch-sources-g14_files-0005-lru-multi-generational.patch"
+  "sys-kernel_arch-sources-g14_files-0006-zstd.patch"
   # mainlined
   #"sys-kernel_arch-sources-g14_files-0006-fix-tigerlake-pin-mapping.patch"
   
@@ -67,7 +68,9 @@ source=(
   #"sys-kernel_arch-sources-g14_files-8024-mediatek-19-09-2021-squashed.patch"
 
   # squashed s0ix enablement through 2021-09-03
-  "sys-kernel_arch-sources-g14_files-9001-v5.14.9-s0ix-patch-2021-10-01.patch"
+  "sys-kernel_arch-sources-g14_files-9001-v5.14.14-s0ix-patch-2021-10-20.patch"
+  "sys-kernel_arch-sources-g14_files-9002-Issue-1710-1712-debugging-and-speculative-fixes.patch"
+
   #"sys-kernel_arch-sources-g14_files-9002-amd-pmc-delay-test.patch"
   # a small amd_pmc SMU debugging patch per Mario Limonciello @AMD
   #"sys-kernel_arch-sources-g14_files-9002-amd-pmc-smu-register-dump-for-diagnostics.patch"
@@ -96,6 +99,7 @@ sha256sums=('SKIP'
             '1ac18cad2578df4a70f9346f7c6fccbb62f042a0ee0594817fdef9f2704904ee'
             'fa6cee9527d8e963d3398085d1862edc509a52e4540baec463edb8a9dd95bee0'
             '69ecf5456468935958f2cbf35691c2533a56344005537902b6051b6323ffff1f'
+            'c9b1e508d2820d812710497172f4a5ab2f7490f3c75977cc8a36be6a83deb1f9'
             '6806c034b7480245a0b9eec448bd79042ff5ff3f9f5efbf2af78227bc56004a8'
             '1ab75535772c63567384eb2ac74753e4d5db2f3317cb265aedf6151b9f18c6c2'
             '32bbcde83406810f41c9ed61206a7596eb43707a912ec9d870fd94f160d247c1'
@@ -119,7 +123,8 @@ sha256sums=('SKIP'
             '6da4010f86a74125969fd3dbc953da7b45209d33ff3d216474c3399e82e893ff'
             'eb391b6d1ebf7ef99ece00b23609b94180a1f3c0149bcf05f6bbeb74d0b724c7'
             'f7afab5f2d872dbb66774a189ed462750985aed0df1d81b3a49db9809e8557b6'
-            'dd5b0df91e7c17e26af4839b3a23ba5e8850d329aeb28137ec6468502418f2bd'
+            '0bbc0ae2e85b82f8bbd73597dbc8d09a77bea79bf33916bb27218e0cd422c77f'
+            '7ad0449622915bcc9297dc51f567e9f1bf71a43971280d0da07a8cb63b6ed81b'
             '544464bf0807b324120767d55867f03014a9fda4e1804768ca341be902d7ade4'
             'f7a4bf6293912bfc4a20743e58a5a266be8c4dbe3c1862d196d3a3b45f2f7c90'
             'ee8794a551e33226900654d5c806183bf3b9b2e06f64fdc322987215d233d399'
@@ -226,12 +231,16 @@ prepare() {
   echo "Prepared $pkgbase version $(<version)"
 
   scripts/config --enable CONFIG_CMDLINE_BOOL \
-               --set-str CONFIG_CMDLINE "pm_debug_messages amd_pmc.dyndbg=+p acpi.dyndbg=file drivers/acpi/x86/s2idle.c +p" \
+               --set-str CONFIG_CMDLINE "pm_debug_messages amd_pmc.dyndbg=+p acpi.dyndbg=file drivers/acpi/x86/s2idle.c +p amd_pmc.enable_stb=1" \
                --disable CMDLINE_OVERRIDE
 
   scripts/config --enable CONFIG_PINCTRL_AMD
   scripts/config --module CONFIG_X86_AMD_PSTATE
   scripts/config --module CONFIG_AMD_PMC
+
+  scripts/config --disable CONFIG_MODULE_COMPRESS_NONE \
+                 --enable CONFIG_MODULE_COMPRESS_ZSTD
+
 }
 
 build() {
