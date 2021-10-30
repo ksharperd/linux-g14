@@ -1,7 +1,7 @@
 # Maintainer: Jan Alexander Steffens (heftig) <jan.steffens@gmail.com>
 
 pkgbase=linux-g14
-pkgver=5.14.14.arch1
+pkgver=5.14.15.arch1
 pkgrel=1
 pkgdesc='Linux'
 _srctag=v${pkgver%.*}-${pkgver##*.}
@@ -64,12 +64,14 @@ source=(
   "sys-kernel_arch-sources-g14_files-8022-mt76-mt7921-report-HE-MU-radiotap.patch"
   "sys-kernel_arch-sources-g14_files-8023-v2-mt76-mt7921-fix-kernel-warning-from-cfg80211_calculate_bitrate.patch"
   "sys-kernel_arch-sources-g14_files-8024-mediatek-more-bt-patches.patch"
+  "sys-kernel_arch-sources-g14_files-8025-r8169_Add_device_10ec_8162_to_driver.patch"
+  "sys-kernel_arch-sources-g14_files-8026-cfg80211-dont-WARN-if-a-self-managed-device.patch"
   
   #"sys-kernel_arch-sources-g14_files-8024-mediatek-19-09-2021-squashed.patch"
 
   # squashed s0ix enablement through 2021-09-03
-  "sys-kernel_arch-sources-g14_files-9001-v5.14.14-s0ix-patch-2021-10-20.patch"
-  "sys-kernel_arch-sources-g14_files-9002-Issue-1710-1712-debugging-and-speculative-fixes.patch"
+  "sys-kernel_arch-sources-g14_files-9001-v5.14.15-s0ix-patch-2021-10-29.patch"
+  #"sys-kernel_arch-sources-g14_files-9002-Issue-1710-1712-debugging-and-speculative-fixes.patch"
 
   #"sys-kernel_arch-sources-g14_files-9002-amd-pmc-delay-test.patch"
   # a small amd_pmc SMU debugging patch per Mario Limonciello @AMD
@@ -123,14 +125,15 @@ sha256sums=('SKIP'
             '6da4010f86a74125969fd3dbc953da7b45209d33ff3d216474c3399e82e893ff'
             'eb391b6d1ebf7ef99ece00b23609b94180a1f3c0149bcf05f6bbeb74d0b724c7'
             'f7afab5f2d872dbb66774a189ed462750985aed0df1d81b3a49db9809e8557b6'
-            '0bbc0ae2e85b82f8bbd73597dbc8d09a77bea79bf33916bb27218e0cd422c77f'
-            '7ad0449622915bcc9297dc51f567e9f1bf71a43971280d0da07a8cb63b6ed81b'
+            '1bf0443a986b8382d21c9363a7cba944df3140f82141cd2287a2b3383572ee2f'
+            '3d8961438b5c8110588ff0b881d472fc71a4304d306808d78a4055a4150f351e'
+            '59c8ccde851c15e394b9fc0df7c7069ab97860aff8d8157bbc6d14d0e90d5b5e'
             '544464bf0807b324120767d55867f03014a9fda4e1804768ca341be902d7ade4'
             'f7a4bf6293912bfc4a20743e58a5a266be8c4dbe3c1862d196d3a3b45f2f7c90'
             'ee8794a551e33226900654d5c806183bf3b9b2e06f64fdc322987215d233d399'
             '2d854fc70297bb52bbc27dbf35ca019800530e40565be9740704d7f81bc4c763'
             '1cec0be41732a23c709e66d4a67e71bc5a75c77a3e4b73faafb5d7bfd3fafc0f'
-            '9025ca0788fbacea25200e6ac17036960000424843f544cdd781052231da7903'
+            'be848356e974adf6a8ea1603aaa645a77f1efa88602de2d1f0d7efd3a76486f1'
             'e7bd53abc9fddc66790a2e63637b4e2b54ed541f41a2f0fb3aca91ea64ff90dc')
 
 # notable microarch levels:
@@ -230,12 +233,15 @@ prepare() {
   make -s kernelrelease > version
   echo "Prepared $pkgbase version $(<version)"
 
-  scripts/config --enable CONFIG_CMDLINE_BOOL \
-               --set-str CONFIG_CMDLINE "pm_debug_messages amd_pmc.dyndbg=+p acpi.dyndbg=file drivers/acpi/x86/s2idle.c +p amd_pmc.enable_stb=1" \
-               --disable CMDLINE_OVERRIDE
+  scripts/config  --enable CONFIG_CMDLINE_BOOL \
+                  --set-str CONFIG_CMDLINE "makepkgplaceholderyolo" \
+                  --disable CMDLINE_OVERRIDE
+
+  ## HACK: forcibly fixup CONFIG_CMDLINE as scripts/config mangles quote escapes
+  sed -i 's#makepkgplaceholderyolo#pm_debug_messages amd_pmc.enable_stb=1 amd_pmc.dyndbg=\\"+p\\" acpi.dyndbg=\\"file drivers/acpi/x86/s2idle.c +p\\"#' .config
 
   scripts/config --enable CONFIG_PINCTRL_AMD
-  scripts/config --module CONFIG_X86_AMD_PSTATE
+  scripts/config --enable CONFIG_X86_AMD_PSTATE
   scripts/config --module CONFIG_AMD_PMC
 
   scripts/config --disable CONFIG_MODULE_COMPRESS_NONE \
