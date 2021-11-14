@@ -1,7 +1,7 @@
 # Maintainer: Jan Alexander Steffens (heftig) <jan.steffens@gmail.com>
 
 pkgbase=linux-g14
-pkgver=5.14.16.arch1
+pkgver=5.15.2.arch1
 pkgrel=1
 pkgdesc='Linux'
 _srctag=v${pkgver%.*}-${pkgver##*.}
@@ -22,7 +22,7 @@ source=(
   config         # the main kernel config file
   "choose-gcc-optimization.sh"
 
-  "sys-kernel_arch-sources-g14_files-0004-5.8+--more-uarches-for-kernel.patch"::"https://raw.githubusercontent.com/graysky2/kernel_compiler_patch/a8d200f422f4b2abeaa6cfcfa37136b308e6e33e/more-uarches-for-kernel-5.8%2B.patch"
+  "sys-kernel_arch-sources-g14_files-0004-5.15+--more-uarches-for-kernel.patch"::"https://raw.githubusercontent.com/graysky2/kernel_compiler_patch/master/more-uarches-for-kernel-5.15+.patch"
   "sys-kernel_arch-sources-g14_files-0005-lru-multi-generational.patch"
   "sys-kernel_arch-sources-g14_files-0006-zstd.patch"
   # mainlined
@@ -30,27 +30,16 @@ source=(
   
   "https://gitlab.com/asus-linux/fedora-kernel/-/archive/$_fedora_kernel_commit_id/fedora-kernel-$_fedora_kernel_commit_id.zip"
 
-  # for now let's just pull the 5 asus-linux patches we need directly and skip all of the git filtering
-  "sys-kernel_arch-sources-g14_files-0039-asus-wmi-Add-panel-overdrive-functionality.patch"
   # pull newer version from fedora repo
   #"sys-kernel_arch-sources-g14_files-0040-asus-wmi-Add-dgpu-disable-method.patch"
   #"sys-kernel_arch-sources-g14_files-0041-asus-wmi-Add-egpu-enable-method.patch"
   #"sys-kernel_arch-sources-g14_files-0042-HID-asus-Remove-check-for-same-LED-brightness-on-set.patch"
   "sys-kernel_arch-sources-g14_files-0043-ALSA-hda-realtek-Fix-speakers-not-working-on-Asus-Fl.patch"
-  "sys-kernel_arch-sources-g14_files-0044-claymore.patch"
-  "sys-kernel_arch-sources-g14_files-0045-v5-asus-wmi-Add-support-for-platform_profile.patch"
   "sys-kernel_arch-sources-g14_files-0046-fan-curvers.patch"
   "sys-kernel_arch-sources-g14_files-0047-asus-nb-wmi-Add-tablet_mode_sw-lid-flip.patch"
   "sys-kernel_arch-sources-g14_files-0048-asus-nb-wmi-fix-tablet_mode_sw_int.patch"
 
-  # k10temp support for Zen3 APUs
-  #"sys-kernel_arch-sources-g14_files-8001-x86-amd_nb-Add-AMD-family-19h-model-50h-PCI-ids.patch"
-  "sys-kernel_arch-sources-g14_files-8002-hwmon-k10temp-support-Zen3-APUs.patch"
-
-
   # mediatek mt7921 bt/wifi patches
-  
-  "sys-kernel_arch-sources-g14_files-8011-Bluetooth-btusb-Enable-MSFT-extension-for-Mediatek-Chip-MT7921.patch"
   "sys-kernel_arch-sources-g14_files-8012-mt76-mt7915-send-EAPOL-frames-at-lowest-rate.patch"
   "sys-kernel_arch-sources-g14_files-8013-mt76-mt7921-robustify-hardware-initialization-flow.patch"
   "sys-kernel_arch-sources-g14_files-8014-mt76-mt7921-fix-retrying-release-semaphore-without-end.patch"
@@ -64,19 +53,19 @@ source=(
   "sys-kernel_arch-sources-g14_files-8022-mt76-mt7921-report-HE-MU-radiotap.patch"
   "sys-kernel_arch-sources-g14_files-8023-v2-mt76-mt7921-fix-kernel-warning-from-cfg80211_calculate_bitrate.patch"
   "sys-kernel_arch-sources-g14_files-8024-mediatek-more-bt-patches.patch"
-  "sys-kernel_arch-sources-g14_files-8025-r8169_Add_device_10ec_8162_to_driver.patch"
   "sys-kernel_arch-sources-g14_files-8026-cfg80211-dont-WARN-if-a-self-managed-device.patch"
 
   "sys-kernel_arch-sources-g14_files-8050-r8152-fix-spurious-wakeups-from-s0i3.patch"
 
+  #testing for enabling dsc over edp
+  #"sys-kernel_arch-sources-g14_files-8050-move_bpp_range_decision.patch"
+  #"sys-kernel_arch-sources-g14_files-8051-amdgpu_enable_dsc_over_edp.patch"
+  #"sys-kernel_arch-sources-g14_files-8052-amdgpu-disable_dsc_edp.patch"
   
-  #"sys-kernel_arch-sources-g14_files-8024-mediatek-19-09-2021-squashed.patch"
 
   # squashed s0ix enablement through 2021-09-03
-  "sys-kernel_arch-sources-g14_files-8050-move_bpp_range_decision.patch"
-  "sys-kernel_arch-sources-g14_files-8051-amdgpu_enable_dsc_over_edp.patch"
-  "sys-kernel_arch-sources-g14_files-8052-amdgpu-disable_dsc_edp.patch"
-  "sys-kernel_arch-sources-g14_files-9001-v5.14.16-s0ix-patch-2021-11-02.patch"
+  
+  "sys-kernel_arch-sources-g14_files-9001-v5.15-s0ix-patch-2021-11-04.patch"
   #"sys-kernel_arch-sources-g14_files-9002-Issue-1710-1712-debugging-and-speculative-fixes.patch"
 
   #"sys-kernel_arch-sources-g14_files-9002-amd-pmc-delay-test.patch"
@@ -93,6 +82,7 @@ source=(
   "sys-kernel_arch-sources-g14_files-9008-fix-cpu-hotplug.patch"
   "sys-kernel_arch-sources-g14_files-9009-amd-pstate-sqashed.patch"
   "sys-kernel_arch-sources-g14_files-9010-ACPI-PM-s2idle-Don-t-report-missing-devices-as-faili.patch"
+  "sys-kernel_arch-sources-g14_files-9012-x86-change-default-to-spec_store_bypass_disable-prct.patch"
 )
 
 validpgpkeys=(
@@ -170,6 +160,7 @@ _fedora_kernel_patch_skip_list=(
   
   0001-asus-wmi-Add-support-for-platform_profile.patch
   0001-asus-wmi-Add-panel-overdrive-functionality.patch
+  0002-asus-wmi-Add-dgpu-disable-method.patch
   0004-HID-asus-Remove-check-for-same-LED-brightness-on-set.patch
   0001-HID-asus-Prevent-Claymore-sending-suspend-event.patch
   0015-PCI-quirks-Quirk-PCI-d3hot-delay-for-AMD-xhci.patch
@@ -256,6 +247,22 @@ prepare() {
   scripts/config --disable CONFIG_MODULE_COMPRESS_NONE \
                  --enable CONFIG_MODULE_COMPRESS_ZSTD
 
+  ## SET default LRU parameters
+  scripts/config --enable CONFIG_LRU_GEN
+  scripts/config --enable CONFIG_LRU_GEN_ENABLED
+  scripts/config --disable CONFIG_LRU_GEN_STATS
+  scripts/config --set-val CONFIG_NR_LRU_GENS 7
+  scripts/config --set-val CONFIG_TIERS_PER_GEN 4
+
+  # DISABLE not need modules on ROG laptops
+  scripts/config  --disable CONFIG_INFINIBAND \
+                --disable CONFIG_DRM_NOUVEAU \
+                --disable CONFIG_PCMCIA_WL3501 \
+                --disable CONFIG_PCMCIA_RAYCS \
+                --disable CONFIG_IWL3945 \
+                --disable CONFIG_IWL4965 \
+                --disable CONFIG_IPW2200 \
+                --disable CONFIG_IPW2100
 }
 
 build() {
