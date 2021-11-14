@@ -1,7 +1,7 @@
 # Maintainer: Jan Alexander Steffens (heftig) <jan.steffens@gmail.com>
 
 pkgbase=linux-g14
-pkgver=5.14.15.arch1
+pkgver=5.14.16.arch1
 pkgrel=1
 pkgdesc='Linux'
 _srctag=v${pkgver%.*}-${pkgver##*.}
@@ -66,11 +66,17 @@ source=(
   "sys-kernel_arch-sources-g14_files-8024-mediatek-more-bt-patches.patch"
   "sys-kernel_arch-sources-g14_files-8025-r8169_Add_device_10ec_8162_to_driver.patch"
   "sys-kernel_arch-sources-g14_files-8026-cfg80211-dont-WARN-if-a-self-managed-device.patch"
+
+  "sys-kernel_arch-sources-g14_files-8050-r8152-fix-spurious-wakeups-from-s0i3.patch"
+
   
   #"sys-kernel_arch-sources-g14_files-8024-mediatek-19-09-2021-squashed.patch"
 
   # squashed s0ix enablement through 2021-09-03
-  "sys-kernel_arch-sources-g14_files-9001-v5.14.15-s0ix-patch-2021-10-29.patch"
+  "sys-kernel_arch-sources-g14_files-8050-move_bpp_range_decision.patch"
+  "sys-kernel_arch-sources-g14_files-8051-amdgpu_enable_dsc_over_edp.patch"
+  "sys-kernel_arch-sources-g14_files-8052-amdgpu-disable_dsc_edp.patch"
+  "sys-kernel_arch-sources-g14_files-9001-v5.14.16-s0ix-patch-2021-11-02.patch"
   #"sys-kernel_arch-sources-g14_files-9002-Issue-1710-1712-debugging-and-speculative-fixes.patch"
 
   #"sys-kernel_arch-sources-g14_files-9002-amd-pmc-delay-test.patch"
@@ -107,7 +113,7 @@ sha256sums=('SKIP'
             '32bbcde83406810f41c9ed61206a7596eb43707a912ec9d870fd94f160d247c1'
             'e2d312ea95d18e91801d131a2b5d03cf2175d3088cac6f84a19410078a5b6b14'
             '4ef12029ea73ca924b6397e1de4911e84d9e77ddaccdab1ef579823d848524e8'
-            '1e547bddf80d201f77da1d876cd280e4d40b377bbd8ebc218f0ba57cd959ff76'
+            '0c422d8f420c1518aab1b980c6cdb6e029a4fa9cde1fd99a63670bb105a44f36'
             '15e912a66e4bbce1cf0450f1dc6610653df29df8dd6d5426f9c1b039490436c8'
             'e9e4b03b836e1a86a2a5dc70b0d5512348eb19742f83bee794a3ab7d91bd41cf'
             'de8c9747637768c4356c06aa65c3f157c526aa420f21fdd5edd0ed06f720a62e'
@@ -127,7 +133,10 @@ sha256sums=('SKIP'
             'f7afab5f2d872dbb66774a189ed462750985aed0df1d81b3a49db9809e8557b6'
             '1bf0443a986b8382d21c9363a7cba944df3140f82141cd2287a2b3383572ee2f'
             '3d8961438b5c8110588ff0b881d472fc71a4304d306808d78a4055a4150f351e'
-            '59c8ccde851c15e394b9fc0df7c7069ab97860aff8d8157bbc6d14d0e90d5b5e'
+            'f47a5a5e329e410a0ae7d46b450707d5575a4deda5b3b58281f5eca14938fb21'
+            '0e5312e9339c1249f7690083bf95c1adee57f8a5b1cc01a339af167bdd91619e'
+            'a3bee998442526492dd359ed64e3ca6003a39959fadcd2d28f4239e137c3e797'
+            '4eb192941184e2c88c749ecb67c6f6b927fefcbf97f2f4433c4c9c5d079790ba'
             '544464bf0807b324120767d55867f03014a9fda4e1804768ca341be902d7ade4'
             'f7a4bf6293912bfc4a20743e58a5a266be8c4dbe3c1862d196d3a3b45f2f7c90'
             'ee8794a551e33226900654d5c806183bf3b9b2e06f64fdc322987215d233d399'
