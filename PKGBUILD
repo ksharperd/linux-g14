@@ -1,7 +1,7 @@
 # Maintainer: Jan Alexander Steffens (heftig) <jan.steffens@gmail.com>
 
 pkgbase=linux-g14
-pkgver=5.15.2.arch1
+pkgver=5.15.4.arch1
 pkgrel=1
 pkgdesc='Linux'
 _srctag=v${pkgver%.*}-${pkgver##*.}
@@ -42,16 +42,16 @@ source=(
   # mediatek mt7921 bt/wifi patches
   "sys-kernel_arch-sources-g14_files-8012-mt76-mt7915-send-EAPOL-frames-at-lowest-rate.patch"
   "sys-kernel_arch-sources-g14_files-8013-mt76-mt7921-robustify-hardware-initialization-flow.patch"
-  "sys-kernel_arch-sources-g14_files-8014-mt76-mt7921-fix-retrying-release-semaphore-without-end.patch"
+  #"sys-kernel_arch-sources-g14_files-8014-mt76-mt7921-fix-retrying-release-semaphore-without-end.patch"
   "sys-kernel_arch-sources-g14_files-8015-mt76-mt7921-send-EAPOL-frames-at-lowest-rate.patch"
   "sys-kernel_arch-sources-g14_files-8016-mt76-mt7921-Add-mt7922-support.patch"
   "sys-kernel_arch-sources-g14_files-8017-mt76-mt7921-enable-VO-tx-aggregation.patch"
-  "sys-kernel_arch-sources-g14_files-8018-mt76-mt7921-fix-dma-hang-in-rmmod.patch"
-  "sys-kernel_arch-sources-g14_files-8019-mt76-mt7921-fix-firmware-usage-of-RA-info-using-legacy-rates.patch"
-  "sys-kernel_arch-sources-g14_files-8020-mt76-mt7921-Fix-out-of-order-process-by-invalid-even.patch"
-  "sys-kernel_arch-sources-g14_files-8021-mt76-mt7921-fix-the-inconsistent-state-between-bind-and-unbind.patch"
-  "sys-kernel_arch-sources-g14_files-8022-mt76-mt7921-report-HE-MU-radiotap.patch"
-  "sys-kernel_arch-sources-g14_files-8023-v2-mt76-mt7921-fix-kernel-warning-from-cfg80211_calculate_bitrate.patch"
+  #"sys-kernel_arch-sources-g14_files-8018-mt76-mt7921-fix-dma-hang-in-rmmod.patch"
+  #"sys-kernel_arch-sources-g14_files-8019-mt76-mt7921-fix-firmware-usage-of-RA-info-using-legacy-rates.patch"
+  #"sys-kernel_arch-sources-g14_files-8020-mt76-mt7921-Fix-out-of-order-process-by-invalid-even.patch"
+  #"sys-kernel_arch-sources-g14_files-8021-mt76-mt7921-fix-the-inconsistent-state-between-bind-and-unbind.patch"
+  #"sys-kernel_arch-sources-g14_files-8022-mt76-mt7921-report-HE-MU-radiotap.patch"
+  #"sys-kernel_arch-sources-g14_files-8023-v2-mt76-mt7921-fix-kernel-warning-from-cfg80211_calculate_bitrate.patch"
   "sys-kernel_arch-sources-g14_files-8024-mediatek-more-bt-patches.patch"
   "sys-kernel_arch-sources-g14_files-8026-cfg80211-dont-WARN-if-a-self-managed-device.patch"
 
@@ -65,7 +65,7 @@ source=(
 
   # squashed s0ix enablement through 2021-09-03
   
-  "sys-kernel_arch-sources-g14_files-9001-v5.15-s0ix-patch-2021-11-04.patch"
+  "sys-kernel_arch-sources-g14_files-9001-v5.15-s0ix-patch-2021-11-19.patch"
   #"sys-kernel_arch-sources-g14_files-9002-Issue-1710-1712-debugging-and-speculative-fixes.patch"
 
   #"sys-kernel_arch-sources-g14_files-9002-amd-pmc-delay-test.patch"
@@ -83,6 +83,8 @@ source=(
   "sys-kernel_arch-sources-g14_files-9009-amd-pstate-sqashed.patch"
   "sys-kernel_arch-sources-g14_files-9010-ACPI-PM-s2idle-Don-t-report-missing-devices-as-faili.patch"
   "sys-kernel_arch-sources-g14_files-9012-x86-change-default-to-spec_store_bypass_disable-prct.patch"
+
+  "sys-kernel_arch-sources-g14_files-9052-x86-csum-Rewrite-optimize-csum_partial.patch"
 )
 
 validpgpkeys=(
@@ -233,13 +235,6 @@ prepare() {
   make -s kernelrelease > version
   echo "Prepared $pkgbase version $(<version)"
 
-  scripts/config  --enable CONFIG_CMDLINE_BOOL \
-                  --set-str CONFIG_CMDLINE "makepkgplaceholderyolo" \
-                  --disable CMDLINE_OVERRIDE
-
-  ## HACK: forcibly fixup CONFIG_CMDLINE as scripts/config mangles quote escapes
-  sed -i 's#makepkgplaceholderyolo#pm_debug_messages amd_pmc.enable_stb=1 amd_pmc.dyndbg=\\"+p\\" acpi.dyndbg=\\"file drivers/acpi/x86/s2idle.c +p\\"#' .config
-
   scripts/config --enable CONFIG_PINCTRL_AMD
   scripts/config --enable CONFIG_X86_AMD_PSTATE
   scripts/config --module CONFIG_AMD_PMC
@@ -255,14 +250,35 @@ prepare() {
   scripts/config --set-val CONFIG_TIERS_PER_GEN 4
 
   # DISABLE not need modules on ROG laptops
+  # XXX: I'm going to make an opinionated decision here and save everyone some compilation time
+  # XXX: on drivers almost no-one is going to use; if you need any of theese turn them on in myconfig
   scripts/config  --disable CONFIG_INFINIBAND \
-                --disable CONFIG_DRM_NOUVEAU \
-                --disable CONFIG_PCMCIA_WL3501 \
-                --disable CONFIG_PCMCIA_RAYCS \
-                --disable CONFIG_IWL3945 \
-                --disable CONFIG_IWL4965 \
-                --disable CONFIG_IPW2200 \
-                --disable CONFIG_IPW2100
+                  --disable CONFIG_DRM_NOUVEAU \
+                  --disable CONFIG_PCMCIA_WL3501 \
+                  --disable CONFIG_PCMCIA_RAYCS \
+                  --disable CONFIG_IWL3945 \
+                  --disable CONFIG_IWL4965 \
+                  --disable CONFIG_IPW2200 \
+                  --disable CONFIG_IPW2100
+
+  # select slightly more sane block device driver options; NVMe really should be built in 
+  scripts/config  --disable CONFIG_RAPIDIO \
+                  --module CONFIG_CDROM \
+                  --disable CONFIG_PARIDE \
+
+  # bake in s0ix debugging parameters so we get useful problem reports re: suspend
+  scripts/config  --enable CONFIG_CMDLINE_BOOL \
+                  --set-str CONFIG_CMDLINE "makepkgplaceholderyolo" \
+                  --disable CMDLINE_OVERRIDE
+
+  # HACK: forcibly fixup CONFIG_CMDLINE here as using scripts/config mangles escaped quotes
+  sed -i 's#makepkgplaceholderyolo#pm_debug_messages amd_pmc.enable_stb=1 amd_pmc.dyndbg=\\"+p\\" acpi.dyndbg=\\"file drivers/acpi/x86/s2idle.c +p\\"#' .config
+
+  # Note the double escaped quotes above, sed strips one; the final result in .config needs to contain single slash
+  # escaped quotes (eg: `CONFIG_CMDLINE="foo.dyndbg=\"+p\""`) to avoid dyndbg parse errors at boot. This is impossible
+  # with the current kernel config script.
+
+
 }
 
 build() {
