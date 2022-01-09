@@ -1,7 +1,7 @@
 # Maintainer: Jan Alexander Steffens (heftig) <jan.steffens@gmail.com>
 
 pkgbase=linux-g14
-pkgver=5.15.4.arch1
+pkgver=5.15.13.arch1
 pkgrel=1
 pkgdesc='Linux'
 _srctag=v${pkgver%.*}-${pkgver##*.}
@@ -25,15 +25,10 @@ source=(
   "sys-kernel_arch-sources-g14_files-0004-5.15+--more-uarches-for-kernel.patch"::"https://raw.githubusercontent.com/graysky2/kernel_compiler_patch/master/more-uarches-for-kernel-5.15+.patch"
   "sys-kernel_arch-sources-g14_files-0005-lru-multi-generational.patch"
   "sys-kernel_arch-sources-g14_files-0006-zstd.patch"
-  # mainlined
-  #"sys-kernel_arch-sources-g14_files-0006-fix-tigerlake-pin-mapping.patch"
   
   "https://gitlab.com/asus-linux/fedora-kernel/-/archive/$_fedora_kernel_commit_id/fedora-kernel-$_fedora_kernel_commit_id.zip"
 
   # pull newer version from fedora repo
-  #"sys-kernel_arch-sources-g14_files-0040-asus-wmi-Add-dgpu-disable-method.patch"
-  #"sys-kernel_arch-sources-g14_files-0041-asus-wmi-Add-egpu-enable-method.patch"
-  #"sys-kernel_arch-sources-g14_files-0042-HID-asus-Remove-check-for-same-LED-brightness-on-set.patch"
   "sys-kernel_arch-sources-g14_files-0043-ALSA-hda-realtek-Fix-speakers-not-working-on-Asus-Fl.patch"
   "sys-kernel_arch-sources-g14_files-0046-fan-curvers.patch"
   "sys-kernel_arch-sources-g14_files-0047-asus-nb-wmi-Add-tablet_mode_sw-lid-flip.patch"
@@ -42,36 +37,16 @@ source=(
   # mediatek mt7921 bt/wifi patches
   "sys-kernel_arch-sources-g14_files-8012-mt76-mt7915-send-EAPOL-frames-at-lowest-rate.patch"
   "sys-kernel_arch-sources-g14_files-8013-mt76-mt7921-robustify-hardware-initialization-flow.patch"
-  #"sys-kernel_arch-sources-g14_files-8014-mt76-mt7921-fix-retrying-release-semaphore-without-end.patch"
   "sys-kernel_arch-sources-g14_files-8015-mt76-mt7921-send-EAPOL-frames-at-lowest-rate.patch"
   "sys-kernel_arch-sources-g14_files-8016-mt76-mt7921-Add-mt7922-support.patch"
   "sys-kernel_arch-sources-g14_files-8017-mt76-mt7921-enable-VO-tx-aggregation.patch"
-  #"sys-kernel_arch-sources-g14_files-8018-mt76-mt7921-fix-dma-hang-in-rmmod.patch"
-  #"sys-kernel_arch-sources-g14_files-8019-mt76-mt7921-fix-firmware-usage-of-RA-info-using-legacy-rates.patch"
-  #"sys-kernel_arch-sources-g14_files-8020-mt76-mt7921-Fix-out-of-order-process-by-invalid-even.patch"
-  #"sys-kernel_arch-sources-g14_files-8021-mt76-mt7921-fix-the-inconsistent-state-between-bind-and-unbind.patch"
-  #"sys-kernel_arch-sources-g14_files-8022-mt76-mt7921-report-HE-MU-radiotap.patch"
-  #"sys-kernel_arch-sources-g14_files-8023-v2-mt76-mt7921-fix-kernel-warning-from-cfg80211_calculate_bitrate.patch"
   "sys-kernel_arch-sources-g14_files-8024-mediatek-more-bt-patches.patch"
   "sys-kernel_arch-sources-g14_files-8026-cfg80211-dont-WARN-if-a-self-managed-device.patch"
 
   "sys-kernel_arch-sources-g14_files-8050-r8152-fix-spurious-wakeups-from-s0i3.patch"
 
-  #testing for enabling dsc over edp
-  #"sys-kernel_arch-sources-g14_files-8050-move_bpp_range_decision.patch"
-  #"sys-kernel_arch-sources-g14_files-8051-amdgpu_enable_dsc_over_edp.patch"
-  #"sys-kernel_arch-sources-g14_files-8052-amdgpu-disable_dsc_edp.patch"
-  
-
-  # squashed s0ix enablement through 2021-09-03
-  
-  "sys-kernel_arch-sources-g14_files-9001-v5.15-s0ix-patch-2021-11-19.patch"
-  #"sys-kernel_arch-sources-g14_files-9002-Issue-1710-1712-debugging-and-speculative-fixes.patch"
-
-  #"sys-kernel_arch-sources-g14_files-9002-amd-pmc-delay-test.patch"
-  # a small amd_pmc SMU debugging patch per Mario Limonciello @AMD
-  #"sys-kernel_arch-sources-g14_files-9002-amd-pmc-smu-register-dump-for-diagnostics.patch"
-  
+  # squashed s0ix enablement through
+  "sys-kernel_arch-sources-g14_files-9001-v5.15.8-s0ix-patch-2021-12-14.patch"
   "sys-kernel_arch-sources-g14_files-9004-HID-asus-Reduce-object-size-by-consolidating-calls.patch"
   "sys-kernel_arch-sources-g14_files-9005-acpi-battery-Always-read-fresh-battery-state-on-update.patch"
   
@@ -80,7 +55,7 @@ source=(
   "sys-kernel_arch-sources-g14_files-9007-squashed-net-tcp_bbr-bbr2-for-5.14.y.patch"
 
   "sys-kernel_arch-sources-g14_files-9008-fix-cpu-hotplug.patch"
-  "sys-kernel_arch-sources-g14_files-9009-amd-pstate-sqashed.patch"
+  "sys-kernel_arch-sources-g14_files-9009-amd-pstate-sqashed-v7.patch"
   "sys-kernel_arch-sources-g14_files-9010-ACPI-PM-s2idle-Don-t-report-missing-devices-as-faili.patch"
   "sys-kernel_arch-sources-g14_files-9012-x86-change-default-to-spec_store_bypass_disable-prct.patch"
 
@@ -95,47 +70,34 @@ validpgpkeys=(
 )
 
 sha256sums=('SKIP'
-            'aa50b2ec33ce304f9b99ce80555a17ea18b1005dae147a560587acbdae00546f'
-            '1ac18cad2578df4a70f9346f7c6fccbb62f042a0ee0594817fdef9f2704904ee'
-            'fa6cee9527d8e963d3398085d1862edc509a52e4540baec463edb8a9dd95bee0'
-            '69ecf5456468935958f2cbf35691c2533a56344005537902b6051b6323ffff1f'
-            'c9b1e508d2820d812710497172f4a5ab2f7490f3c75977cc8a36be6a83deb1f9'
+            '0eecdc29b3bde4bccda282c4c04ef114250fedddcf3dbf07a3cc201dce35838f'
+            '5b8eddb90671f3e8469a023b7ed0d3c5a9521f662affa1d541063e273b64dba8'
+            '5e5fcb9500c469f49db4b893bd88ff96f420b9ae1e7aea8d86adca939c132b9b'
+            '76ce4379907ecc7047776bfcf9dc26268d1d526389f976b9ac8d52d3f8d5fce1'
+            '50fee0bcd896c4fe1494e3b5d40ea8592210ea3b35d947bb7feb62b46b47ca82'
             '6806c034b7480245a0b9eec448bd79042ff5ff3f9f5efbf2af78227bc56004a8'
-            '1ab75535772c63567384eb2ac74753e4d5db2f3317cb265aedf6151b9f18c6c2'
             '32bbcde83406810f41c9ed61206a7596eb43707a912ec9d870fd94f160d247c1'
-            'e2d312ea95d18e91801d131a2b5d03cf2175d3088cac6f84a19410078a5b6b14'
-            '4ef12029ea73ca924b6397e1de4911e84d9e77ddaccdab1ef579823d848524e8'
             '0c422d8f420c1518aab1b980c6cdb6e029a4fa9cde1fd99a63670bb105a44f36'
             '15e912a66e4bbce1cf0450f1dc6610653df29df8dd6d5426f9c1b039490436c8'
             'e9e4b03b836e1a86a2a5dc70b0d5512348eb19742f83bee794a3ab7d91bd41cf'
-            'de8c9747637768c4356c06aa65c3f157c526aa420f21fdd5edd0ed06f720a62e'
-            '9f6b8c3ea6e1c285e0a7efda4d743dbae343bc6ee7ad599a4ab7d380c750bc83'
             '4bfbff4eba07fc9de2ce78097a4a269509468ba0e24c15a82905cd94e093ad55'
             'c368cc4eefff20b7ae904eec686b7e72b46ff02b32c8a4fbd6bd4039f087e7ba'
-            '1a8639167a1ee1b66f580c0c6f8304e6ef359a68cfa3eb869d9200a9f0234098'
             '021f8539ab2fb722b46937b95fdab22a2308236a24ecc1a9ea8db4853721dd39'
             'a01cf700d79b983807e2285be1b30df6e02db6adfd9c9027fe2dfa8ca5a74bc9'
             '1ce9fd988201c4d2e48794c58acda5b768ec0fea1d29555e99d35cd2712281e4'
-            'e7e37c7c433c58e2f5a79e2a7724823bef1dccaa01e857584397b4e3c837d991'
-            'f075ac354acfd65dff4db49dc9798747cb9b7a3dd9839987bc46495bdbbd22dc'
-            '2163cb2e394a013042a40cd3b00dae788603284b20d71e262995366c5534e480'
-            '1770fec49335bc93194e9e55ced49e1cb67f2df4bf6948e80712a0b2ba50fa49'
-            '6da4010f86a74125969fd3dbc953da7b45209d33ff3d216474c3399e82e893ff'
-            'eb391b6d1ebf7ef99ece00b23609b94180a1f3c0149bcf05f6bbeb74d0b724c7'
             'f7afab5f2d872dbb66774a189ed462750985aed0df1d81b3a49db9809e8557b6'
-            '1bf0443a986b8382d21c9363a7cba944df3140f82141cd2287a2b3383572ee2f'
             '3d8961438b5c8110588ff0b881d472fc71a4304d306808d78a4055a4150f351e'
             'f47a5a5e329e410a0ae7d46b450707d5575a4deda5b3b58281f5eca14938fb21'
-            '0e5312e9339c1249f7690083bf95c1adee57f8a5b1cc01a339af167bdd91619e'
-            'a3bee998442526492dd359ed64e3ca6003a39959fadcd2d28f4239e137c3e797'
-            '4eb192941184e2c88c749ecb67c6f6b927fefcbf97f2f4433c4c9c5d079790ba'
+            'd2267cad50e2c18a4ffa69171b396e4ed9eaf95bb588a0b1d350c88858e920de'
             '544464bf0807b324120767d55867f03014a9fda4e1804768ca341be902d7ade4'
             'f7a4bf6293912bfc4a20743e58a5a266be8c4dbe3c1862d196d3a3b45f2f7c90'
             'ee8794a551e33226900654d5c806183bf3b9b2e06f64fdc322987215d233d399'
             '2d854fc70297bb52bbc27dbf35ca019800530e40565be9740704d7f81bc4c763'
             '1cec0be41732a23c709e66d4a67e71bc5a75c77a3e4b73faafb5d7bfd3fafc0f'
-            'be848356e974adf6a8ea1603aaa645a77f1efa88602de2d1f0d7efd3a76486f1'
-            'e7bd53abc9fddc66790a2e63637b4e2b54ed541f41a2f0fb3aca91ea64ff90dc')
+            '8f62b1b6b1bade3f0cc04a72292e9307d00f87f02e097e7cb59a7f76c9f92758'
+            'e7bd53abc9fddc66790a2e63637b4e2b54ed541f41a2f0fb3aca91ea64ff90dc'
+            'cc401107f1bf7b7d8e8a78ee594f9db4b6fa252b7239b6aa88f678aef84d935c'
+            '261807a9bc838709bd04e65a83eba2fefd8554699e5dfc8da9a1ee8499807813')
 
 # notable microarch levels:
 #

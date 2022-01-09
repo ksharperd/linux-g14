@@ -1,0 +1,3505 @@
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Return-Path: <linux-kernel-owner@kernel.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
+	aws-us-west-2-korg-lkml-1.web.codeaurora.org
+Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F0316C433EF
+	for <linux-kernel@archiver.kernel.org>; Fri, 24 Dec 2021 01:05:48 +0000 (UTC)
+Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
+        id S1350513AbhLXBFj (ORCPT
+        <rfc822;linux-kernel@archiver.kernel.org>);
+        Thu, 23 Dec 2021 20:05:39 -0500
+Received: from mail-bn7nam10on2061.outbound.protection.outlook.com ([40.107.92.61]:24385
+        "EHLO NAM10-BN7-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1350464AbhLXBFi (ORCPT <rfc822;linux-kernel@vger.kernel.org>);
+        Thu, 23 Dec 2021 20:05:38 -0500
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=XS6qX87tPhaZQtYdW0laSdq1CUaGhwXXoKL7t2vsp4gNo3evskvZ/b04P9sssoFafYa3ioVKj9R5YbaS+WGeoduz9bLZAsy9m4MlvOVA+1QMXK36a5fx+IzqRh8ogDydPf14mYZxFFJAEh5PTJlVERtVCMwDSF20pAmlf6IbiCDulB6HfJZnhr28A7eV23POJ5ytGSdNBRDS3+tr4CJ/pDSk6oYR+xlVUKuAgy0WYyfTSHKgVMq46EM9WktiIwkK9tI4Pa1jiOKTT4FzUFcB02lD/4TUtOjigzwSiuDmIWoTX0il6Gg6A9TgVbk+6n5T1zFq7vHavDMke73UL3Dt4A==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=VFpsTHzsc4S/yAm2lai1tvTk8AIOTj4EwQTjCfegOTM=;
+ b=kWcrLlPZ+YrCbcMu5PVOsAAIkGnZkBV0cAsJJDiTYcjjRfGrzemjIs1vWsOlG7K9cZs9oKyO1tfOd5fXchHWkcN0cxACskrh8/j8Yw9UuCeJjibFGBSd5CufDW1aoTWe1ie8YKzmp4vVw8e+mAy1k6YujVLHqksLBmuaSEIpV68Uc4Nu/NBOJD95HUiTE7NJqOt7iDIfmyFgpT2npA7f4S2Q6njKLipjOpVN5cd0Nr8ob+UkWFIf7JVXrfsebFlOrNcWuIg5v2kLgzARAR4eoXGGxL9pniWUZmW1DYz+nt2K1u8XMB7Fe1SsoZH47pNsJAFycZ6wPc/mxsODz6b44Q==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 165.204.84.17) smtp.rcpttodomain=intel.com smtp.mailfrom=amd.com; dmarc=pass
+ (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
+ dkim=none (message not signed); arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=VFpsTHzsc4S/yAm2lai1tvTk8AIOTj4EwQTjCfegOTM=;
+ b=v2rHVP5amESffAozYvxw1O62Cl8SrPwWgmYm36UPJxwyoyDXXhtYJpqeBNs92a0bBAXsruYcTLk4PuuPeYUIQtcXIWqtodmeb/Ekt5zqDw2YAKHt+lx4GzReI7l2oqCVDnqHVNcUYNnbFN32FIFdoIwRkGVC5xuIvvenoa/CsFQ=
+Received: from DM5PR20CA0029.namprd20.prod.outlook.com (2603:10b6:3:13d::15)
+ by BL1PR12MB5126.namprd12.prod.outlook.com (2603:10b6:208:312::8) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4823.19; Fri, 24 Dec
+ 2021 01:05:35 +0000
+Received: from DM6NAM11FT035.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:3:13d:cafe::2f) by DM5PR20CA0029.outlook.office365.com
+ (2603:10b6:3:13d::15) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4823.19 via Frontend
+ Transport; Fri, 24 Dec 2021 01:05:35 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
+ smtp.mailfrom=amd.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=amd.com;
+Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
+ 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
+ client-ip=165.204.84.17; helo=SATLEXMB03.amd.com;
+Received: from SATLEXMB03.amd.com (165.204.84.17) by
+ DM6NAM11FT035.mail.protection.outlook.com (10.13.172.100) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.20.4823.18 via Frontend Transport; Fri, 24 Dec 2021 01:05:35 +0000
+Received: from hr-amd.amd.com (10.180.168.240) by SATLEXMB03.amd.com
+ (10.181.40.144) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.17; Thu, 23 Dec
+ 2021 19:05:30 -0600
+From:   Huang Rui <ray.huang@amd.com>
+To:     "Rafael J . Wysocki" <rafael.j.wysocki@intel.com>,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        Shuah Khan <skhan@linuxfoundation.org>,
+        "Borislav Petkov" <bp@suse.de>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Ingo Molnar <mingo@kernel.org>,
+        Giovanni Gherdovich <ggherdovich@suse.cz>,
+        Steven Rostedt <rostedt@goodmis.org>,
+        <linux-pm@vger.kernel.org>
+CC:     Deepak Sharma <deepak.sharma@amd.com>,
+        Alex Deucher <alexander.deucher@amd.com>,
+        Mario Limonciello <mario.limonciello@amd.com>,
+        Steven Noonan <steven@valvesoftware.com>,
+        Nathan Fontenot <nathan.fontenot@amd.com>,
+        Jinzhou Su <Jinzhou.Su@amd.com>,
+        Xiaojian Du <Xiaojian.Du@amd.com>,
+        <linux-kernel@vger.kernel.org>, <x86@kernel.org>,
+        Huang Rui <ray.huang@amd.com>
+Subject: [PATCH v7 01/14] x86/cpufeatures: Add AMD Collaborative Processor Performance Control feature flag
+Date:   Fri, 24 Dec 2021 09:04:55 +0800
+Message-ID: <20211224010508.110159-2-ray.huang@amd.com>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20211224010508.110159-1-ray.huang@amd.com>
+References: <20211224010508.110159-1-ray.huang@amd.com>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-Originating-IP: [10.180.168.240]
+X-ClientProxiedBy: SATLEXMB04.amd.com (10.181.40.145) To SATLEXMB03.amd.com
+ (10.181.40.144)
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: b545ed3f-319e-4784-f584-08d9c6797dab
+X-MS-TrafficTypeDiagnostic: BL1PR12MB5126:EE_
+X-Microsoft-Antispam-PRVS: <BL1PR12MB5126582E7AAC3E2097D0A745EC7F9@BL1PR12MB5126.namprd12.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:5797;
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: kr8VmuVJ84+Bgyfl6uhznLhM+TlWh+JYpS2wuWb1vqB0R6J0MaWG+RB+N69NR+88aoNRzJZDzSdNdmpJSigGr4CdGACZ3w5D6LT+N7wN7Y/xTU/wYVvLrq548PoXwIPLViaEyLwTVCW8Y1YzM91Jfv4BBsNsZtnKgcbxlnoqnwoNvrVOf6iMnqSZRAbtjBAn8FSgx83lEfnUc91qq2TRDVGPbm69c4V9B8LhhRFei2LZKYRHKbChAJHMUF2uuj8KUZqBhcyb/5K8cCN8v54VpuBY3M7S3mrjvcNJ8h6pTL58I0QChhc35+NRVZB8Jo5gQ7Koz4Gm4XuLXG62omQ6J1K59aQT3LbGejZrr11f4BiigcBRBM5NTug5ac5r9a1cq71E908sEoLZc/6ntOV/WzToXtbGFfGP2A9O5ViAer55IpHxarCKYmOXERxAfn02SWKkI0UIrMXuWSzjJIgvLgAoDwcMiqNA2UURS6z0t+SUwKx0XDLtz+8HVynzM07+401U72Ho/N4ZMBP8U3/pgFMmdk5pF76nUDyx86VQ7k8pV7+lOZ/0ttgl89D7ABD4DZBjJgDd7tb8Qrc/q8Ets0WOJDuoLggckHTfX6Agp9Sg/ZUcjopI/Gd7m4l/U+gR1H+4xqI/TqAJubVmu6Ye0tNaIOnWVLX2S0XcOKU45fH6glQbZZiKsMbrwSt2VyV7lzFMR7IAu/edqJKRYbT9+Zi+dxCkW+WVmeET74rmDHSzuhlF+ohqQ03jzZM4ZIG2fdDflfo2cmiC2xz2uuYyw0u0034KJJX2oA2W4KRLs7Q=
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB03.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(4636009)(36840700001)(46966006)(40470700002)(336012)(36756003)(186003)(316002)(16526019)(7696005)(54906003)(6666004)(110136005)(508600001)(2616005)(40460700001)(5660300002)(1076003)(2906002)(70206006)(70586007)(81166007)(82310400004)(47076005)(86362001)(356005)(36860700001)(426003)(7416002)(8936002)(8676002)(4326008)(26005)(36900700001);DIR:OUT;SFP:1101;
+X-OriginatorOrg: amd.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 24 Dec 2021 01:05:35.0306
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: b545ed3f-319e-4784-f584-08d9c6797dab
+X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB03.amd.com]
+X-MS-Exchange-CrossTenant-AuthSource: DM6NAM11FT035.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BL1PR12MB5126
+Precedence: bulk
+List-ID: <linux-kernel.vger.kernel.org>
+X-Mailing-List: linux-kernel@vger.kernel.org
+
+Add Collaborative Processor Performance Control feature flag for AMD
+processors.
+
+This feature flag will be used on the following AMD P-State driver. The
+AMD P-State driver has two approaches to implement the frequency control
+behavior. That depends on the CPU hardware implementation. One is "Full
+MSR Support" and another is "Shared Memory Support". The feature flag
+indicates the current processors with "Full MSR Support".
+
+Acked-by: Borislav Petkov <bp@suse.de>
+Signed-off-by: Huang Rui <ray.huang@amd.com>
+---
+ arch/x86/include/asm/cpufeatures.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/x86/include/asm/cpufeatures.h b/arch/x86/include/asm/cpufeatures.h
+index d5b5f2ab87a0..18de5f76f198 100644
+--- a/arch/x86/include/asm/cpufeatures.h
++++ b/arch/x86/include/asm/cpufeatures.h
+@@ -315,6 +315,7 @@
+ #define X86_FEATURE_AMD_SSBD		(13*32+24) /* "" Speculative Store Bypass Disable */
+ #define X86_FEATURE_VIRT_SSBD		(13*32+25) /* Virtualized Speculative Store Bypass Disable */
+ #define X86_FEATURE_AMD_SSB_NO		(13*32+26) /* "" Speculative Store Bypass is fixed in hardware. */
++#define X86_FEATURE_CPPC		(13*32+27) /* Collaborative Processor Performance Control */
+ 
+ /* Thermal and Power Management Leaf, CPUID level 0x00000006 (EAX), word 14 */
+ #define X86_FEATURE_DTHERM		(14*32+ 0) /* Digital Thermal Sensor */
+-- 
+2.25.1
+
+
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Return-Path: <linux-kernel-owner@kernel.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
+	aws-us-west-2-korg-lkml-1.web.codeaurora.org
+Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 523DBC43217
+	for <linux-kernel@archiver.kernel.org>; Fri, 24 Dec 2021 01:05:49 +0000 (UTC)
+Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
+        id S1350560AbhLXBFr (ORCPT
+        <rfc822;linux-kernel@archiver.kernel.org>);
+        Thu, 23 Dec 2021 20:05:47 -0500
+Received: from mail-dm3nam07on2067.outbound.protection.outlook.com ([40.107.95.67]:18931
+        "EHLO NAM02-DM3-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1350527AbhLXBFn (ORCPT <rfc822;linux-kernel@vger.kernel.org>);
+        Thu, 23 Dec 2021 20:05:43 -0500
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=Q4+NEmrdDCgskwVIg2P82y/Pi+zLP/zx+RCim6eAIFK1+m25rQnbB8uMWx4xntbAiJYMNzA76XgTeBMjCOUTgJPcFDLrz+/ezL3sae9hy/6Xa6PJVkEpPEf+wlrJZFUyEmAq1h5/X5Tyqv1ovEcCn3QkXGqAnocL6R2NY9Ag1XF4N2bIKoyx9vcoOK4NPMnd1p0mSO/U9bv+aYcEmhpBtXKFMZfQvdjkDskHFZjPdsQohe6dRsG0oW9OKmuxFn++4v9jvhPNFLelx0FRwYLCNUAUGac+ulGFqOuegW/Gz6T7qBMnxQkrcditCXXkZAePXmTybD3sne4BEtDpL3YbJw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=r0JWqZZbP7KDJceB1FBd55dd8WVg8MQZ7LP4Zd+8H0w=;
+ b=G5qpPGq6JDSwwYmOdsOcQBeLb9Xl8mA0s3oYGqhRw6mhmNSFyVS508JLYOJj6rRODa2xXPI6BFp0f2Hda9L7St4WyXGTc+Z7YoHBTDPO5zwAlO/G1QNnw54rYRcgRebw5r5bsPtbZ7oo/gsBwp/cXE3IeKnJnN+UqQ4pmwUoHk8F4tKOjMBnUEmcdGMy6734zHT6rh/5hoAu+Q1L0XKAhRuGnkvwqBsAXdiKtI1DllZ4c3LTEcIdLAU4oCd/vqjkbp/DKIIWR+ciPKH+JDHh1/XJXOkLLn1UknGkZxj+nWGGcpMxkZSzpQvtN79kd8Zzm7vVvKve4mje1kZpIrIWAw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 165.204.84.17) smtp.rcpttodomain=intel.com smtp.mailfrom=amd.com; dmarc=pass
+ (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
+ dkim=none (message not signed); arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=r0JWqZZbP7KDJceB1FBd55dd8WVg8MQZ7LP4Zd+8H0w=;
+ b=aG5D/y1gD92Vp27X/wG8p4Q9g0TeuACyC/+yANRKF+NWkURRR3YgXGxuNjBpsgc+rE6hPSJU8cJ4MAC5kPkwHBsi6E5ZfvdqPv211qRN3NRV7uzHns030Ym7V9789E/WQdw3Q4hi6jEpZdpDbGZj6YMeU645RU1Iz1pszuTiCD0=
+Received: from DM6PR17CA0016.namprd17.prod.outlook.com (2603:10b6:5:1b3::29)
+ by MN2PR12MB2877.namprd12.prod.outlook.com (2603:10b6:208:ae::32) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4823.19; Fri, 24 Dec
+ 2021 01:05:39 +0000
+Received: from DM6NAM11FT011.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:5:1b3:cafe::d4) by DM6PR17CA0016.outlook.office365.com
+ (2603:10b6:5:1b3::29) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4823.21 via Frontend
+ Transport; Fri, 24 Dec 2021 01:05:39 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
+ smtp.mailfrom=amd.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=amd.com;
+Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
+ 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
+ client-ip=165.204.84.17; helo=SATLEXMB03.amd.com;
+Received: from SATLEXMB03.amd.com (165.204.84.17) by
+ DM6NAM11FT011.mail.protection.outlook.com (10.13.172.108) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.20.4823.18 via Frontend Transport; Fri, 24 Dec 2021 01:05:39 +0000
+Received: from hr-amd.amd.com (10.180.168.240) by SATLEXMB03.amd.com
+ (10.181.40.144) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.17; Thu, 23 Dec
+ 2021 19:05:34 -0600
+From:   Huang Rui <ray.huang@amd.com>
+To:     "Rafael J . Wysocki" <rafael.j.wysocki@intel.com>,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        Shuah Khan <skhan@linuxfoundation.org>,
+        "Borislav Petkov" <bp@suse.de>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Ingo Molnar <mingo@kernel.org>,
+        Giovanni Gherdovich <ggherdovich@suse.cz>,
+        Steven Rostedt <rostedt@goodmis.org>,
+        <linux-pm@vger.kernel.org>
+CC:     Deepak Sharma <deepak.sharma@amd.com>,
+        Alex Deucher <alexander.deucher@amd.com>,
+        Mario Limonciello <mario.limonciello@amd.com>,
+        Steven Noonan <steven@valvesoftware.com>,
+        Nathan Fontenot <nathan.fontenot@amd.com>,
+        Jinzhou Su <Jinzhou.Su@amd.com>,
+        Xiaojian Du <Xiaojian.Du@amd.com>,
+        <linux-kernel@vger.kernel.org>, <x86@kernel.org>,
+        Huang Rui <ray.huang@amd.com>
+Subject: [PATCH v7 02/14] x86/msr: Add AMD CPPC MSR definitions
+Date:   Fri, 24 Dec 2021 09:04:56 +0800
+Message-ID: <20211224010508.110159-3-ray.huang@amd.com>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20211224010508.110159-1-ray.huang@amd.com>
+References: <20211224010508.110159-1-ray.huang@amd.com>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-Originating-IP: [10.180.168.240]
+X-ClientProxiedBy: SATLEXMB04.amd.com (10.181.40.145) To SATLEXMB03.amd.com
+ (10.181.40.144)
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: 95151b69-0b07-49cd-596a-08d9c6798046
+X-MS-TrafficTypeDiagnostic: MN2PR12MB2877:EE_
+X-Microsoft-Antispam-PRVS: <MN2PR12MB2877F4678D1FF9A6C59CB27DEC7F9@MN2PR12MB2877.namprd12.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:1107;
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: jwiw68eelmhjL1UhSIyxpQ5o03uuqA9zI8g6C0yXwdMDsPm7gUo5eLK3KOixbS2e2munGdRTXeH990TOv4x4l/NBhK4kQp/hmlbu/yHrHEZb2WP4Vu14pkRELSzx1dyAKNwQq/bQ4P+79KJpgO0Nr5fDTOPesbbFPIj79uIVpbIjhogPz5F7c9HE9vaPdbds1r7vMtLengSV/b7OsEDgX9pB7H1FGEyewpWQidCtz2b5VDmrmgcpwqRc0r3dQzCIy4uIEzNQkJ0vKl+75TFGi4ofUsXarNwuP0i1MKkCH6FOmCbf4/i/A7jUT1FomSz7W8vrFh70A/9S0T7Hxp37EwTIwpuXtiG3Uaha/qFMTsiCY7Es9Rq1Sv3+BfdscRg9s4eckBoYkSbTGKkvoG1PVYvh299Id6Mb5t55yw1jay92+X64p4BEYFAL1yK5/db+quEdSdB5ntgoCo+wAK3OGh6HRlXYmKo7mTCrcfwhDLokXcFcHaamsyfNwbEIH0lYvoaI3HQAcIf2R1d4wq4Aoh9agrn/F4wnIivTPMT0POzK3BdAGLT0qltPLr+ku++RU73BF1f+5OWfNxKd+2E1sxaXV9HrzvIV2CMxs0bnhO0GTR2+VdE8kCtpDeoO4/MAx1XLh94NQfrlSAHuKxDHqF6sPWoOF8dWlCSnvwrl80WXptRAofkZgvLsHP+Xq1A9FV/V9YN1AWYVHclL6JzgBSfCluYM6i8wBv/MiAHj1RAFltAD/0dSDzHf+it7lpaBnmWPtl9ZIQoc8Xps8vhNV9kGpUn17v1sxpPHSIulxcQ=
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB03.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(4636009)(36840700001)(46966006)(40470700002)(40460700001)(86362001)(8936002)(8676002)(70206006)(316002)(2906002)(54906003)(70586007)(1076003)(7416002)(110136005)(6666004)(508600001)(82310400004)(7696005)(4326008)(47076005)(336012)(5660300002)(426003)(26005)(2616005)(356005)(186003)(16526019)(36756003)(36860700001)(81166007)(36900700001);DIR:OUT;SFP:1101;
+X-OriginatorOrg: amd.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 24 Dec 2021 01:05:39.4291
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: 95151b69-0b07-49cd-596a-08d9c6798046
+X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB03.amd.com]
+X-MS-Exchange-CrossTenant-AuthSource: DM6NAM11FT011.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MN2PR12MB2877
+Precedence: bulk
+List-ID: <linux-kernel.vger.kernel.org>
+X-Mailing-List: linux-kernel@vger.kernel.org
+
+AMD CPPC (Collaborative Processor Performance Control) function uses MSR
+registers to manage the performance hints. So add the MSR register macro
+here.
+
+Signed-off-by: Huang Rui <ray.huang@amd.com>
+---
+ arch/x86/include/asm/msr-index.h | 17 +++++++++++++++++
+ 1 file changed, 17 insertions(+)
+
+diff --git a/arch/x86/include/asm/msr-index.h b/arch/x86/include/asm/msr-index.h
+index 01e2650b9585..3faf0f97edb1 100644
+--- a/arch/x86/include/asm/msr-index.h
++++ b/arch/x86/include/asm/msr-index.h
+@@ -486,6 +486,23 @@
+ 
+ #define MSR_AMD64_VIRT_SPEC_CTRL	0xc001011f
+ 
++/* AMD Collaborative Processor Performance Control MSRs */
++#define MSR_AMD_CPPC_CAP1		0xc00102b0
++#define MSR_AMD_CPPC_ENABLE		0xc00102b1
++#define MSR_AMD_CPPC_CAP2		0xc00102b2
++#define MSR_AMD_CPPC_REQ		0xc00102b3
++#define MSR_AMD_CPPC_STATUS		0xc00102b4
++
++#define AMD_CPPC_LOWEST_PERF(x)		(((x) >> 0) & 0xff)
++#define AMD_CPPC_LOWNONLIN_PERF(x)	(((x) >> 8) & 0xff)
++#define AMD_CPPC_NOMINAL_PERF(x)	(((x) >> 16) & 0xff)
++#define AMD_CPPC_HIGHEST_PERF(x)	(((x) >> 24) & 0xff)
++
++#define AMD_CPPC_MAX_PERF(x)		(((x) & 0xff) << 0)
++#define AMD_CPPC_MIN_PERF(x)		(((x) & 0xff) << 8)
++#define AMD_CPPC_DES_PERF(x)		(((x) & 0xff) << 16)
++#define AMD_CPPC_ENERGY_PERF_PREF(x)	(((x) & 0xff) << 24)
++
+ /* Fam 17h MSRs */
+ #define MSR_F17H_IRPERF			0xc00000e9
+ 
+-- 
+2.25.1
+
+
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Return-Path: <linux-kernel-owner@kernel.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
+	aws-us-west-2-korg-lkml-1.web.codeaurora.org
+Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 34BDFC433FE
+	for <linux-kernel@archiver.kernel.org>; Fri, 24 Dec 2021 01:05:49 +0000 (UTC)
+Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
+        id S1350526AbhLXBFm (ORCPT
+        <rfc822;linux-kernel@archiver.kernel.org>);
+        Thu, 23 Dec 2021 20:05:42 -0500
+Received: from mail-bn8nam11on2083.outbound.protection.outlook.com ([40.107.236.83]:7521
+        "EHLO NAM11-BN8-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1350489AbhLXBFi (ORCPT <rfc822;linux-kernel@vger.kernel.org>);
+        Thu, 23 Dec 2021 20:05:38 -0500
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=VqOu5c+c2dPJ8nCUJN2v4XnslAVRLyVjTbg/06G1AtxXSVmtMiKDXO+2r8NRAh5d6dWwbZXzZP0/rDr1hTkUEEz+sCDYx/v7ddd/z6FzfRS6Flm/PUOtKmy9Ym2crrp2nEDdk9h9XpMV95wJkBehSLEhPLXcrOftmVxZDdWyu2BwWosU74WQ1coWVJXId0FXu6Pdy4rcMjBpoAvrStpoCxWnntxXz3CVjMF6ZgXugxBrBSh5xScI4c+U1lp2nss2cXwY69pbQuSocnb+TDEgKNf8DdUaXwpMyBYTF870IL6w3Q6hWYtMOVpKPukrEA/AchCINKvJopOrZMf4rpP+7g==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=4+aihskXSSXPHA7bm6rNtiwdRNW0toQ2jYSPOIj/sdQ=;
+ b=LjI7VRCo1TS1Z4J7H5hjslrbT4WukOSJ0kiUJtEunnYPaSZtdapYbkiimn/UQTZsMLYstviLfvJljHg1be4x6Q3zymlwhL9+TULJVu3DLbn0Sdq3B1PUNTlKu3AoYtlyRJb577uWzyoFkmY+JLgpN8EvbUdRniUOzPqkmF978e8vuAHUS1N+uh0ZPqttSYpkiiHQk85FOoI8RY5/tOG0ZJ0OVLLpD7bPg/xuTXn9/07FgcjB1S1g4hDFQQwY2DCOLDY0DXPMUjcCmLBO6hprgKjw9rKh+0ocqifoyHyc7CFYnchDTGTjlUkpNMApW6+xS+k6YaPAvJGLmjyQ2cObxg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 165.204.84.17) smtp.rcpttodomain=intel.com smtp.mailfrom=amd.com; dmarc=pass
+ (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
+ dkim=none (message not signed); arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=4+aihskXSSXPHA7bm6rNtiwdRNW0toQ2jYSPOIj/sdQ=;
+ b=F+v7jBwZ6vNGKB34qz9yMN9T2Pm9fDR9P2CmhMA0eFjTLGlDEwcXw4k8ILntO20npfkFe9xJDo6Q/dfO6nLQNeLpMG8THmwrTbx0G8MH4l6a2N/VyGANGL3VmvdHidgDhZVb1n1YwHADBngNFtQWBKszdrWnIVe8PQ8BVw1pMEY=
+Received: from DM5PR20CA0006.namprd20.prod.outlook.com (2603:10b6:3:93::16) by
+ BL1PR12MB5111.namprd12.prod.outlook.com (2603:10b6:208:31b::12) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4823.17; Fri, 24 Dec
+ 2021 01:05:30 +0000
+Received: from DM6NAM11FT020.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:3:93:cafe::aa) by DM5PR20CA0006.outlook.office365.com
+ (2603:10b6:3:93::16) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4823.17 via Frontend
+ Transport; Fri, 24 Dec 2021 01:05:30 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
+ smtp.mailfrom=amd.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=amd.com;
+Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
+ 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
+ client-ip=165.204.84.17; helo=SATLEXMB03.amd.com;
+Received: from SATLEXMB03.amd.com (165.204.84.17) by
+ DM6NAM11FT020.mail.protection.outlook.com (10.13.172.224) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.20.4823.18 via Frontend Transport; Fri, 24 Dec 2021 01:05:30 +0000
+Received: from hr-amd.amd.com (10.180.168.240) by SATLEXMB03.amd.com
+ (10.181.40.144) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.17; Thu, 23 Dec
+ 2021 19:05:25 -0600
+From:   Huang Rui <ray.huang@amd.com>
+To:     "Rafael J . Wysocki" <rafael.j.wysocki@intel.com>,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        Shuah Khan <skhan@linuxfoundation.org>,
+        "Borislav Petkov" <bp@suse.de>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Ingo Molnar <mingo@kernel.org>,
+        Giovanni Gherdovich <ggherdovich@suse.cz>,
+        Steven Rostedt <rostedt@goodmis.org>,
+        <linux-pm@vger.kernel.org>
+CC:     Deepak Sharma <deepak.sharma@amd.com>,
+        Alex Deucher <alexander.deucher@amd.com>,
+        Mario Limonciello <mario.limonciello@amd.com>,
+        Steven Noonan <steven@valvesoftware.com>,
+        Nathan Fontenot <nathan.fontenot@amd.com>,
+        Jinzhou Su <Jinzhou.Su@amd.com>,
+        Xiaojian Du <Xiaojian.Du@amd.com>,
+        <linux-kernel@vger.kernel.org>, <x86@kernel.org>,
+        Huang Rui <ray.huang@amd.com>
+Subject: [PATCH v7 00/14] cpufreq: Introduce a new AMD CPU frequency control mechanism
+Date:   Fri, 24 Dec 2021 09:04:54 +0800
+Message-ID: <20211224010508.110159-1-ray.huang@amd.com>
+X-Mailer: git-send-email 2.25.1
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-Originating-IP: [10.180.168.240]
+X-ClientProxiedBy: SATLEXMB04.amd.com (10.181.40.145) To SATLEXMB03.amd.com
+ (10.181.40.144)
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: e1261d77-0b9c-4be2-86d8-08d9c6797af7
+X-MS-TrafficTypeDiagnostic: BL1PR12MB5111:EE_
+X-Microsoft-Antispam-PRVS: <BL1PR12MB51116F4CA3714C60B31457C9EC7F9@BL1PR12MB5111.namprd12.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:7219;
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: YILNurgez2hFHqMTOCgXgyMAuTtJzBIU2g5EupBg5M1wj7O0EGfIlBRhsnAyLNTeEb44PbeEwwgAjI72JSdZCV3kliKP/rqOatGGDSw2WVH/b86em8/zCW1tZ0aT1kV1iZcvaJIBkh6C2VkWUz4u0SNaVwAozaPy7vMhCuyNzgB1DoUjqFT5PmRjqhjuYx8s/l29bHMaxSkWFlgF2i3Jz55dsJDyR7JuqHBzOAgWQf8C7c3WGuvWwkkztXtOdRdUPxz3JPDarnKcrlCZF2SI6SLvchf7RhC0dXokEbqazpAkdPGEqjoNrXjd4A84lskR4mhm/qACDMorPngbuDPXUg0yTGJQkdG4ZlrNSRWmXLF5pwFrvQT2Ey3iKdJEPi/PEj9eJGlCeuDab20Vw3XCha6nLzr0a9qFhkE8I1/7UAXvbQojJBwXj3Z05qSA+FZeAQ92GKCv+NuixyKgvPE6BP4cLMw/fjV+D+sn/voNqHtih9Zdtpm2/HUf3KlO5tMPLzBKx2Mz1MDoYswON7FUIlouq1CriP9RWqZfdG6L9Ntqc+Bh9ctlqbfoqUVaMcxpN9TFa5Spk6xnY3iclcoakpShE1n3NJTk7imkOAlsO8zVsc5jWLneAkOZmax5yduxeXkXOYmHivJOwPK4i5kd8qNZJUuXRRdHbRJJNPpF8i/f6RcXnMXy7hhPt5RIZp9Tt2Bi/qJmu2A+a5cJE+/k7wFLdlMC8RX8NPgcKgg+PYASGjvDu8Rv4vOuC8U4cGcN55QboUkNd40nazIDCbAf3JAXTTdCs1Xf63IXvNzBlEXtaNjodZYoMBCsjOrugRaU/dbHFqWgJDpZGEUvXMU5MnfaKCINL7QWhLV7xuSBvrnlSOfwR7cfdYUzWzQ85kIDSYGEsNHh8E7qJyGKWObaoSdOavTSor+vRBhPp1c3ynQ=
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB03.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(4636009)(40470700002)(46966006)(36840700001)(4326008)(110136005)(7416002)(1076003)(316002)(6666004)(81166007)(30864003)(54906003)(2616005)(47076005)(36860700001)(7696005)(5660300002)(336012)(70206006)(45954011)(45080400002)(26005)(40460700001)(2906002)(966005)(70586007)(82310400004)(16526019)(8936002)(508600001)(86362001)(356005)(36756003)(83380400001)(426003)(186003)(8676002)(36900700001);DIR:OUT;SFP:1101;
+X-OriginatorOrg: amd.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 24 Dec 2021 01:05:30.5083
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: e1261d77-0b9c-4be2-86d8-08d9c6797af7
+X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB03.amd.com]
+X-MS-Exchange-CrossTenant-AuthSource: DM6NAM11FT020.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BL1PR12MB5111
+Precedence: bulk
+List-ID: <linux-kernel.vger.kernel.org>
+X-Mailing-List: linux-kernel@vger.kernel.org
+
+Hi all,
+
+Merry Christmas & Happy New Year!
+
+We would like to introduce a new AMD CPU frequency control mechanism as the
+AMD P-State driver for modern AMD Zen based CPU series in Linux Kernel.
+The new mechanism is based on Collaborative processor performance control
+(CPPC) which is finer grain frequency management than legacy ACPI hardware
+P-States. Current AMD CPU platforms are using the ACPI P-states driver to
+manage CPU frequency and clocks with switching only in 3 P-states. AMD
+P-State is to replace the ACPI P-states controls, allows a flexible,
+low-latency interface for the Linux kernel to directly communicate the
+performance hints to hardware.
+
+AMD P-State leverages the Linux kernel governors such as *schedutil*,
+*ondemand*, etc. to manage the performance hints which are provided by CPPC
+hardware functionality. The first version for AMD P-State is to support one
+of the Zen3 processors, and we will support more in future after we verify
+the hardware and SBIOS functionalities.
+
+There are two types of hardware implementations for AMD P-State: one is full
+MSR support and another is shared memory support. It can use
+X86_FEATURE_CPPC feature flag to distinguish the different types. 
+
+Using the new AMD P-State method + kernel governors (*schedutil*,
+*ondemand*, ...) to manage the frequency update is the most appropriate
+bridge between AMD Zen based hardware processor and Linux kernel, the
+processor is able to adjust to the most efficiency frequency according to
+the kernel scheduler loading.
+
+Please check the detailed CPU feature and MSR register description in
+Processor Programming Reference (PPR) for AMD Family 19h Model 51h,
+Revision A1 Processors:
+
+https://www.amd.com/system/files/TechDocs/56569-A1-PUB.zip
+
+Performance Per Watt (PPW) Calculation:
+
+We use the RAPL interface with "perf" tool to get the energy data of the
+package power.
+
+The data comparisons between AMD P-State and ACPI CPUFreq module are tested on
+AMD Cezanne processor (mobile CPU):
+
+1) TBench CPU benchmark:
+
++----------------------------------------------------------------------------------------------+
+|                                                                                              |
+|                               TBench4 (Performance Per Watt)                                 |
+|                                                                             Higher is better |
++-------------------+------------------------+------------------------+------------------------+
+|                   |  Performance Per Watt  |  Performance Per Watt  |  Performance Per Watt  |
+|   Kernel Module   |       (Schedutil)      |       (Ondemand)       |       (Performance)    |
+|                   |       Unit: MB / J     |       Unit: MB / J     |       Unit: MB / J     |
++-------------------+------------------------+------------------------+------------------------+
+|                   |                        |                        |                        |
+|    ACPI CPUFreq   |         48.56          |        48.89           |        47.81           |
+|                   |                        |                        |                        |
++-------------------+------------------------+------------------------+------------------------+
+|                   |                        |                        |                        |
+|    AMD P-State    |         48.38          |        47.38           |        48.77           |
+|                   |                        |                        |                        |
++-------------------+------------------------+------------------------+------------------------+
+
+Note: The previous data was based on TBench2, as align with Suse, we use
+TBench4 to re-test it. The PPW is very closed to ACPI CPUFreq.
+
+2) Gitsource CPU benchmark:
+
++----------------------------------------------------------------------------------------------+
+|                                                                                              |
+|                               Gitsource (Performance Per Watt)                               |
+|                                                                             Higher is better |
++-------------------+------------------------+------------------------+------------------------+
+|                   |  Performance Per Watt  |  Performance Per Watt  |  Performance Per Watt  |
+|   Kernel Module   |       (Schedutil)      |       (Ondemand)       |       (Performance)    |
+|                   |    Unit: 1/(s*watt)    |    Unit: 1/(s*watt)    |    Unit: 1/(s*watt)    |
++-------------------+------------------------+------------------------+------------------------+
+|                   |                        |                        |                        |
+|    ACPI CPUFreq   |     0.000174579        |     0.000222647        |     0.000174455        |
+|                   |                        |                        |                        |
++-------------------+------------------------+------------------------+------------------------+
+|                   |                        |                        |                        |
+|    AMD P-State    |     0.000217094        |     0.000291109        |     0.000175385        |
+|                   |                        |                        |                        |
++-------------------+------------------------+------------------------+------------------------+
+
+3) Speedometer CPU benchmark:
+
++----------------------------------------------------------------------------------------------+
+|                                                                                              |
+|                               Speedometer 2.0 (Performance Per Watt)                         |
+|                                                                             Higher is better |
++-------------------+------------------------+------------------------+------------------------+
+|                   |  Performance Per Watt  |  Performance Per Watt  |  Performance Per Watt  |
+|   Kernel Module   |       (Schedutil)      |       (Ondemand)       |       (Performance)    |
+|                   |    Unit: goal/watt     |    Unit: goal/watt     |    Unit: goal/watt     |
++-------------------+------------------------+------------------------+------------------------+
+|                   |                        |                        |                        |
+|    ACPI CPUFreq   |     17.95373047        |     19.67731256        |     17.97789671        |
+|                   |                        |                        |                        |
++-------------------+------------------------+------------------------+------------------------+
+|                   |                        |                        |                        |
+|    AMD P-State    |     17.90493980        |     21.45128302        |     17.39773457        |
+|                   |                        |                        |                        |
++-------------------+------------------------+------------------------+------------------------+
+
+Steam Game Demo on Ryzen 5900X (12 core 24 threads):
+
+The picture to compare AMD P-State and ACPI CPUFreq:
+https://drive.google.com/file/d/1PvSduykJn9U5MMOhzFWycnbmGmznalM3/view?usp=sharing
+
+Two videos:
+https://drive.google.com/file/d/1nQQEteL-v_zQxnOJpyW8JqvRW2FFDN2Z/view?usp=sharing
+https://drive.google.com/file/d/1heuPgFG71SQHvGb6wfedrQciBfE2rhnu/view?usp=sharing
+
+Actually, the AMD P-State driver doesn't change the physical maximum
+frequency capacity in the processor. But it's able to provide the finer
+grain performance control range instead of legacy 3 P-States. It has a
+better performance and power efficiency than before. We will continue
+optimize AMD P-State function on kernel governors to support different types
+of processors such as mobile latop, performance desktop, and etc.
+
+See patch series in below git repo:
+V1: https://git.kernel.org/pub/scm/linux/kernel/git/rui/linux.git/log/?h=amd-pstate-dev-v1
+V2: https://git.kernel.org/pub/scm/linux/kernel/git/rui/linux.git/log/?h=amd-pstate-dev-v2
+V3: https://git.kernel.org/pub/scm/linux/kernel/git/rui/linux.git/log/?h=amd-pstate-dev-v3
+V4: https://git.kernel.org/pub/scm/linux/kernel/git/rui/linux.git/log/?h=amd-pstate-dev-v4
+V5: https://git.kernel.org/pub/scm/linux/kernel/git/rui/linux.git/log/?h=amd-pstate-dev-v5
+V6: https://git.kernel.org/pub/scm/linux/kernel/git/rui/linux.git/log/?h=amd-pstate-dev-v6
+V7: https://git.kernel.org/pub/scm/linux/kernel/git/rui/linux.git/log/?h=amd-pstate-dev-v7
+
+For details introduction, please see the patch 22.
+
+Changes from V1 -> V2:
+- cpufreq:
+- - Add detailed description in the commit log.
+- - Clean up the "extension" postfix in the x86 feature flag.
+- - Revise cppc_set_enable helper.
+- - Add a fix to check online cpus in cppc_acpi.
+- - Use static calls to avoid retpolines.
+- - Revise the comment style.
+- - Remove amd_pstate_boost_supported() function.
+- - Revise the return value in sysfs attribute functions.
+- cpupower:
+- - Refine the commit log for cpupower patches.
+- - Expose a function to get the sysfs value from specific table.
+- - Move AMD P-State sysfs definitions and functions into AMD helper file.
+- - Move the boost init function into AMD helper file and explain the
+  details in the commit log.
+- - Remove the amd_pstate_get_data in the lib/cpufreq.c to keep the lib as
+  common operations.
+- - Move print_speed function into misc helper file.
+- - Add amd_pstate_show_perf_and_freq() function in AMD helper for
+  cpufreq-info print.
+
+Changes from V2 -> V3:
+- cpufreq:
+- - Add a patch from Steven to add systemio register in cppc lib. (Thanks
+  to verify the driver in his platform)
+- - Update online cpu mask to present cpu.
+- - Enhance cppc_set_enable to cover all valid use cases.
+- - Add more description in the Kconfig definition.
+- - Clean up some redundance functions and data members.
+- - Revise AMD P-State trace event prints.
+- - Move the AMD P-State traces into power trace system and set the driver
+  as build-in instead of module.
+- - Clean up the duplicated sysfs with core cpufreq driver.
+- - Revise the AMD P-State RST documentation.
+- cpupower:
+- - Revise the cpupower_amd_pstate_enabled() function to use
+  cpufreq_get_driver helper instead of read sysfs.
+- - Clean up the AMD P-State max/min frequency APIs, because they are
+  actually the same with cpufreq info sysfs.
+
+Changes from V3 -> V4:
+- cpufreq:
+- - Rebase the whole series to Rafael's pm branch (5.15)
+- - Fix the typo in the commit message and comment.
+- - Clean up function implementation.
+- - Clean up freq&perf sysfs APIs.
+- - Fall back to move AMD P-State traces out of power trace system, because
+  it's flexible to debug and fine tune processors with the shared memory
+  solution.
+- - Add a kernel param to disable shared memory on AMD P-State, it can be
+  enabled manually.
+- cpupower:
+- - Introduce ACPI CPPC library support.
+- - Clean up the duplicated AMD specific perf/frequency.
+
+We received two issues that reported on the processors with shared memory
+solution from the community. 
+
+First one:
+https://lore.kernel.org/linux-pm/a0e932477e9b826c0781dda1d0d2953e57f904cc.camel@suse.cz/ 
+
+Thanks Giovanni's support and suggestions, we corrected the calculation
+method and duplicated the performance issue in a 64 cores / 128 threads
+threadripper which is similiar with EPYC 7713. Check with firmware guy, the
+sample rate is about 1 ms that the hardware responds the frequency change.
+We are working to simulate the ACPI pstates with cppc api and checking
+where is the gap with ACPI CPUFreq. Will share you the status later.
+
+Second one:
+https://lore.kernel.org/linux-pm/f9323c6fddd4a55d8ca4191a9539ebd056221045.camel@gmail.com/
+
+Thanks Matt to help us reproduce this issue in our side with Ryzen 5900X.
+Below is the video to compare with AMD P-State and ACPI CPUFreq on "Control"
+steam games. The FPS can be increased as well. It is probably something
+wrong in the SBIOS.
+https://lore.kernel.org/linux-pm/DM4PR12MB5136084E5DC1809FBB578075F1959@DM4PR12MB5136.namprd12.prod.outlook.com/
+
+Due to some issues on shared memory solution, so we fallback to build as a
+module and add a parameter "shared_mem" to disable AMD P-State on processors
+with shared memory solution for the moment till we complete tunning on this
+function.
+
+Changes from V4 -> V5:
+- cpufreq:
+- - Fix subject typo.
+- - Fix Clang-13 build warning.
+- - Update RST documentation for the latest update.
+- cpupower:
+- - Fix the table check condition at cpufreq_get_sysfs_value_from_table.
+
+Changes from V5 -> V6:
+- cpufreq:
+- - Fix online cpu to present cpu.
+- - Fix comment code style and use macro instead of raw value.
+- - Move static call implementation into the patch of shared memory
+  support.
+- - Move freq_qos requests into patch of boost support.
+- - Add brief driver and core data structure descriptions at the start.
+- - Add maintainer entry.
+
+Only send the cpufreq driver patches because there is no update on cpupower
+tool in V6.
+
+Changes from V6 -> V7:
+- cpufreq:
+- - Capitalize the subjects.
+- - Update x86 macro name to use "AMD_CPPC_" as the prefix.
+
+For cpupower patches, please see the V5 version.
+
+Thanks,
+Ray
+
+
+Huang Rui (11):
+  x86/cpufeatures: Add AMD Collaborative Processor Performance Control
+    feature flag
+  x86/msr: Add AMD CPPC MSR definitions
+  cpufreq: amd-pstate: Introduce a new AMD P-State driver to support
+    future processors
+  cpufreq: amd-pstate: Add fast switch function for AMD P-State
+  cpufreq: amd-pstate: Introduce the support for the processors with
+    shared memory solution
+  cpufreq: amd-pstate: Add trace for AMD P-State module
+  cpufreq: amd-pstate: Add boost mode support for AMD P-State
+  cpufreq: amd-pstate: Add AMD P-State frequencies attributes
+  cpufreq: amd-pstate: Add AMD P-State performance attributes
+  Documentation: amd-pstate: Add AMD P-State driver introduction
+  MAINTAINERS: Add AMD P-State driver maintainer entry
+
+Jinzhou Su (1):
+  ACPI: CPPC: Add CPPC enable register function
+
+Mario Limonciello (1):
+  ACPI: CPPC: Check present CPUs for determining _CPC is valid
+
+Steven Noonan (1):
+  ACPI: CPPC: Implement support for SystemIO registers
+
+ Documentation/admin-guide/acpi/cppc_sysfs.rst |   2 +
+ Documentation/admin-guide/pm/amd-pstate.rst   | 383 +++++++++++
+ .../admin-guide/pm/working-state.rst          |   1 +
+ MAINTAINERS                                   |   7 +
+ arch/x86/include/asm/cpufeatures.h            |   1 +
+ arch/x86/include/asm/msr-index.h              |  17 +
+ drivers/acpi/cppc_acpi.c                      |  99 ++-
+ drivers/cpufreq/Kconfig.x86                   |  17 +
+ drivers/cpufreq/Makefile                      |   5 +
+ drivers/cpufreq/amd-pstate-trace.c            |   2 +
+ drivers/cpufreq/amd-pstate-trace.h            |  77 +++
+ drivers/cpufreq/amd-pstate.c                  | 643 ++++++++++++++++++
+ include/acpi/cppc_acpi.h                      |   5 +
+ 13 files changed, 1255 insertions(+), 4 deletions(-)
+ create mode 100644 Documentation/admin-guide/pm/amd-pstate.rst
+ create mode 100644 drivers/cpufreq/amd-pstate-trace.c
+ create mode 100644 drivers/cpufreq/amd-pstate-trace.h
+ create mode 100644 drivers/cpufreq/amd-pstate.c
+
+-- 
+2.25.1
+
+
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Return-Path: <linux-kernel-owner@kernel.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
+	aws-us-west-2-korg-lkml-1.web.codeaurora.org
+Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BE5EBC433F5
+	for <linux-kernel@archiver.kernel.org>; Fri, 24 Dec 2021 01:05:59 +0000 (UTC)
+Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
+        id S1350565AbhLXBF4 (ORCPT
+        <rfc822;linux-kernel@archiver.kernel.org>);
+        Thu, 23 Dec 2021 20:05:56 -0500
+Received: from mail-bn8nam11on2081.outbound.protection.outlook.com ([40.107.236.81]:60068
+        "EHLO NAM11-BN8-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1350543AbhLXBFy (ORCPT <rfc822;linux-kernel@vger.kernel.org>);
+        Thu, 23 Dec 2021 20:05:54 -0500
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=Uoyenm9WdRPBuw4kU7bo0upUsaS0lNSzf8USCa2dkGZghYtFn9flmMgZCOyHtwMpeoYZYoCCQ2Rtjnkr1MeuVcOKZCVa2IGB1A5XBTNXJv6fE3BI+3s87PNVkXSQHMf7dmmaFrad7h611kmy74tFznubqj5UIVxcYIXOVKKbWTW4yUdKyNchYa5699Lt9JQE7Hvvu1c9DnVPELPsGGUFaabI3Fb5ZjS7INP8A5tHr7COINsk6d1+Zz3H5JR0mSKGEypWhpVh4t2YfJ1k6PnTWOcK4QBJmIXRQUtjb/zxFYP1LeHWv1X5joozICmg+UQnjmV7ml/bsXhSCVkXLdcpew==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=oIfQxURDoLiRdYdh3RmTxNuSKDBcomrDa15EUoBmGq4=;
+ b=F0m5iUKXbMJn3jBv9tvtpbYaQmK1z4x5QKdJ8GdOpzg27t/JH+e7Vuct17AbdKME/hX4WlpPp1pB7yheEk2qoJjJKoWn43NI4mPVFVLRDDgN8TyEga3REQWnMPTPlfMKl/MyD81TpG9ebbwSXcdym+NVxBCXDzTDKIUrProt2pPeVh2R266fdxfepZiv4+Wh+qYDcs38mXoUl/y7q+EPyBizny9Pfvlk3Zq740T41iDm6C/TB572K5uogR7ENwNOlIILIZPlrCyTSHmmX3S/4GgsGmsZGC5w81P95aYVhXolQrXuYwf0GFYgXlghjs7CI4+0lyW5w/DA6HrYExri3g==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 165.204.84.17) smtp.rcpttodomain=intel.com smtp.mailfrom=amd.com; dmarc=pass
+ (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
+ dkim=none (message not signed); arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=oIfQxURDoLiRdYdh3RmTxNuSKDBcomrDa15EUoBmGq4=;
+ b=KUobwkcsgH4TDqDGINXix2G/0ggKOPdW2mY77GcS/DE2WWs7Z0J6sJebYDtzN8KJ1oeKx9tnr8GpmOIIGJD8nHRQ5w+imOQdaurJNDR19Gn5zqhxUOcPDXmPA7f7L9uP7a56Lnksnd184aDyCOM6ii28La0vmOlDk9LuDGwiH6A=
+Received: from DM5PR07CA0150.namprd07.prod.outlook.com (2603:10b6:3:ee::16) by
+ BN6PR1201MB0017.namprd12.prod.outlook.com (2603:10b6:405:53::20) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4823.19; Fri, 24 Dec
+ 2021 01:05:44 +0000
+Received: from DM6NAM11FT055.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:3:ee:cafe::3) by DM5PR07CA0150.outlook.office365.com
+ (2603:10b6:3:ee::16) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4823.18 via Frontend
+ Transport; Fri, 24 Dec 2021 01:05:44 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
+ smtp.mailfrom=amd.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=amd.com;
+Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
+ 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
+ client-ip=165.204.84.17; helo=SATLEXMB03.amd.com;
+Received: from SATLEXMB03.amd.com (165.204.84.17) by
+ DM6NAM11FT055.mail.protection.outlook.com (10.13.173.103) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.20.4823.18 via Frontend Transport; Fri, 24 Dec 2021 01:05:44 +0000
+Received: from hr-amd.amd.com (10.180.168.240) by SATLEXMB03.amd.com
+ (10.181.40.144) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.17; Thu, 23 Dec
+ 2021 19:05:39 -0600
+From:   Huang Rui <ray.huang@amd.com>
+To:     "Rafael J . Wysocki" <rafael.j.wysocki@intel.com>,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        Shuah Khan <skhan@linuxfoundation.org>,
+        "Borislav Petkov" <bp@suse.de>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Ingo Molnar <mingo@kernel.org>,
+        Giovanni Gherdovich <ggherdovich@suse.cz>,
+        Steven Rostedt <rostedt@goodmis.org>,
+        <linux-pm@vger.kernel.org>
+CC:     Deepak Sharma <deepak.sharma@amd.com>,
+        Alex Deucher <alexander.deucher@amd.com>,
+        Mario Limonciello <mario.limonciello@amd.com>,
+        Steven Noonan <steven@valvesoftware.com>,
+        Nathan Fontenot <nathan.fontenot@amd.com>,
+        Jinzhou Su <Jinzhou.Su@amd.com>,
+        Xiaojian Du <Xiaojian.Du@amd.com>,
+        <linux-kernel@vger.kernel.org>, <x86@kernel.org>,
+        Huang Rui <ray.huang@amd.com>
+Subject: [PATCH v7 03/14] ACPI: CPPC: Implement support for SystemIO registers
+Date:   Fri, 24 Dec 2021 09:04:57 +0800
+Message-ID: <20211224010508.110159-4-ray.huang@amd.com>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20211224010508.110159-1-ray.huang@amd.com>
+References: <20211224010508.110159-1-ray.huang@amd.com>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-Originating-IP: [10.180.168.240]
+X-ClientProxiedBy: SATLEXMB04.amd.com (10.181.40.145) To SATLEXMB03.amd.com
+ (10.181.40.144)
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: af876d5a-267e-4544-ed37-08d9c6798333
+X-MS-TrafficTypeDiagnostic: BN6PR1201MB0017:EE_
+X-Microsoft-Antispam-PRVS: <BN6PR1201MB00170BE7F4A6D7CA92359FE6EC7F9@BN6PR1201MB0017.namprd12.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:3513;
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: rnfPJE4Tz/IK2HGcg1bQsWM7S5gQTwXQEiYKPAgV7oH25iMID1LN4ea3AOr/kb6IR0QEQtSUy84Be0gb3mUkJpVBp1JBnGZChYKELR+FBP7T04hyexJByZydL46itgvIG7d90b9H9UNok/BsG4THnq2milBQkNXI21IBla2aifp0N1k1xhdhX95MOKDWb3MWn/qp9LPoyOYW6kUqT6wHTr13V5IN4iOeT2+8tkMDUX0UNUxoITWVkcjRDM+xOjmFJelPjH0ln7v5y3O3NDu0rJkyfOpOtC7A9runeopYFGfAyEQxwfOkFRYZPxOrO7eJ1sxmbRopmTxACsuwFjvtfpDPiAKSokQxSF7vchYFF74Sypn8SIKphNe5mqqRwZ12qNxD9ceInkjiOGbjVr/BcpIWCgqR3uOejwPwsR2Q+eQXHvJcFmRCYaE4mrWGz5d4p+VrS2jdQuILqnMZmtUAi/XB3hUfXr2PXdHmOgI4Llp9npGsP97OPJJurMKtQ9iFYQ42cuNNaMsi7B7V+rlU6ILrh1qr0agtEdYFq9+pGF/T14Ik6f1uln6TNa+JXH2zKF5gMO/MGUT7JX0gOSWASbILbA8GgP4BOo+CNdt8YSoxmjagjsvzgv0ezlACWB4pneHXFUOWeSs3QjYtev1w1mB7RuFgqctN8A7d0RTiVKzxkqJBSCt5G/kBUx96PjjWcbg3Sb7xPpZL7e3edVUOVnGvv9HCVb8iWJzYL9+lTkMsfwBypZ3kTIxIBCgC3q9o/dO8alhX7nnK37bEE2LjIEyQsbJne4Lehni6mpS/7Vo=
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB03.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(4636009)(46966006)(36840700001)(40470700002)(1076003)(26005)(2906002)(336012)(47076005)(36860700001)(186003)(16526019)(40460700001)(54906003)(8676002)(316002)(426003)(82310400004)(8936002)(110136005)(36756003)(83380400001)(70206006)(7416002)(70586007)(86362001)(6666004)(7696005)(508600001)(81166007)(356005)(2616005)(5660300002)(4326008)(36900700001);DIR:OUT;SFP:1101;
+X-OriginatorOrg: amd.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 24 Dec 2021 01:05:44.3103
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: af876d5a-267e-4544-ed37-08d9c6798333
+X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB03.amd.com]
+X-MS-Exchange-CrossTenant-AuthSource: DM6NAM11FT055.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BN6PR1201MB0017
+Precedence: bulk
+List-ID: <linux-kernel.vger.kernel.org>
+X-Mailing-List: linux-kernel@vger.kernel.org
+
+From: Steven Noonan <steven@valvesoftware.com>
+
+According to the ACPI v6.2 (and later) specification, SystemIO can be
+used for _CPC registers. This teaches cppc_acpi how to handle such
+registers.
+
+This patch was tested using the amd_pstate driver on my Zephyrus G15
+(model GA503QS) using the current version 410 BIOS, which uses
+a SystemIO register for the HighestPerformance element in _CPC.
+
+Signed-off-by: Steven Noonan <steven@valvesoftware.com>
+Signed-off-by: Huang Rui <ray.huang@amd.com>
+---
+ drivers/acpi/cppc_acpi.c | 52 +++++++++++++++++++++++++++++++++++++---
+ 1 file changed, 49 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/acpi/cppc_acpi.c b/drivers/acpi/cppc_acpi.c
+index a85c351589be..df2933c28bec 100644
+--- a/drivers/acpi/cppc_acpi.c
++++ b/drivers/acpi/cppc_acpi.c
+@@ -118,6 +118,8 @@ static DEFINE_PER_CPU(struct cpc_desc *, cpc_desc_ptr);
+  */
+ #define NUM_RETRIES 500ULL
+ 
++#define OVER_16BTS_MASK ~0xFFFFULL
++
+ #define define_one_cppc_ro(_name)		\
+ static struct kobj_attribute _name =		\
+ __ATTR(_name, 0444, show_##_name, NULL)
+@@ -746,9 +748,26 @@ int acpi_cppc_processor_probe(struct acpi_processor *pr)
+ 						goto out_free;
+ 					cpc_ptr->cpc_regs[i-2].sys_mem_vaddr = addr;
+ 				}
++			} else if (gas_t->space_id == ACPI_ADR_SPACE_SYSTEM_IO) {
++				if (gas_t->access_width < 1 || gas_t->access_width > 3) {
++					/*
++					 * 1 = 8-bit, 2 = 16-bit, and 3 = 32-bit.
++					 * SystemIO doesn't implement 64-bit
++					 * registers.
++					 */
++					pr_debug("Invalid access width %d for SystemIO register\n",
++						gas_t->access_width);
++					goto out_free;
++				}
++				if (gas_t->address & OVER_16BTS_MASK) {
++					/* SystemIO registers use 16-bit integer addresses */
++					pr_debug("Invalid IO port %llu for SystemIO register\n",
++						gas_t->address);
++					goto out_free;
++				}
+ 			} else {
+ 				if (gas_t->space_id != ACPI_ADR_SPACE_FIXED_HARDWARE || !cpc_ffh_supported()) {
+-					/* Support only PCC ,SYS MEM and FFH type regs */
++					/* Support only PCC, SystemMemory, SystemIO, and FFH type regs. */
+ 					pr_debug("Unsupported register type: %d\n", gas_t->space_id);
+ 					goto out_free;
+ 				}
+@@ -923,7 +942,21 @@ static int cpc_read(int cpu, struct cpc_register_resource *reg_res, u64 *val)
+ 	}
+ 
+ 	*val = 0;
+-	if (reg->space_id == ACPI_ADR_SPACE_PLATFORM_COMM && pcc_ss_id >= 0)
++
++	if (reg->space_id == ACPI_ADR_SPACE_SYSTEM_IO) {
++		u32 width = 8 << (reg->access_width - 1);
++		acpi_status status;
++
++		status = acpi_os_read_port((acpi_io_address)reg->address,
++					   (u32 *)val, width);
++		if (ACPI_FAILURE(status)) {
++			pr_debug("Error: Failed to read SystemIO port %llx\n",
++				 reg->address);
++			return -EFAULT;
++		}
++
++		return 0;
++	} else if (reg->space_id == ACPI_ADR_SPACE_PLATFORM_COMM && pcc_ss_id >= 0)
+ 		vaddr = GET_PCC_VADDR(reg->address, pcc_ss_id);
+ 	else if (reg->space_id == ACPI_ADR_SPACE_SYSTEM_MEMORY)
+ 		vaddr = reg_res->sys_mem_vaddr;
+@@ -962,7 +995,20 @@ static int cpc_write(int cpu, struct cpc_register_resource *reg_res, u64 val)
+ 	int pcc_ss_id = per_cpu(cpu_pcc_subspace_idx, cpu);
+ 	struct cpc_reg *reg = &reg_res->cpc_entry.reg;
+ 
+-	if (reg->space_id == ACPI_ADR_SPACE_PLATFORM_COMM && pcc_ss_id >= 0)
++	if (reg->space_id == ACPI_ADR_SPACE_SYSTEM_IO) {
++		u32 width = 8 << (reg->access_width - 1);
++		acpi_status status;
++
++		status = acpi_os_write_port((acpi_io_address)reg->address,
++					    (u32)val, width);
++		if (ACPI_FAILURE(status)) {
++			pr_debug("Error: Failed to write SystemIO port %llx\n",
++				 reg->address);
++			return -EFAULT;
++		}
++
++		return 0;
++	} else if (reg->space_id == ACPI_ADR_SPACE_PLATFORM_COMM && pcc_ss_id >= 0)
+ 		vaddr = GET_PCC_VADDR(reg->address, pcc_ss_id);
+ 	else if (reg->space_id == ACPI_ADR_SPACE_SYSTEM_MEMORY)
+ 		vaddr = reg_res->sys_mem_vaddr;
+-- 
+2.25.1
+
+
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Return-Path: <linux-kernel-owner@kernel.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
+	aws-us-west-2-korg-lkml-1.web.codeaurora.org
+Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A3163C4332F
+	for <linux-kernel@archiver.kernel.org>; Fri, 24 Dec 2021 01:06:00 +0000 (UTC)
+Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
+        id S1350587AbhLXBF7 (ORCPT
+        <rfc822;linux-kernel@archiver.kernel.org>);
+        Thu, 23 Dec 2021 20:05:59 -0500
+Received: from mail-bn7nam10on2065.outbound.protection.outlook.com ([40.107.92.65]:54130
+        "EHLO NAM10-BN7-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1350553AbhLXBF4 (ORCPT <rfc822;linux-kernel@vger.kernel.org>);
+        Thu, 23 Dec 2021 20:05:56 -0500
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=iL9szznkzDrbaYDaQmz4YSCndsMVSD6AlJsi8zA3hDim+TvbSeetNvnn4n+4sdLRVrJkyX0Ak2ceMXLpopwTkfAQdphNeJrA+9bVLyfA5qra/qZHhJf79e+SCrB+SsXd9kcunS4dpu13KNh16FMz4VuvalgURx9xGiSJUzmM18x94wrMqMw61ANjHFmAgUIvDWCUntYNV2EGr/4uFwjC2NoJQkW4mcxz9tRAz9JJwft1EXFgVDo1WHzlEV9gwbJWDN6VTUNbFMw8jp0jFRoMwEvnUbx2gyvk1YscB10uw5zUKZwS9H7fr2q9cmNqOxJ6Ghgaq9QMju49+5rwdNGVmw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=u3UU5d76mg+7cQStoPV9EmAx/srF2ZK8NyHHbv51EwA=;
+ b=lwS8/+rId5wWf0a8iNuAaQTHbQE0vCOjyIwOfOpOF/unLzBtzVIMeuHkLPokItc77g8G6nxJHupU7JkvbAV68EbYWyKSui+E7SC9tqC6ZsxVcWy34p+OhjFcZxQRJwcHsXk4nHIesDSySrq32r/vi58Mi09kU35qUCmhC9f6A6iW+k/2aLtiZuhq1AiueK+Z7kMeDFWFcYMT6/kwvlhfsQGbjs2E4a9Jdk6dxM8q9miEEcAvIe08Th2bLGH4jpAG3fZxG7ymyBNhEEBi+3BOWGrx4qNPCkK3MfeHeLNXYhGaHUPiEooyH8TArFTCRaFQQi8F9WhsdJM0aTTWdrtGDw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 165.204.84.17) smtp.rcpttodomain=intel.com smtp.mailfrom=amd.com; dmarc=pass
+ (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
+ dkim=none (message not signed); arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=u3UU5d76mg+7cQStoPV9EmAx/srF2ZK8NyHHbv51EwA=;
+ b=uUMAeIfzKGYch4tExPLBg4qWmIOO8bYCWnrVtFezs9cq3rTCtcOXyUNH+V1JDhgNt8t12VunlpzbF7dgi1PdLKFHbWOR4sZkydLy5ATSLNCDoWxx5LeKbdzKNO3HCsmoV6iUnxB93Zd62p/i8SOLj9ahOnkVT/l9IZcKj3YWL7M=
+Received: from DS7PR07CA0012.namprd07.prod.outlook.com (2603:10b6:5:3af::20)
+ by MN2PR12MB3471.namprd12.prod.outlook.com (2603:10b6:208:c8::11) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4823.19; Fri, 24 Dec
+ 2021 01:05:49 +0000
+Received: from DM6NAM11FT052.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:5:3af:cafe::62) by DS7PR07CA0012.outlook.office365.com
+ (2603:10b6:5:3af::20) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4823.19 via Frontend
+ Transport; Fri, 24 Dec 2021 01:05:49 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
+ smtp.mailfrom=amd.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=amd.com;
+Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
+ 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
+ client-ip=165.204.84.17; helo=SATLEXMB03.amd.com;
+Received: from SATLEXMB03.amd.com (165.204.84.17) by
+ DM6NAM11FT052.mail.protection.outlook.com (10.13.172.111) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.20.4823.18 via Frontend Transport; Fri, 24 Dec 2021 01:05:48 +0000
+Received: from hr-amd.amd.com (10.180.168.240) by SATLEXMB03.amd.com
+ (10.181.40.144) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.17; Thu, 23 Dec
+ 2021 19:05:43 -0600
+From:   Huang Rui <ray.huang@amd.com>
+To:     "Rafael J . Wysocki" <rafael.j.wysocki@intel.com>,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        Shuah Khan <skhan@linuxfoundation.org>,
+        "Borislav Petkov" <bp@suse.de>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Ingo Molnar <mingo@kernel.org>,
+        Giovanni Gherdovich <ggherdovich@suse.cz>,
+        Steven Rostedt <rostedt@goodmis.org>,
+        <linux-pm@vger.kernel.org>
+CC:     Deepak Sharma <deepak.sharma@amd.com>,
+        Alex Deucher <alexander.deucher@amd.com>,
+        Mario Limonciello <mario.limonciello@amd.com>,
+        Steven Noonan <steven@valvesoftware.com>,
+        Nathan Fontenot <nathan.fontenot@amd.com>,
+        Jinzhou Su <Jinzhou.Su@amd.com>,
+        Xiaojian Du <Xiaojian.Du@amd.com>,
+        <linux-kernel@vger.kernel.org>, <x86@kernel.org>,
+        Huang Rui <ray.huang@amd.com>
+Subject: [PATCH v7 04/14] ACPI: CPPC: Check present CPUs for determining _CPC is valid
+Date:   Fri, 24 Dec 2021 09:04:58 +0800
+Message-ID: <20211224010508.110159-5-ray.huang@amd.com>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20211224010508.110159-1-ray.huang@amd.com>
+References: <20211224010508.110159-1-ray.huang@amd.com>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-Originating-IP: [10.180.168.240]
+X-ClientProxiedBy: SATLEXMB04.amd.com (10.181.40.145) To SATLEXMB03.amd.com
+ (10.181.40.144)
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: d0b1bf12-08f4-45b6-6605-08d9c67985ec
+X-MS-TrafficTypeDiagnostic: MN2PR12MB3471:EE_
+X-Microsoft-Antispam-PRVS: <MN2PR12MB34714DB54F5C6668256A4228EC7F9@MN2PR12MB3471.namprd12.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:7691;
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: MRMrTg/4WTpfG1dGyY++aszQ82pkIX+NBFyym96xmCufX4onh4kxDdEZ75J4a59OWYPALJKEaKS96h+ImEEohJIJ/mFcQPwEZiCtOYXRKFwPWe5mUKp5tW3wqu9GQbGjq1MBC6ZpdvgCU0m2Gj4tLVc8fV1523VoXounzFs2KRuyXPlbj2Dz1gwPnpl9jJP/qEFclzwNMjialcDAmfrQd7PFRWnmQHfrqCqTv6c6+RNLoYMD7XSHjXf4Tx04B4mmbNO7ir25ySCYiTHHaifcy7JofENsmtmi1g1lrf9gjTv083pyTdK9UEOydSIVIz26KLCXqEKTiI0xGWlWWycc/USYf5VeUaTzvV+5GnSZFSegSSXBQOaCN7+5Q93zUD8Tpmj6cAW8qFxTmnkz11OTTazr6bbVmhk10ux9X3eESw+QdDnCHiudk7PDWEqzpL/+7McEi4JvEKtVa78S8T1RcUWahdytacPuDTr3EoZmJCPYkopyKb9NzyMVz10rbe1+bhse5D6gO05gDxXuP9484zZ3yek8NHjoKf+y0nXEAV/Vt4bmdeZIxubTIVCbhHrlB5O8EitFvhWQgYLHOBI9EmEo3Xh/hAG7/l1iXMpWQ4Lt10KqI8SupxmdtUdEmSXDrCF5H69Ku1NsNKIxb6ceMwuJc4p+Lt+HrCTWLcUup+AZ1CV35wHLOHpOl0fe+2y/T9+H3DqXEVnaOPH9LLcllQPtioMHDfSmAJq82cyPPqOygfP1eaPgValK3bmntUw+prz3QRFyPL65KG4gc+5n7Gl6QY9knQZbWFH2FlzKotU=
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB03.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(4636009)(40470700002)(46966006)(36840700001)(5660300002)(83380400001)(316002)(86362001)(26005)(16526019)(6666004)(54906003)(81166007)(70206006)(8676002)(356005)(36860700001)(508600001)(426003)(186003)(36756003)(2616005)(336012)(4326008)(8936002)(2906002)(7696005)(70586007)(40460700001)(47076005)(1076003)(110136005)(82310400004)(7416002)(36900700001);DIR:OUT;SFP:1101;
+X-OriginatorOrg: amd.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 24 Dec 2021 01:05:48.8903
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: d0b1bf12-08f4-45b6-6605-08d9c67985ec
+X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB03.amd.com]
+X-MS-Exchange-CrossTenant-AuthSource: DM6NAM11FT052.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MN2PR12MB3471
+Precedence: bulk
+List-ID: <linux-kernel.vger.kernel.org>
+X-Mailing-List: linux-kernel@vger.kernel.org
+
+From: Mario Limonciello <mario.limonciello@amd.com>
+
+As this is a static check, it should be based upon what is currently
+present on the system. This makes probeing more deterministic.
+
+While local APIC flags field (lapic_flags) of cpu core in MADT table is
+0, then the cpu core won't be enabled. In this case, _CPC won't be found
+in this core, and return back to _CPC invalid with walking through
+possible cpus (include disable cpus). This is not expected, so switch to
+check present CPUs instead.
+
+Reported-by: Jinzhou Su <Jinzhou.Su@amd.com>
+Signed-off-by: Mario Limonciello <mario.limonciello@amd.com>
+Signed-off-by: Huang Rui <ray.huang@amd.com>
+---
+ drivers/acpi/cppc_acpi.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/acpi/cppc_acpi.c b/drivers/acpi/cppc_acpi.c
+index df2933c28bec..0c4f7005818e 100644
+--- a/drivers/acpi/cppc_acpi.c
++++ b/drivers/acpi/cppc_acpi.c
+@@ -413,7 +413,7 @@ bool acpi_cpc_valid(void)
+ 	struct cpc_desc *cpc_ptr;
+ 	int cpu;
+ 
+-	for_each_possible_cpu(cpu) {
++	for_each_present_cpu(cpu) {
+ 		cpc_ptr = per_cpu(cpc_desc_ptr, cpu);
+ 		if (!cpc_ptr)
+ 			return false;
+-- 
+2.25.1
+
+
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Return-Path: <linux-kernel-owner@kernel.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
+	aws-us-west-2-korg-lkml-1.web.codeaurora.org
+Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4C36DC433F5
+	for <linux-kernel@archiver.kernel.org>; Fri, 24 Dec 2021 01:06:05 +0000 (UTC)
+Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
+        id S1350614AbhLXBGD (ORCPT
+        <rfc822;linux-kernel@archiver.kernel.org>);
+        Thu, 23 Dec 2021 20:06:03 -0500
+Received: from mail-mw2nam10on2059.outbound.protection.outlook.com ([40.107.94.59]:21376
+        "EHLO NAM10-MW2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1350551AbhLXBF4 (ORCPT <rfc822;linux-kernel@vger.kernel.org>);
+        Thu, 23 Dec 2021 20:05:56 -0500
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=C4Oc2/ogtyxb1X4OaMV5tdjpdsVfslmWolhMyJIVjvm7vyG6k0GFIaVFWv4D4xMdkZxuY8j5PP1fBWnR1R7llwlrFdIyvBbVIB+uXgGACzIBST+J1HtjDBbNoOPQMwJlG4ahWvBXHRj9t5aQXZXD9YDvw+pQR0CnQjYBpAMI6xNm61AvNy1k4GPDR6QpnjJ/QJSRhedWAK7Dmpg0S8IljeZgyO0MDDPJEYoYVFxUK+Lym3cw2Dhx9iqU+jYLRUiOxgEtRrVjLDnmC+YCJrqJPFe3z+SRKdueaqPfE1IsOzsanw14a0+V8BzkCbxKYy958QfFQQH0FqOXUZKDV2Vbyg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=h2U2NKv1TFMPPogbMA/QS2BdL5i+mp1ILjQzAkLh9LY=;
+ b=BjTvKt0ATd7X3cX+PFujJ6Y30kRFvOGirdFBYI7wg4YuWmQ5RAplwDhB22Yo9n/nM3psuDKF5oasQWA6TxEMOEOa7r6td1EnLlANo5EsEli1GAORVN4aiAltOito2PmKU/ABo1MY9yvkgvVRzT1Wt5mZXRH/PGYJHhh9rb1cxVYQcHtsCvEO614cg+30rwBH8qAyz0HwJqil8DeV9t/OTNatgXt4GrSe/ImdCIJ74YFhDbte12pmQ3VCOxE3nBmQnzSdw4kxsJ3Q4SksjkomddlIFlyQO1FdTD0rbp5Vd5Bmp4vR/9pwAIlMWClgMpKvLXCPVy22NHQrys8UTDNnqg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 165.204.84.17) smtp.rcpttodomain=intel.com smtp.mailfrom=amd.com; dmarc=pass
+ (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
+ dkim=none (message not signed); arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=h2U2NKv1TFMPPogbMA/QS2BdL5i+mp1ILjQzAkLh9LY=;
+ b=C3/6PKcQ1KClDRmc902UiUtMwYA+sora0WaBieRQbPlRhEbHaXkSCptHhCQ9JhHuyReqHmfW2EwXYgkdVutORq6zN65qt6ROkTlg9FqVzgtLpVesrc55uGRoRP/fBJSwfG1czLQvU9VdiruDBjmhxd/Noxu3L62NT7gH2x8PXyk=
+Received: from DS7PR03CA0256.namprd03.prod.outlook.com (2603:10b6:5:3b3::21)
+ by CH2PR12MB4645.namprd12.prod.outlook.com (2603:10b6:610:e::13) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4823.18; Fri, 24 Dec
+ 2021 01:05:53 +0000
+Received: from DM6NAM11FT065.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:5:3b3:cafe::5a) by DS7PR03CA0256.outlook.office365.com
+ (2603:10b6:5:3b3::21) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4823.18 via Frontend
+ Transport; Fri, 24 Dec 2021 01:05:53 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
+ smtp.mailfrom=amd.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=amd.com;
+Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
+ 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
+ client-ip=165.204.84.17; helo=SATLEXMB03.amd.com;
+Received: from SATLEXMB03.amd.com (165.204.84.17) by
+ DM6NAM11FT065.mail.protection.outlook.com (10.13.172.109) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.20.4823.18 via Frontend Transport; Fri, 24 Dec 2021 01:05:53 +0000
+Received: from hr-amd.amd.com (10.180.168.240) by SATLEXMB03.amd.com
+ (10.181.40.144) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.17; Thu, 23 Dec
+ 2021 19:05:48 -0600
+From:   Huang Rui <ray.huang@amd.com>
+To:     "Rafael J . Wysocki" <rafael.j.wysocki@intel.com>,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        Shuah Khan <skhan@linuxfoundation.org>,
+        "Borislav Petkov" <bp@suse.de>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Ingo Molnar <mingo@kernel.org>,
+        Giovanni Gherdovich <ggherdovich@suse.cz>,
+        Steven Rostedt <rostedt@goodmis.org>,
+        <linux-pm@vger.kernel.org>
+CC:     Deepak Sharma <deepak.sharma@amd.com>,
+        Alex Deucher <alexander.deucher@amd.com>,
+        Mario Limonciello <mario.limonciello@amd.com>,
+        Steven Noonan <steven@valvesoftware.com>,
+        Nathan Fontenot <nathan.fontenot@amd.com>,
+        Jinzhou Su <Jinzhou.Su@amd.com>,
+        Xiaojian Du <Xiaojian.Du@amd.com>,
+        <linux-kernel@vger.kernel.org>, <x86@kernel.org>,
+        Huang Rui <ray.huang@amd.com>
+Subject: [PATCH v7 05/14] ACPI: CPPC: Add CPPC enable register function
+Date:   Fri, 24 Dec 2021 09:04:59 +0800
+Message-ID: <20211224010508.110159-6-ray.huang@amd.com>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20211224010508.110159-1-ray.huang@amd.com>
+References: <20211224010508.110159-1-ray.huang@amd.com>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-Originating-IP: [10.180.168.240]
+X-ClientProxiedBy: SATLEXMB04.amd.com (10.181.40.145) To SATLEXMB03.amd.com
+ (10.181.40.144)
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: ec3a8062-57a7-4738-4708-08d9c67988a2
+X-MS-TrafficTypeDiagnostic: CH2PR12MB4645:EE_
+X-Microsoft-Antispam-PRVS: <CH2PR12MB4645CB3FCF27138B53C4B317EC7F9@CH2PR12MB4645.namprd12.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:6790;
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: 9TsJMY24ki+WAbcxXROgIIBu+8tZn48W6McKFfLhKB2EKPDdthwYELHCA0vt4cHdo901qiViYiGEPLwuybMkk9lpBJuavW+Xq0ZjK5lSKvG25pD9MDp6T5lFt6QjbvO8tY29QhcGR+sGs67IONcgu5+pR2yjn1tpicPj1NnHv4xBMq7Xw3vTMd4q4wOGaEsvXFVu9PvsDD5XZi7XfuBNKraizSWofMjBDdL8a30cApL1QZJ9eXyCChojoMl9TIOWN0eyaMdJ2VVpVWJF6OPSjLUARprkM3aGoz4xflWRym7cS8ER+RN1nQYznRrI2Sa+v7yqEsBIcHFk1y9f8uaN18Kq/wrGoK3TgpEm8uV3kn27PaqQGH7v2wOwP6PC83ZbujaeHXMYH5+KufCLUv3HDKxxX1+cPYExObllz1ZB5AgK5+bPhP5c3FmZ0OmWHpboYgS1qFtKFe73Piq9DyI6jSw/etzd/dHOsUhfFOki//lHxqFYpNUaM+IwK5/C194uywHWcYLSgFKMB5jD0ZNFxrh06DNGhXANojJFZnDhOM0QExcYTnGKeTBv1E+fGOuJ8gkSHK91mlPwjIvKWzEhhioV69qwBG5fqZPZWDDI87oNn+YU00nlexD744OQXmAPSsx89G42wg2DJKiKVLI9v/UjeNlgyIu0oempZlM1Kntc5HbaEWE4OIDzIwhSQXX7a36EzdQ1U9QOPfuT0ON5cqrQ+41yUuX9mYMFllSRAFSMd93js4bJYPX/DoULW/jNqjE/RUjfQtADmeVildqoz6cNCnvl/9S3Gi22E8/YuJM=
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB03.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(4636009)(36840700001)(46966006)(40470700002)(70206006)(70586007)(7416002)(508600001)(7696005)(6666004)(2616005)(40460700001)(5660300002)(8676002)(4326008)(81166007)(54906003)(426003)(36860700001)(2906002)(26005)(316002)(110136005)(83380400001)(8936002)(36756003)(1076003)(16526019)(82310400004)(47076005)(186003)(336012)(356005)(86362001)(36900700001);DIR:OUT;SFP:1101;
+X-OriginatorOrg: amd.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 24 Dec 2021 01:05:53.4533
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: ec3a8062-57a7-4738-4708-08d9c67988a2
+X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB03.amd.com]
+X-MS-Exchange-CrossTenant-AuthSource: DM6NAM11FT065.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: CH2PR12MB4645
+Precedence: bulk
+List-ID: <linux-kernel.vger.kernel.org>
+X-Mailing-List: linux-kernel@vger.kernel.org
+
+From: Jinzhou Su <Jinzhou.Su@amd.com>
+
+Add a new function to enable CPPC feature. This function
+will write Continuous Performance Control package
+EnableRegister field on the processor.
+
+CPPC EnableRegister register described in section 8.4.7.1 of ACPI 6.4:
+This element is optional. If supported, contains a resource descriptor
+with a single Register() descriptor that describes a register to which
+OSPM writes a One to enable CPPC on this processor. Before this register
+is set, the processor will be controlled by legacy mechanisms (ACPI
+Pstates, firmware, etc.).
+
+This register will be used for AMD processors to enable AMD P-State
+function instead of legacy ACPI P-States.
+
+Signed-off-by: Jinzhou Su <Jinzhou.Su@amd.com>
+Signed-off-by: Huang Rui <ray.huang@amd.com>
+---
+ drivers/acpi/cppc_acpi.c | 45 ++++++++++++++++++++++++++++++++++++++++
+ include/acpi/cppc_acpi.h |  5 +++++
+ 2 files changed, 50 insertions(+)
+
+diff --git a/drivers/acpi/cppc_acpi.c b/drivers/acpi/cppc_acpi.c
+index 0c4f7005818e..6c0a55a17dfc 100644
+--- a/drivers/acpi/cppc_acpi.c
++++ b/drivers/acpi/cppc_acpi.c
+@@ -1268,6 +1268,51 @@ int cppc_get_perf_ctrs(int cpunum, struct cppc_perf_fb_ctrs *perf_fb_ctrs)
+ }
+ EXPORT_SYMBOL_GPL(cppc_get_perf_ctrs);
+ 
++/**
++ * cppc_set_enable - Set to enable CPPC on the processor by writing the
++ * Continuous Performance Control package EnableRegister field.
++ * @cpu: CPU for which to enable CPPC register.
++ * @enable: 0 - disable, 1 - enable CPPC feature on the processor.
++ *
++ * Return: 0 for success, -ERRNO or -EIO otherwise.
++ */
++int cppc_set_enable(int cpu, bool enable)
++{
++	int pcc_ss_id = per_cpu(cpu_pcc_subspace_idx, cpu);
++	struct cpc_register_resource *enable_reg;
++	struct cpc_desc *cpc_desc = per_cpu(cpc_desc_ptr, cpu);
++	struct cppc_pcc_data *pcc_ss_data = NULL;
++	int ret = -EINVAL;
++
++	if (!cpc_desc) {
++		pr_debug("No CPC descriptor for CPU:%d\n", cpu);
++		return -EINVAL;
++	}
++
++	enable_reg = &cpc_desc->cpc_regs[ENABLE];
++
++	if (CPC_IN_PCC(enable_reg)) {
++
++		if (pcc_ss_id < 0)
++			return -EIO;
++
++		ret = cpc_write(cpu, enable_reg, enable);
++		if (ret)
++			return ret;
++
++		pcc_ss_data = pcc_data[pcc_ss_id];
++
++		down_write(&pcc_ss_data->pcc_lock);
++		/* after writing CPC, transfer the ownership of PCC to platfrom */
++		ret = send_pcc_cmd(pcc_ss_id, CMD_WRITE);
++		up_write(&pcc_ss_data->pcc_lock);
++		return ret;
++	}
++
++	return cpc_write(cpu, enable_reg, enable);
++}
++EXPORT_SYMBOL_GPL(cppc_set_enable);
++
+ /**
+  * cppc_set_perf - Set a CPU's performance controls.
+  * @cpu: CPU for which to set performance controls.
+diff --git a/include/acpi/cppc_acpi.h b/include/acpi/cppc_acpi.h
+index bc159a9b4a73..92b7ea8d8f5e 100644
+--- a/include/acpi/cppc_acpi.h
++++ b/include/acpi/cppc_acpi.h
+@@ -138,6 +138,7 @@ extern int cppc_get_desired_perf(int cpunum, u64 *desired_perf);
+ extern int cppc_get_nominal_perf(int cpunum, u64 *nominal_perf);
+ extern int cppc_get_perf_ctrs(int cpu, struct cppc_perf_fb_ctrs *perf_fb_ctrs);
+ extern int cppc_set_perf(int cpu, struct cppc_perf_ctrls *perf_ctrls);
++extern int cppc_set_enable(int cpu, bool enable);
+ extern int cppc_get_perf_caps(int cpu, struct cppc_perf_caps *caps);
+ extern bool acpi_cpc_valid(void);
+ extern int acpi_get_psd_map(unsigned int cpu, struct cppc_cpudata *cpu_data);
+@@ -162,6 +163,10 @@ static inline int cppc_set_perf(int cpu, struct cppc_perf_ctrls *perf_ctrls)
+ {
+ 	return -ENOTSUPP;
+ }
++static inline int cppc_set_enable(int cpu, bool enable)
++{
++	return -ENOTSUPP;
++}
+ static inline int cppc_get_perf_caps(int cpu, struct cppc_perf_caps *caps)
+ {
+ 	return -ENOTSUPP;
+-- 
+2.25.1
+
+
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Return-Path: <linux-kernel-owner@kernel.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
+	aws-us-west-2-korg-lkml-1.web.codeaurora.org
+Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D4F0AC433FE
+	for <linux-kernel@archiver.kernel.org>; Fri, 24 Dec 2021 01:06:06 +0000 (UTC)
+Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
+        id S1350637AbhLXBGF (ORCPT
+        <rfc822;linux-kernel@archiver.kernel.org>);
+        Thu, 23 Dec 2021 20:06:05 -0500
+Received: from mail-dm3nam07on2045.outbound.protection.outlook.com ([40.107.95.45]:26881
+        "EHLO NAM02-DM3-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1350586AbhLXBGB (ORCPT <rfc822;linux-kernel@vger.kernel.org>);
+        Thu, 23 Dec 2021 20:06:01 -0500
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=LuJwWS84ycQhBCrQrQc/tlNAzYQ99+0lIkv58F0AQnL0xUOY9rz8u32HRUFfXKqTj7xBm6J84PISB+114ehXzEBQ5oYyhe1H3z5U53yO+NHac2yqc+5NzL9gT4g6UtlImmCX89IpadG/aWN2hqiDejfbwM8z+YaHWFJetaIgr7YSFRbQPBx3jT+7UJxYgCm84jI4IflzaDQyIkeKEJqGO3K8LxCkZFarPnVuOMGXdyHb8RP5J/Qgaz5XZfNbGxarL2YDGvMtCg231L9je4pf7Mn1saEJVG0U76GSLhH32NiwyrGY5NmWQ7DkyUjZNe7Vg+tvxDGI74Jz77S3xriBgw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=6GM3JLDWa5HDkXQXp9+TYwR1KdIb75kcxSnVlCxQgVo=;
+ b=bjUErZjXh0MyYUuZwBEB/iPjYaB2++QgycksAOC7NVupReqHXCBM57gLuHhczJH00TY1tOHHhVgGhR5hdsULYzCJIKijCEPRE0LeZknQ23Shqg7Xthye6FfDGuG6wselLqVwShbkh8D5vw/BNXBhdrxA6ixgmieAjTWQ+Y3xPePYBpem8LPkdguAu7usgZNezrq5NrNk+5k3fbk4PkNMRUdPbP+2YbkQz/qW+udjBrB7EZlspPfvpEc1hjKcJF4K9CZoxiw55KBQfuQUcES26EH0VbUj/yBiNV/c6VAnJzhXo5L5n3L4BiCk03VAP62tEaf4WbllZAd8b/KYbVHiaQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 165.204.84.17) smtp.rcpttodomain=intel.com smtp.mailfrom=amd.com; dmarc=pass
+ (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
+ dkim=none (message not signed); arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=6GM3JLDWa5HDkXQXp9+TYwR1KdIb75kcxSnVlCxQgVo=;
+ b=wF82UKxRMgG8/cMdmQOToY2100Cxq3zcgLvSYtLmstVUeYz9QQyrSEUIBWlJARe60oPWAMSAodfL8ah/O++/iPSJ5h0yGBugsPYk78HY6q9k3LunOLKZJFZ3Zw2pHghbYIVVg28WESBv6ZP//rFwT8SiALCr4n9OrWfvHjRA2CQ=
+Received: from DM3PR08CA0006.namprd08.prod.outlook.com (2603:10b6:0:52::16) by
+ MN2PR12MB2877.namprd12.prod.outlook.com (2603:10b6:208:ae::32) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.4823.19; Fri, 24 Dec 2021 01:05:58 +0000
+Received: from DM6NAM11FT033.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:0:52:cafe::aa) by DM3PR08CA0006.outlook.office365.com
+ (2603:10b6:0:52::16) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4823.19 via Frontend
+ Transport; Fri, 24 Dec 2021 01:05:58 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
+ smtp.mailfrom=amd.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=amd.com;
+Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
+ 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
+ client-ip=165.204.84.17; helo=SATLEXMB03.amd.com;
+Received: from SATLEXMB03.amd.com (165.204.84.17) by
+ DM6NAM11FT033.mail.protection.outlook.com (10.13.172.221) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.20.4823.18 via Frontend Transport; Fri, 24 Dec 2021 01:05:58 +0000
+Received: from hr-amd.amd.com (10.180.168.240) by SATLEXMB03.amd.com
+ (10.181.40.144) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.17; Thu, 23 Dec
+ 2021 19:05:53 -0600
+From:   Huang Rui <ray.huang@amd.com>
+To:     "Rafael J . Wysocki" <rafael.j.wysocki@intel.com>,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        Shuah Khan <skhan@linuxfoundation.org>,
+        "Borislav Petkov" <bp@suse.de>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Ingo Molnar <mingo@kernel.org>,
+        Giovanni Gherdovich <ggherdovich@suse.cz>,
+        Steven Rostedt <rostedt@goodmis.org>,
+        <linux-pm@vger.kernel.org>
+CC:     Deepak Sharma <deepak.sharma@amd.com>,
+        Alex Deucher <alexander.deucher@amd.com>,
+        Mario Limonciello <mario.limonciello@amd.com>,
+        Steven Noonan <steven@valvesoftware.com>,
+        Nathan Fontenot <nathan.fontenot@amd.com>,
+        Jinzhou Su <Jinzhou.Su@amd.com>,
+        Xiaojian Du <Xiaojian.Du@amd.com>,
+        <linux-kernel@vger.kernel.org>, <x86@kernel.org>,
+        Huang Rui <ray.huang@amd.com>
+Subject: [PATCH v7 06/14] cpufreq: amd-pstate: Introduce a new AMD P-State driver to support future processors
+Date:   Fri, 24 Dec 2021 09:05:00 +0800
+Message-ID: <20211224010508.110159-7-ray.huang@amd.com>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20211224010508.110159-1-ray.huang@amd.com>
+References: <20211224010508.110159-1-ray.huang@amd.com>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-Originating-IP: [10.180.168.240]
+X-ClientProxiedBy: SATLEXMB04.amd.com (10.181.40.145) To SATLEXMB03.amd.com
+ (10.181.40.144)
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: b7674857-3632-40ff-b85e-08d9c6798b92
+X-MS-TrafficTypeDiagnostic: MN2PR12MB2877:EE_
+X-Microsoft-Antispam-PRVS: <MN2PR12MB287748647975D554CB305163EC7F9@MN2PR12MB2877.namprd12.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:9508;
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: PRDz2fYCESh+0n1hBeD3FBJTP0Qm3yBpySOVLK65f4wk/3bHgeRLqrtOO+ZrpH/GL0n+hUWlgNEVSr5SHp9pfjBC33pBP6fS2YOfadg++RuWfajyxVMn23dznoITj/uwNxL1vxON4VKK5QgXfPKIfR0XNHgF5k0u2WEebNHuWOF9tQLFkcdH2S8hdamtF+7GlRT04VxA3ILORnumQSGireZ7aqVG+Kp7G7cB9qHj1gTzmZ9pjk66/yt71T/A0wHGlyjm2XpkYjFTVcLbkwJJBsPtdzSszCf8AH0am/SSbVjguDDLvhqJleSUUYMjmZYeyz4jP7PRAOqyfxeHiPV4DbpVZphPX++gcihcx5MP28twC350/T2aQnQYZwqqAdGIvEPKcuyibxcutrkFguSOL4fE8TgO/4bBvXlZnkOqKk4xQ0ujDdh+k6CQkZh/9bdhSn5pBO4j0EFIyorZ8glc9Ilq/nYS227hMPTV/Y49n3g2WxArij5fk1BW8IvEp0181IJaai4ChD91jTVB68FWv6P7O/nbdd+clg0NJtTLhGQM+5EXhDwn9FDbiEK6qXbETtx47sOeKxrJ1S2C4XPMlMWWdrejCUg0Sy8xX0WS92drrYGDzB+2ffhd0zmfieUQy4cs+LlJvKXYw2jGXPUgpsflfLAwEIhN/XCnGZxkRLo5M6jUzhwEBE2lOr5wQ6uh+iMmP1NqJQBzTZ0vRtDwIOeeSil59Gv3FZKXlO5rA9vjFa5MZOfGwrp5eK2bwaaKPtCn/mVZc2WNv7Xu7i59b0KM5vShvwB/+wZVh5YkBkl8zfSvUDSOwJtr4tt4dk2nbLrg4J2Io+bGsCOhTCzBrvBS64z7/2EuWBW/uRNhuUKD5/n5LYJKpQP2mNoPyEzW
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB03.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(4636009)(36840700001)(46966006)(40470700002)(40460700001)(86362001)(8936002)(8676002)(70206006)(316002)(2906002)(54906003)(70586007)(1076003)(7416002)(110136005)(30864003)(6666004)(966005)(508600001)(82310400004)(7696005)(4326008)(47076005)(336012)(5660300002)(426003)(26005)(2616005)(356005)(186003)(16526019)(36756003)(83380400001)(36860700001)(81166007)(36900700001);DIR:OUT;SFP:1101;
+X-OriginatorOrg: amd.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 24 Dec 2021 01:05:58.3845
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: b7674857-3632-40ff-b85e-08d9c6798b92
+X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB03.amd.com]
+X-MS-Exchange-CrossTenant-AuthSource: DM6NAM11FT033.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MN2PR12MB2877
+Precedence: bulk
+List-ID: <linux-kernel.vger.kernel.org>
+X-Mailing-List: linux-kernel@vger.kernel.org
+
+AMD P-State is the AMD CPU performance scaling driver that introduces a
+new CPU frequency control mechanism on AMD Zen based CPU series in Linux
+kernel. The new mechanism is based on Collaborative processor
+performance control (CPPC) which is finer grain frequency management
+than legacy ACPI hardware P-States. Current AMD CPU platforms are using
+the ACPI P-states driver to manage CPU frequency and clocks with
+switching only in 3 P-states. AMD P-State is to replace the ACPI
+P-states controls, allows a flexible, low-latency interface for the
+Linux kernel to directly communicate the performance hints to hardware.
+
+AMD P-State leverages the Linux kernel governors such as *schedutil*,
+*ondemand*, etc. to manage the performance hints which are provided by CPPC
+hardware functionality. The first version for AMD P-State is to support one
+of the Zen3 processors, and we will support more in future after we verify
+the hardware and SBIOS functionalities.
+
+There are two types of hardware implementations for AMD P-State: one is full
+MSR support and another is shared memory support. It can use
+X86_FEATURE_CPPC feature flag to distinguish the different types.
+
+Using the new AMD P-State method + kernel governors (*schedutil*,
+*ondemand*, ...) to manage the frequency update is the most appropriate
+bridge between AMD Zen based hardware processor and Linux kernel, the
+processor is able to adjust to the most efficiency frequency according to
+the kernel scheduler loading.
+
+Please check the detailed CPU feature and MSR register description in
+Processor Programming Reference (PPR) for AMD Family 19h Model 51h,
+Revision A1 Processors:
+
+https://www.amd.com/system/files/TechDocs/56569-A1-PUB.zip
+
+Signed-off-by: Huang Rui <ray.huang@amd.com>
+---
+ drivers/cpufreq/Kconfig.x86  |  17 ++
+ drivers/cpufreq/Makefile     |   1 +
+ drivers/cpufreq/amd-pstate.c | 386 +++++++++++++++++++++++++++++++++++
+ 3 files changed, 404 insertions(+)
+ create mode 100644 drivers/cpufreq/amd-pstate.c
+
+diff --git a/drivers/cpufreq/Kconfig.x86 b/drivers/cpufreq/Kconfig.x86
+index 92701a18bdd9..a951768c3ebb 100644
+--- a/drivers/cpufreq/Kconfig.x86
++++ b/drivers/cpufreq/Kconfig.x86
+@@ -34,6 +34,23 @@ config X86_PCC_CPUFREQ
+ 
+ 	  If in doubt, say N.
+ 
++config X86_AMD_PSTATE
++	tristate "AMD Processor P-State driver"
++	depends on X86
++	select ACPI_PROCESSOR if ACPI
++	select ACPI_CPPC_LIB if X86_64 && ACPI
++	select CPU_FREQ_GOV_SCHEDUTIL if SMP
++	help
++	  This driver adds a CPUFreq driver which utilizes a fine grain
++	  processor performance frequency control range instead of legacy
++	  performance levels. _CPC needs to be present in the ACPI tables
++	  of the system.
++
++	  For details, take a look at:
++	  <file:Documentation/admin-guide/pm/amd-pstate.rst>.
++
++	  If in doubt, say N.
++
+ config X86_ACPI_CPUFREQ
+ 	tristate "ACPI Processor P-States driver"
+ 	depends on ACPI_PROCESSOR
+diff --git a/drivers/cpufreq/Makefile b/drivers/cpufreq/Makefile
+index 48ee5859030c..c8d307010922 100644
+--- a/drivers/cpufreq/Makefile
++++ b/drivers/cpufreq/Makefile
+@@ -25,6 +25,7 @@ obj-$(CONFIG_CPUFREQ_DT_PLATDEV)	+= cpufreq-dt-platdev.o
+ # speedstep-* is preferred over p4-clockmod.
+ 
+ obj-$(CONFIG_X86_ACPI_CPUFREQ)		+= acpi-cpufreq.o
++obj-$(CONFIG_X86_AMD_PSTATE)		+= amd-pstate.o
+ obj-$(CONFIG_X86_POWERNOW_K8)		+= powernow-k8.o
+ obj-$(CONFIG_X86_PCC_CPUFREQ)		+= pcc-cpufreq.o
+ obj-$(CONFIG_X86_POWERNOW_K6)		+= powernow-k6.o
+diff --git a/drivers/cpufreq/amd-pstate.c b/drivers/cpufreq/amd-pstate.c
+new file mode 100644
+index 000000000000..2698ed5ec6d7
+--- /dev/null
++++ b/drivers/cpufreq/amd-pstate.c
+@@ -0,0 +1,386 @@
++// SPDX-License-Identifier: GPL-2.0-or-later
++/*
++ * amd-pstate.c - AMD Processor P-state Frequency Driver
++ *
++ * Copyright (C) 2021 Advanced Micro Devices, Inc. All Rights Reserved.
++ *
++ * Author: Huang Rui <ray.huang@amd.com>
++ *
++ * AMD P-State introduces a new CPU performance scaling design for AMD
++ * processors using the ACPI Collaborative Performance and Power Control (CPPC)
++ * feature which works with the AMD SMU firmware providing a finer grained
++ * frequency control range. It is to replace the legacy ACPI P-States control,
++ * allows a flexible, low-latency interface for the Linux kernel to directly
++ * communicate the performance hints to hardware.
++ *
++ * AMD P-State is supported on recent AMD Zen base CPU series include some of
++ * Zen2 and Zen3 processors. _CPC needs to be present in the ACPI tables of AMD
++ * P-State supported system. And there are two types of hardware implementations
++ * for AMD P-State: 1) Full MSR Solution and 2) Shared Memory Solution.
++ * X86_FEATURE_CPPC CPU feature flag is used to distinguish the different types.
++ */
++
++#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
++
++#include <linux/kernel.h>
++#include <linux/module.h>
++#include <linux/init.h>
++#include <linux/smp.h>
++#include <linux/sched.h>
++#include <linux/cpufreq.h>
++#include <linux/compiler.h>
++#include <linux/dmi.h>
++#include <linux/slab.h>
++#include <linux/acpi.h>
++#include <linux/io.h>
++#include <linux/delay.h>
++#include <linux/uaccess.h>
++#include <linux/static_call.h>
++
++#include <acpi/processor.h>
++#include <acpi/cppc_acpi.h>
++
++#include <asm/msr.h>
++#include <asm/processor.h>
++#include <asm/cpufeature.h>
++#include <asm/cpu_device_id.h>
++
++#define AMD_PSTATE_TRANSITION_LATENCY	0x20000
++#define AMD_PSTATE_TRANSITION_DELAY	500
++
++static struct cpufreq_driver amd_pstate_driver;
++
++/**
++ * struct amd_cpudata - private CPU data for AMD P-State
++ * @cpu: CPU number
++ * @cppc_req_cached: cached performance request hints
++ * @highest_perf: the maximum performance an individual processor may reach,
++ *		  assuming ideal conditions
++ * @nominal_perf: the maximum sustained performance level of the processor,
++ *		  assuming ideal operating conditions
++ * @lowest_nonlinear_perf: the lowest performance level at which nonlinear power
++ *			   savings are achieved
++ * @lowest_perf: the absolute lowest performance level of the processor
++ * @max_freq: the frequency that mapped to highest_perf
++ * @min_freq: the frequency that mapped to lowest_perf
++ * @nominal_freq: the frequency that mapped to nominal_perf
++ * @lowest_nonlinear_freq: the frequency that mapped to lowest_nonlinear_perf
++ *
++ * The amd_cpudata is key private data for each CPU thread in AMD P-State, and
++ * represents all the attributes and goals that AMD P-State requests at runtime.
++ */
++struct amd_cpudata {
++	int	cpu;
++
++	u64	cppc_req_cached;
++
++	u32	highest_perf;
++	u32	nominal_perf;
++	u32	lowest_nonlinear_perf;
++	u32	lowest_perf;
++
++	u32	max_freq;
++	u32	min_freq;
++	u32	nominal_freq;
++	u32	lowest_nonlinear_freq;
++};
++
++static inline int amd_pstate_enable(bool enable)
++{
++	return wrmsrl_safe(MSR_AMD_CPPC_ENABLE, enable);
++}
++
++static int amd_pstate_init_perf(struct amd_cpudata *cpudata)
++{
++	u64 cap1;
++
++	int ret = rdmsrl_safe_on_cpu(cpudata->cpu, MSR_AMD_CPPC_CAP1,
++				     &cap1);
++	if (ret)
++		return ret;
++
++	/*
++	 * TODO: Introduce AMD specific power feature.
++	 *
++	 * CPPC entry doesn't indicate the highest performance in some ASICs.
++	 */
++	WRITE_ONCE(cpudata->highest_perf, amd_get_highest_perf());
++
++	WRITE_ONCE(cpudata->nominal_perf, AMD_CPPC_NOMINAL_PERF(cap1));
++	WRITE_ONCE(cpudata->lowest_nonlinear_perf, AMD_CPPC_LOWNONLIN_PERF(cap1));
++	WRITE_ONCE(cpudata->lowest_perf, AMD_CPPC_LOWEST_PERF(cap1));
++
++	return 0;
++}
++
++static void amd_pstate_update_perf(struct amd_cpudata *cpudata, u32 min_perf,
++				   u32 des_perf, u32 max_perf, bool fast_switch)
++{
++	if (fast_switch)
++		wrmsrl(MSR_AMD_CPPC_REQ, READ_ONCE(cpudata->cppc_req_cached));
++	else
++		wrmsrl_on_cpu(cpudata->cpu, MSR_AMD_CPPC_REQ,
++			      READ_ONCE(cpudata->cppc_req_cached));
++}
++
++static void amd_pstate_update(struct amd_cpudata *cpudata, u32 min_perf,
++			      u32 des_perf, u32 max_perf, bool fast_switch)
++{
++	u64 prev = READ_ONCE(cpudata->cppc_req_cached);
++	u64 value = prev;
++
++	value &= ~AMD_CPPC_MIN_PERF(~0L);
++	value |= AMD_CPPC_MIN_PERF(min_perf);
++
++	value &= ~AMD_CPPC_DES_PERF(~0L);
++	value |= AMD_CPPC_DES_PERF(des_perf);
++
++	value &= ~AMD_CPPC_MAX_PERF(~0L);
++	value |= AMD_CPPC_MAX_PERF(max_perf);
++
++	if (value == prev)
++		return;
++
++	WRITE_ONCE(cpudata->cppc_req_cached, value);
++
++	amd_pstate_update_perf(cpudata, min_perf, des_perf,
++			       max_perf, fast_switch);
++}
++
++static int amd_pstate_verify(struct cpufreq_policy_data *policy)
++{
++	cpufreq_verify_within_cpu_limits(policy);
++
++	return 0;
++}
++
++static int amd_pstate_target(struct cpufreq_policy *policy,
++			     unsigned int target_freq,
++			     unsigned int relation)
++{
++	struct cpufreq_freqs freqs;
++	struct amd_cpudata *cpudata = policy->driver_data;
++	unsigned long max_perf, min_perf, des_perf, cap_perf;
++
++	if (!cpudata->max_freq)
++		return -ENODEV;
++
++	cap_perf = READ_ONCE(cpudata->highest_perf);
++	min_perf = READ_ONCE(cpudata->lowest_nonlinear_perf);
++	max_perf = cap_perf;
++
++	freqs.old = policy->cur;
++	freqs.new = target_freq;
++
++	des_perf = DIV_ROUND_CLOSEST(target_freq * cap_perf,
++				     cpudata->max_freq);
++
++	cpufreq_freq_transition_begin(policy, &freqs);
++	amd_pstate_update(cpudata, min_perf, des_perf,
++			  max_perf, false);
++	cpufreq_freq_transition_end(policy, &freqs, false);
++
++	return 0;
++}
++
++static int amd_get_min_freq(struct amd_cpudata *cpudata)
++{
++	struct cppc_perf_caps cppc_perf;
++
++	int ret = cppc_get_perf_caps(cpudata->cpu, &cppc_perf);
++	if (ret)
++		return ret;
++
++	/* Switch to khz */
++	return cppc_perf.lowest_freq * 1000;
++}
++
++static int amd_get_max_freq(struct amd_cpudata *cpudata)
++{
++	struct cppc_perf_caps cppc_perf;
++	u32 max_perf, max_freq, nominal_freq, nominal_perf;
++	u64 boost_ratio;
++
++	int ret = cppc_get_perf_caps(cpudata->cpu, &cppc_perf);
++	if (ret)
++		return ret;
++
++	nominal_freq = cppc_perf.nominal_freq;
++	nominal_perf = READ_ONCE(cpudata->nominal_perf);
++	max_perf = READ_ONCE(cpudata->highest_perf);
++
++	boost_ratio = div_u64(max_perf << SCHED_CAPACITY_SHIFT,
++			      nominal_perf);
++
++	max_freq = nominal_freq * boost_ratio >> SCHED_CAPACITY_SHIFT;
++
++	/* Switch to khz */
++	return max_freq * 1000;
++}
++
++static int amd_get_nominal_freq(struct amd_cpudata *cpudata)
++{
++	struct cppc_perf_caps cppc_perf;
++
++	int ret = cppc_get_perf_caps(cpudata->cpu, &cppc_perf);
++	if (ret)
++		return ret;
++
++	/* Switch to khz */
++	return cppc_perf.nominal_freq * 1000;
++}
++
++static int amd_get_lowest_nonlinear_freq(struct amd_cpudata *cpudata)
++{
++	struct cppc_perf_caps cppc_perf;
++	u32 lowest_nonlinear_freq, lowest_nonlinear_perf,
++	    nominal_freq, nominal_perf;
++	u64 lowest_nonlinear_ratio;
++
++	int ret = cppc_get_perf_caps(cpudata->cpu, &cppc_perf);
++	if (ret)
++		return ret;
++
++	nominal_freq = cppc_perf.nominal_freq;
++	nominal_perf = READ_ONCE(cpudata->nominal_perf);
++
++	lowest_nonlinear_perf = cppc_perf.lowest_nonlinear_perf;
++
++	lowest_nonlinear_ratio = div_u64(lowest_nonlinear_perf << SCHED_CAPACITY_SHIFT,
++					 nominal_perf);
++
++	lowest_nonlinear_freq = nominal_freq * lowest_nonlinear_ratio >> SCHED_CAPACITY_SHIFT;
++
++	/* Switch to khz */
++	return lowest_nonlinear_freq * 1000;
++}
++
++static int amd_pstate_cpu_init(struct cpufreq_policy *policy)
++{
++	int min_freq, max_freq, nominal_freq, lowest_nonlinear_freq, ret;
++	struct device *dev;
++	struct amd_cpudata *cpudata;
++
++	dev = get_cpu_device(policy->cpu);
++	if (!dev)
++		return -ENODEV;
++
++	cpudata = kzalloc(sizeof(*cpudata), GFP_KERNEL);
++	if (!cpudata)
++		return -ENOMEM;
++
++	cpudata->cpu = policy->cpu;
++
++	ret = amd_pstate_init_perf(cpudata);
++	if (ret)
++		goto free_cpudata;
++
++	min_freq = amd_get_min_freq(cpudata);
++	max_freq = amd_get_max_freq(cpudata);
++	nominal_freq = amd_get_nominal_freq(cpudata);
++	lowest_nonlinear_freq = amd_get_lowest_nonlinear_freq(cpudata);
++
++	if (min_freq < 0 || max_freq < 0 || min_freq > max_freq) {
++		dev_err(dev, "min_freq(%d) or max_freq(%d) value is incorrect\n",
++			min_freq, max_freq);
++		ret = -EINVAL;
++		goto free_cpudata;
++	}
++
++	policy->cpuinfo.transition_latency = AMD_PSTATE_TRANSITION_LATENCY;
++	policy->transition_delay_us = AMD_PSTATE_TRANSITION_DELAY;
++
++	policy->min = min_freq;
++	policy->max = max_freq;
++
++	policy->cpuinfo.min_freq = min_freq;
++	policy->cpuinfo.max_freq = max_freq;
++
++	/* It will be updated by governor */
++	policy->cur = policy->cpuinfo.min_freq;
++
++	/* Initial processor data capability frequencies */
++	cpudata->max_freq = max_freq;
++	cpudata->min_freq = min_freq;
++	cpudata->nominal_freq = nominal_freq;
++	cpudata->lowest_nonlinear_freq = lowest_nonlinear_freq;
++
++	policy->driver_data = cpudata;
++
++	return 0;
++
++free_cpudata:
++	kfree(cpudata);
++	return ret;
++}
++
++static int amd_pstate_cpu_exit(struct cpufreq_policy *policy)
++{
++	struct amd_cpudata *cpudata;
++
++	cpudata = policy->driver_data;
++
++	kfree(cpudata);
++
++	return 0;
++}
++
++static struct cpufreq_driver amd_pstate_driver = {
++	.flags		= CPUFREQ_CONST_LOOPS | CPUFREQ_NEED_UPDATE_LIMITS,
++	.verify		= amd_pstate_verify,
++	.target		= amd_pstate_target,
++	.init		= amd_pstate_cpu_init,
++	.exit		= amd_pstate_cpu_exit,
++	.name		= "amd-pstate",
++};
++
++static int __init amd_pstate_init(void)
++{
++	int ret;
++
++	if (boot_cpu_data.x86_vendor != X86_VENDOR_AMD)
++		return -ENODEV;
++
++	if (!acpi_cpc_valid()) {
++		pr_debug("the _CPC object is not present in SBIOS\n");
++		return -ENODEV;
++	}
++
++	/* don't keep reloading if cpufreq_driver exists */
++	if (cpufreq_get_current_driver())
++		return -EEXIST;
++
++	/* capability check */
++	if (!boot_cpu_has(X86_FEATURE_CPPC)) {
++		pr_debug("AMD CPPC MSR based functionality is not supported\n");
++		return -ENODEV;
++	}
++
++	/* enable amd pstate feature */
++	ret = amd_pstate_enable(true);
++	if (ret) {
++		pr_err("failed to enable amd-pstate with return %d\n", ret);
++		return ret;
++	}
++
++	ret = cpufreq_register_driver(&amd_pstate_driver);
++	if (ret)
++		pr_err("failed to register amd_pstate_driver with return %d\n",
++		       ret);
++
++	return ret;
++}
++
++static void __exit amd_pstate_exit(void)
++{
++	cpufreq_unregister_driver(&amd_pstate_driver);
++
++	amd_pstate_enable(false);
++}
++
++module_init(amd_pstate_init);
++module_exit(amd_pstate_exit);
++
++MODULE_AUTHOR("Huang Rui <ray.huang@amd.com>");
++MODULE_DESCRIPTION("AMD Processor P-state Frequency Driver");
++MODULE_LICENSE("GPL");
+-- 
+2.25.1
+
+
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Return-Path: <linux-kernel-owner@kernel.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
+	aws-us-west-2-korg-lkml-1.web.codeaurora.org
+Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 07466C433EF
+	for <linux-kernel@archiver.kernel.org>; Fri, 24 Dec 2021 01:06:11 +0000 (UTC)
+Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
+        id S1350647AbhLXBGK (ORCPT
+        <rfc822;linux-kernel@archiver.kernel.org>);
+        Thu, 23 Dec 2021 20:06:10 -0500
+Received: from mail-co1nam11on2086.outbound.protection.outlook.com ([40.107.220.86]:5984
+        "EHLO NAM11-CO1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1350595AbhLXBGG (ORCPT <rfc822;linux-kernel@vger.kernel.org>);
+        Thu, 23 Dec 2021 20:06:06 -0500
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=MDyP6gPmQvKBTgCop9w2a8FWEN1m2I4wyNOOmuQDfnQ52bjbm5K0Gn1Lcmz6sT3GwqLjWVnrIDnXsvU0lA84+7uETD2ogEr+Qq9TPQtWxKzbuMdUvznIvMl+bA/4YBaNKvypK6fuwP4gHZlstK1tVIAMz9tuVl6N9Lf1SsMvyT5E8BHN8KJ1lTV+ZubKkWCcT4w6UwZ6eFCC4gFtxdMcifv6pau+uV7TnQxFXhqgTl5qS6gu2Fn3YISE5la7Vr4mx+AfisLgsE1hyic7lyJ1478Tpq81XZzsb7OFPZAhvR/gA38cYnibR2Xmgh2/D72CtvQpvG9YpQYhnGcxkr+r+w==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=rDt0XQVQ9ZSi2UwjdLLQGxKQsEfZtNEOarSmckuszuQ=;
+ b=REcuKnxtsgw2a67wEOnGAGJK/afdK3HJNa5J+r416EDCaqPQ6u9y+vXkE5HGd4CCrTcEkEi3tvu0OONhl2DVQCCIMbePlWwRbJ4xksKMrQ27kIibEZ+6MvHPTDU+xyvRtWbzCld+eHdvjFFo7sHHxvLli1wB6o9MwNwWFjPq1e6DHVn1NXspZwMyZl2AHLoCesiAmeLz13xE/L2lN1g4D6a0w39FMiW+LbOp0444f6TvENFa1xFMO2LCDVVLOrOwj/Y69OHKovrPJRHgM8wNqevqw3Y2ROAy8RRplmSFeaFvOScbge0lDrT86xQEcBsbbARzig/+HB5ePmQH1ailsg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 165.204.84.17) smtp.rcpttodomain=intel.com smtp.mailfrom=amd.com; dmarc=pass
+ (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
+ dkim=none (message not signed); arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=rDt0XQVQ9ZSi2UwjdLLQGxKQsEfZtNEOarSmckuszuQ=;
+ b=ikv3fTNK5UcktGnydPRVxYpZlyAZlfHDbi/juMcwwKcYM00Z4LrnZW5duK+3V22Dgr4w6JGY+B21NAxJ+NTcw/CLPDKnF5sQfg/O7cKRxcSo1TfTGZcrg3an02DxoNhXBxq9m+YXXa7kYqhxAjp2tGAdoqHagW6Y3hI+0sD0D5M=
+Received: from DM3PR14CA0138.namprd14.prod.outlook.com (2603:10b6:0:53::22) by
+ SA0PR12MB4525.namprd12.prod.outlook.com (2603:10b6:806:92::10) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.4823.19; Fri, 24 Dec 2021 01:06:04 +0000
+Received: from DM6NAM11FT032.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:0:53:cafe::45) by DM3PR14CA0138.outlook.office365.com
+ (2603:10b6:0:53::22) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4823.19 via Frontend
+ Transport; Fri, 24 Dec 2021 01:06:04 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
+ smtp.mailfrom=amd.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=amd.com;
+Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
+ 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
+ client-ip=165.204.84.17; helo=SATLEXMB03.amd.com;
+Received: from SATLEXMB03.amd.com (165.204.84.17) by
+ DM6NAM11FT032.mail.protection.outlook.com (10.13.173.93) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.20.4823.18 via Frontend Transport; Fri, 24 Dec 2021 01:06:04 +0000
+Received: from hr-amd.amd.com (10.180.168.240) by SATLEXMB03.amd.com
+ (10.181.40.144) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.17; Thu, 23 Dec
+ 2021 19:05:57 -0600
+From:   Huang Rui <ray.huang@amd.com>
+To:     "Rafael J . Wysocki" <rafael.j.wysocki@intel.com>,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        Shuah Khan <skhan@linuxfoundation.org>,
+        "Borislav Petkov" <bp@suse.de>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Ingo Molnar <mingo@kernel.org>,
+        Giovanni Gherdovich <ggherdovich@suse.cz>,
+        Steven Rostedt <rostedt@goodmis.org>,
+        <linux-pm@vger.kernel.org>
+CC:     Deepak Sharma <deepak.sharma@amd.com>,
+        Alex Deucher <alexander.deucher@amd.com>,
+        Mario Limonciello <mario.limonciello@amd.com>,
+        Steven Noonan <steven@valvesoftware.com>,
+        Nathan Fontenot <nathan.fontenot@amd.com>,
+        Jinzhou Su <Jinzhou.Su@amd.com>,
+        Xiaojian Du <Xiaojian.Du@amd.com>,
+        <linux-kernel@vger.kernel.org>, <x86@kernel.org>,
+        Huang Rui <ray.huang@amd.com>
+Subject: [PATCH v7 07/14] cpufreq: amd-pstate: Add fast switch function for AMD P-State
+Date:   Fri, 24 Dec 2021 09:05:01 +0800
+Message-ID: <20211224010508.110159-8-ray.huang@amd.com>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20211224010508.110159-1-ray.huang@amd.com>
+References: <20211224010508.110159-1-ray.huang@amd.com>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-Originating-IP: [10.180.168.240]
+X-ClientProxiedBy: SATLEXMB04.amd.com (10.181.40.145) To SATLEXMB03.amd.com
+ (10.181.40.144)
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: 743306c7-afae-4b2e-7516-08d9c6798f40
+X-MS-TrafficTypeDiagnostic: SA0PR12MB4525:EE_
+X-Microsoft-Antispam-PRVS: <SA0PR12MB452506F50E344CB52B7AD687EC7F9@SA0PR12MB4525.namprd12.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:2803;
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: co+ug05++l4n/SMCf3+pjyiJhNTFJshRN8XnMGDexfshsyUorJV82YYZRDqzrRG5WmN2R6gUUYtEqjEl24naTomGc3cIo/GU2/PEisvXBI91H5sYRNtuuxtwgvKexU8ju/GxpeL8ZLw+BUJws0kQ2wP1+/2MdyVNxHgdFwa9s18C7Z7SYJkFr/eI3gzLd8HzsPs0igpYrLb71TWXLa/AEp2iEvwstTLADpBbHYKI5a42dD7RHhUW7F5i5T/tTK/prrB1hks9i6CH/Bbz//d9rFtFInePyQRtIKDN6Rge1dCEh9fV0j8yZdTsnoD6WeZqYkpcwriYpVOUo2rtDJJtYhppLDkRobxWoZNk4VK5uMfM4tCmEZ/i9yQ0BTLOk3zAPQuHl+qeGk+zBC/F+F1fI9nBKOqW+YjyfrOIwPn7sp/4d80/ebowVWKOfgiufZnrE9+metVN7kewFemYFincAICobWj+Jiyx8D6Dy14GR+XxuzxY5FExL5ab39OzdSs3SmE7F0oDu6tJmg1Jcq4ReOf69mPlotR/Vuuf3OePvy0O+u4AFC758zkwn3MpNhNLwKYhp/XFb8AmQmFzBTRBFkDga2zBzcTwxdtkYWzI4PQdq2R7bq5FgUZxOd4u6STiOAR6YEJXTXWqcsoqRT4qMlSzpESxAYItqvhS3e3cACa4uYMwQw0VbfK1QYnMKGFcX/Tnwil9HWd3Fmz5aCYGJQiZUGR1t0M9fD+A3oULQC4wLu9QsYVZ/GGDyWhdC3N3BMHRjdUrC92NPRHE5tnV8jnSAqsxZ0hQieFiz02hDtU=
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB03.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(4636009)(36840700001)(40470700002)(46966006)(26005)(186003)(86362001)(7416002)(70206006)(336012)(8676002)(16526019)(6666004)(70586007)(8936002)(82310400004)(110136005)(426003)(5660300002)(40460700001)(54906003)(4326008)(7696005)(47076005)(2616005)(36756003)(83380400001)(508600001)(81166007)(36860700001)(356005)(2906002)(1076003)(316002)(36900700001);DIR:OUT;SFP:1101;
+X-OriginatorOrg: amd.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 24 Dec 2021 01:06:04.5563
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: 743306c7-afae-4b2e-7516-08d9c6798f40
+X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB03.amd.com]
+X-MS-Exchange-CrossTenant-AuthSource: DM6NAM11FT032.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: SA0PR12MB4525
+Precedence: bulk
+List-ID: <linux-kernel.vger.kernel.org>
+X-Mailing-List: linux-kernel@vger.kernel.org
+
+Introduce the fast switch function for AMD P-State on the AMD processors
+which support the full MSR register control. It's able to decrease the
+latency on interrupt context.
+
+Signed-off-by: Huang Rui <ray.huang@amd.com>
+---
+ drivers/cpufreq/amd-pstate.c | 36 ++++++++++++++++++++++++++++++++++++
+ 1 file changed, 36 insertions(+)
+
+diff --git a/drivers/cpufreq/amd-pstate.c b/drivers/cpufreq/amd-pstate.c
+index 2698ed5ec6d7..8c9c199b560e 100644
+--- a/drivers/cpufreq/amd-pstate.c
++++ b/drivers/cpufreq/amd-pstate.c
+@@ -183,6 +183,39 @@ static int amd_pstate_target(struct cpufreq_policy *policy,
+ 	return 0;
+ }
+ 
++static void amd_pstate_adjust_perf(unsigned int cpu,
++				   unsigned long _min_perf,
++				   unsigned long target_perf,
++				   unsigned long capacity)
++{
++	unsigned long max_perf, min_perf, des_perf,
++		      cap_perf, lowest_nonlinear_perf;
++	struct cpufreq_policy *policy = cpufreq_cpu_get(cpu);
++	struct amd_cpudata *cpudata = policy->driver_data;
++
++	cap_perf = READ_ONCE(cpudata->highest_perf);
++	lowest_nonlinear_perf = READ_ONCE(cpudata->lowest_nonlinear_perf);
++
++	des_perf = cap_perf;
++	if (target_perf < capacity)
++		des_perf = DIV_ROUND_UP(cap_perf * target_perf, capacity);
++
++	min_perf = READ_ONCE(cpudata->highest_perf);
++	if (_min_perf < capacity)
++		min_perf = DIV_ROUND_UP(cap_perf * _min_perf, capacity);
++
++	if (min_perf < lowest_nonlinear_perf)
++		min_perf = lowest_nonlinear_perf;
++
++	max_perf = cap_perf;
++	if (max_perf < min_perf)
++		max_perf = min_perf;
++
++	des_perf = clamp_t(unsigned long, des_perf, min_perf, max_perf);
++
++	amd_pstate_update(cpudata, min_perf, des_perf, max_perf, true);
++}
++
+ static int amd_get_min_freq(struct amd_cpudata *cpudata)
+ {
+ 	struct cppc_perf_caps cppc_perf;
+@@ -299,6 +332,8 @@ static int amd_pstate_cpu_init(struct cpufreq_policy *policy)
+ 	/* It will be updated by governor */
+ 	policy->cur = policy->cpuinfo.min_freq;
+ 
++	policy->fast_switch_possible = true;
++
+ 	/* Initial processor data capability frequencies */
+ 	cpudata->max_freq = max_freq;
+ 	cpudata->min_freq = min_freq;
+@@ -329,6 +364,7 @@ static struct cpufreq_driver amd_pstate_driver = {
+ 	.flags		= CPUFREQ_CONST_LOOPS | CPUFREQ_NEED_UPDATE_LIMITS,
+ 	.verify		= amd_pstate_verify,
+ 	.target		= amd_pstate_target,
++	.adjust_perf    = amd_pstate_adjust_perf,
+ 	.init		= amd_pstate_cpu_init,
+ 	.exit		= amd_pstate_cpu_exit,
+ 	.name		= "amd-pstate",
+-- 
+2.25.1
+
+
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Return-Path: <linux-kernel-owner@kernel.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
+	aws-us-west-2-korg-lkml-1.web.codeaurora.org
+Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E680DC433FE
+	for <linux-kernel@archiver.kernel.org>; Fri, 24 Dec 2021 01:06:34 +0000 (UTC)
+Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
+        id S1350410AbhLXBGd (ORCPT
+        <rfc822;linux-kernel@archiver.kernel.org>);
+        Thu, 23 Dec 2021 20:06:33 -0500
+Received: from mail-bn8nam11on2054.outbound.protection.outlook.com ([40.107.236.54]:7299
+        "EHLO NAM11-BN8-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1350616AbhLXBG2 (ORCPT <rfc822;linux-kernel@vger.kernel.org>);
+        Thu, 23 Dec 2021 20:06:28 -0500
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=D3fmc+vwGlV0Ky4xk/A5NrbT5Ah6fVQQoQa4E1mWisYwn+4eQ6vuHOiS4sORZt3SQiFxiQSnb5PIc7S1t7owi4vJ4AZsxi4YW5vYxsea3F4HRLIEFnjDiRI/L6R7WSSmTU3di7/1iTEDibEy5j6BH74W//D/s6OnCNZa79K/EDHGnbTdCpzFJZvG5GWHRGQeXJQmkkInH2C0+rgtP+mDNWA4sDYD7Q46NfUqYiiUKKZ1DoCIQv0CKYvbtuApSYxr6mNPHGV35wahJlTMPMhAsimqSCDYot5S2uiy4UNaNdWdAkVaAinfeYcuVOIF5O4a9bchZTz266hZtK9/3VmdTg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=iWpuXfWTucxJ2qCTCcDd/T/+bNnu//YZTSnNXBij8aU=;
+ b=cUnQrlAu/mwEJ9doA9ziu+t5UpIi0MuvbH/NmWvogxi/w26WlmvfHkCcbgtoG8ntt12F+v3BRXZUT0SlgzKycGj0EQJZuR70MTlantWce85I1ByAv8YecnXtINW7lG/ltKsaQuAh3V5ADx0dZTZGDsmxCOuDYAQIUSatIlsoScJnMPnsJAqg4d9ew+11hUKfDLmrVyDm0BqkZuLT6Ufaa8GFlaeUaop9746OyGxlCxzCuaedcUY3EudkgpcbomOz+SImdjHIzP6mWdWKlhFfvJMfFnIrc6Y48uKPNtBXruXeoH4SgBBm7dl8k8Q7BJwfAOzdL+5BLPK9yq+nwNK61Q==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 165.204.84.17) smtp.rcpttodomain=intel.com smtp.mailfrom=amd.com; dmarc=pass
+ (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
+ dkim=none (message not signed); arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=iWpuXfWTucxJ2qCTCcDd/T/+bNnu//YZTSnNXBij8aU=;
+ b=f6ZNCwvF1tr6s5F0JVnIesofSMTGQD9b8ussiE8l2Kwt5BRBL5DWIeE9KQ7zB9J1WvESAbo0IpwiYxqXXHFWDO7zixqddRDPQq0FuHQtdBSP5EHfQPua0Hl5fxpzNrEM0AJOu3NUD1TdXhSEH8thdhFyXvV67k26T94bszzh8AI=
+Received: from DM5PR19CA0041.namprd19.prod.outlook.com (2603:10b6:3:9a::27) by
+ DM5PR1201MB0235.namprd12.prod.outlook.com (2603:10b6:4:4f::8) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.4801.17; Fri, 24 Dec 2021 01:06:26 +0000
+Received: from DM6NAM11FT023.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:3:9a:cafe::bf) by DM5PR19CA0041.outlook.office365.com
+ (2603:10b6:3:9a::27) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4823.19 via Frontend
+ Transport; Fri, 24 Dec 2021 01:06:26 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
+ smtp.mailfrom=amd.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=amd.com;
+Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
+ 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
+ client-ip=165.204.84.17; helo=SATLEXMB03.amd.com;
+Received: from SATLEXMB03.amd.com (165.204.84.17) by
+ DM6NAM11FT023.mail.protection.outlook.com (10.13.173.96) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.20.4823.18 via Frontend Transport; Fri, 24 Dec 2021 01:06:26 +0000
+Received: from hr-amd.amd.com (10.180.168.240) by SATLEXMB03.amd.com
+ (10.181.40.144) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.17; Thu, 23 Dec
+ 2021 19:06:02 -0600
+From:   Huang Rui <ray.huang@amd.com>
+To:     "Rafael J . Wysocki" <rafael.j.wysocki@intel.com>,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        Shuah Khan <skhan@linuxfoundation.org>,
+        "Borislav Petkov" <bp@suse.de>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Ingo Molnar <mingo@kernel.org>,
+        Giovanni Gherdovich <ggherdovich@suse.cz>,
+        Steven Rostedt <rostedt@goodmis.org>,
+        <linux-pm@vger.kernel.org>
+CC:     Deepak Sharma <deepak.sharma@amd.com>,
+        Alex Deucher <alexander.deucher@amd.com>,
+        Mario Limonciello <mario.limonciello@amd.com>,
+        Steven Noonan <steven@valvesoftware.com>,
+        Nathan Fontenot <nathan.fontenot@amd.com>,
+        Jinzhou Su <Jinzhou.Su@amd.com>,
+        Xiaojian Du <Xiaojian.Du@amd.com>,
+        <linux-kernel@vger.kernel.org>, <x86@kernel.org>,
+        Huang Rui <ray.huang@amd.com>
+Subject: [PATCH v7 08/14] cpufreq: amd-pstate: Introduce the support for the processors with shared memory solution
+Date:   Fri, 24 Dec 2021 09:05:02 +0800
+Message-ID: <20211224010508.110159-9-ray.huang@amd.com>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20211224010508.110159-1-ray.huang@amd.com>
+References: <20211224010508.110159-1-ray.huang@amd.com>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-Originating-IP: [10.180.168.240]
+X-ClientProxiedBy: SATLEXMB04.amd.com (10.181.40.145) To SATLEXMB03.amd.com
+ (10.181.40.144)
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: dc84c6e3-5ae5-4f81-25c9-08d9c6799c5d
+X-MS-TrafficTypeDiagnostic: DM5PR1201MB0235:EE_
+X-Microsoft-Antispam-PRVS: <DM5PR1201MB02356299A06D0A302812327AEC7F9@DM5PR1201MB0235.namprd12.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:8882;
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: K9HFCEQwC6SF0L1D8KrGkWYM0ohYBIsJcwZbWLtCqpaQZWTV+xiBZa5QoP2RTPS/zYDyFggLQGFjSACqjokfelaqCmb/4+mHed+K/pX6m8q+YdK9P9k+ZQWREZyruBKIkiuq347ZydbubQ6rgS+3LW/uGp/4xQ1Kza2iAylrAKQHIQjrRn0gOFzgQH0UmsHCayhheSPCfcxbeeRgFYjfopXowXnJQy8p+BdyePeHacocgolocPoTr/mvBjnTwaX8yfmAjw2RWzfp1vOkb6Wd+koqL9fUKKs12VYRIaJIOG3s30Q7FzgAKfiaFT9XBjBZld6dsGgs235iRxEhkqJdTco8n3gNmm0otK3AKuYu1Unbk53ncKXShlB81Sp9IXtT8Ati+SEBYPb0YjK4GSZP+mrkw1og1rGh5eCC52Tr/tHq7yXRplBf2aQwPeh8CqhRVzYrlL5HNNPcovAPkycKBoY9+utCf2q1xeptbJwiMsONJXzLgAyW3NtFuUkszCihJKUd9gIDV4Vo5Nzn0Y8KnDs0GG9ebpHuqC/Wp258qWNflF3JPo07wvER99K7jwomo5ggz/vB9YSihlBCWy/VHgH6XHjqfwdrpDikEW+gI8R/V6Dw4fYB+fylew2xf3QTGW0t/d5EZkI7sHMKNA6WfEtMl8jr9NorItJ4xt2T/i+LOG7+Pqu6/py13Rp2FEJsOVPm4ANyLPtcOLiz1nuddespP5MXWfX5j02JnjncFaggVm7S+nwWu57IgCVCZ8rc3Ea1B5FES4MtIPcOqTf9d+EDVMgFD46mEARSyrYUYY0=
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB03.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(4636009)(40470700002)(36840700001)(46966006)(54906003)(110136005)(5660300002)(1076003)(7696005)(2616005)(83380400001)(316002)(186003)(40460700001)(7416002)(4326008)(82310400004)(47076005)(70206006)(356005)(8676002)(2906002)(36756003)(36860700001)(26005)(426003)(16526019)(508600001)(81166007)(70586007)(86362001)(8936002)(336012)(36900700001);DIR:OUT;SFP:1101;
+X-OriginatorOrg: amd.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 24 Dec 2021 01:06:26.5391
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: dc84c6e3-5ae5-4f81-25c9-08d9c6799c5d
+X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB03.amd.com]
+X-MS-Exchange-CrossTenant-AuthSource: DM6NAM11FT023.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM5PR1201MB0235
+Precedence: bulk
+List-ID: <linux-kernel.vger.kernel.org>
+X-Mailing-List: linux-kernel@vger.kernel.org
+
+In some of Zen2 and Zen3 based processors, they are using the shared
+memory that exposed from ACPI SBIOS. In this kind of the processors,
+there is no MSR support, so we add acpi cppc function as the backend for
+them.
+
+It is using a module param (shared_mem) to enable related processors
+manually. We will enable this by default once we address performance
+issue on this solution.
+
+Signed-off-by: Jinzhou Su <Jinzhou.Su@amd.com>
+Signed-off-by: Huang Rui <ray.huang@amd.com>
+---
+ drivers/cpufreq/amd-pstate.c | 105 ++++++++++++++++++++++++++++++++---
+ 1 file changed, 97 insertions(+), 8 deletions(-)
+
+diff --git a/drivers/cpufreq/amd-pstate.c b/drivers/cpufreq/amd-pstate.c
+index 8c9c199b560e..cc62f7484007 100644
+--- a/drivers/cpufreq/amd-pstate.c
++++ b/drivers/cpufreq/amd-pstate.c
+@@ -48,6 +48,20 @@
+ #define AMD_PSTATE_TRANSITION_LATENCY	0x20000
+ #define AMD_PSTATE_TRANSITION_DELAY	500
+ 
++/*
++ * TODO: We need more time to fine tune processors with shared memory solution
++ * with community together.
++ *
++ * There are some performance drops on the CPU benchmarks which reports from
++ * Suse. We are co-working with them to fine tune the shared memory solution. So
++ * we disable it by default to go acpi-cpufreq on these processors and add a
++ * module parameter to be able to enable it manually for debugging.
++ */
++static bool shared_mem = false;
++module_param(shared_mem, bool, 0444);
++MODULE_PARM_DESC(shared_mem,
++		 "enable amd-pstate on processors with shared memory solution (false = disabled (default), true = enabled)");
++
+ static struct cpufreq_driver amd_pstate_driver;
+ 
+ /**
+@@ -85,12 +99,32 @@ struct amd_cpudata {
+ 	u32	lowest_nonlinear_freq;
+ };
+ 
+-static inline int amd_pstate_enable(bool enable)
++static inline int pstate_enable(bool enable)
+ {
+ 	return wrmsrl_safe(MSR_AMD_CPPC_ENABLE, enable);
+ }
+ 
+-static int amd_pstate_init_perf(struct amd_cpudata *cpudata)
++static int cppc_enable(bool enable)
++{
++	int cpu, ret = 0;
++
++	for_each_present_cpu(cpu) {
++		ret = cppc_set_enable(cpu, enable);
++		if (ret)
++			return ret;
++	}
++
++	return ret;
++}
++
++DEFINE_STATIC_CALL(amd_pstate_enable, pstate_enable);
++
++static inline int amd_pstate_enable(bool enable)
++{
++	return static_call(amd_pstate_enable)(enable);
++}
++
++static int pstate_init_perf(struct amd_cpudata *cpudata)
+ {
+ 	u64 cap1;
+ 
+@@ -113,8 +147,33 @@ static int amd_pstate_init_perf(struct amd_cpudata *cpudata)
+ 	return 0;
+ }
+ 
+-static void amd_pstate_update_perf(struct amd_cpudata *cpudata, u32 min_perf,
+-				   u32 des_perf, u32 max_perf, bool fast_switch)
++static int cppc_init_perf(struct amd_cpudata *cpudata)
++{
++	struct cppc_perf_caps cppc_perf;
++
++	int ret = cppc_get_perf_caps(cpudata->cpu, &cppc_perf);
++	if (ret)
++		return ret;
++
++	WRITE_ONCE(cpudata->highest_perf, amd_get_highest_perf());
++
++	WRITE_ONCE(cpudata->nominal_perf, cppc_perf.nominal_perf);
++	WRITE_ONCE(cpudata->lowest_nonlinear_perf,
++		   cppc_perf.lowest_nonlinear_perf);
++	WRITE_ONCE(cpudata->lowest_perf, cppc_perf.lowest_perf);
++
++	return 0;
++}
++
++DEFINE_STATIC_CALL(amd_pstate_init_perf, pstate_init_perf);
++
++static inline int amd_pstate_init_perf(struct amd_cpudata *cpudata)
++{
++	return static_call(amd_pstate_init_perf)(cpudata);
++}
++
++static void pstate_update_perf(struct amd_cpudata *cpudata, u32 min_perf,
++			       u32 des_perf, u32 max_perf, bool fast_switch)
+ {
+ 	if (fast_switch)
+ 		wrmsrl(MSR_AMD_CPPC_REQ, READ_ONCE(cpudata->cppc_req_cached));
+@@ -123,6 +182,29 @@ static void amd_pstate_update_perf(struct amd_cpudata *cpudata, u32 min_perf,
+ 			      READ_ONCE(cpudata->cppc_req_cached));
+ }
+ 
++static void cppc_update_perf(struct amd_cpudata *cpudata,
++			     u32 min_perf, u32 des_perf,
++			     u32 max_perf, bool fast_switch)
++{
++	struct cppc_perf_ctrls perf_ctrls;
++
++	perf_ctrls.max_perf = max_perf;
++	perf_ctrls.min_perf = min_perf;
++	perf_ctrls.desired_perf = des_perf;
++
++	cppc_set_perf(cpudata->cpu, &perf_ctrls);
++}
++
++DEFINE_STATIC_CALL(amd_pstate_update_perf, pstate_update_perf);
++
++static inline void amd_pstate_update_perf(struct amd_cpudata *cpudata,
++					  u32 min_perf, u32 des_perf,
++					  u32 max_perf, bool fast_switch)
++{
++	static_call(amd_pstate_update_perf)(cpudata, min_perf, des_perf,
++					    max_perf, fast_switch);
++}
++
+ static void amd_pstate_update(struct amd_cpudata *cpudata, u32 min_perf,
+ 			      u32 des_perf, u32 max_perf, bool fast_switch)
+ {
+@@ -332,7 +414,8 @@ static int amd_pstate_cpu_init(struct cpufreq_policy *policy)
+ 	/* It will be updated by governor */
+ 	policy->cur = policy->cpuinfo.min_freq;
+ 
+-	policy->fast_switch_possible = true;
++	if (boot_cpu_has(X86_FEATURE_CPPC))
++		policy->fast_switch_possible = true;
+ 
+ 	/* Initial processor data capability frequencies */
+ 	cpudata->max_freq = max_freq;
+@@ -364,7 +447,6 @@ static struct cpufreq_driver amd_pstate_driver = {
+ 	.flags		= CPUFREQ_CONST_LOOPS | CPUFREQ_NEED_UPDATE_LIMITS,
+ 	.verify		= amd_pstate_verify,
+ 	.target		= amd_pstate_target,
+-	.adjust_perf    = amd_pstate_adjust_perf,
+ 	.init		= amd_pstate_cpu_init,
+ 	.exit		= amd_pstate_cpu_exit,
+ 	.name		= "amd-pstate",
+@@ -387,8 +469,15 @@ static int __init amd_pstate_init(void)
+ 		return -EEXIST;
+ 
+ 	/* capability check */
+-	if (!boot_cpu_has(X86_FEATURE_CPPC)) {
+-		pr_debug("AMD CPPC MSR based functionality is not supported\n");
++	if (boot_cpu_has(X86_FEATURE_CPPC)) {
++		pr_debug("AMD CPPC MSR based functionality is supported\n");
++		amd_pstate_driver.adjust_perf = amd_pstate_adjust_perf;
++	} else if (shared_mem) {
++		static_call_update(amd_pstate_enable, cppc_enable);
++		static_call_update(amd_pstate_init_perf, cppc_init_perf);
++		static_call_update(amd_pstate_update_perf, cppc_update_perf);
++	} else {
++		pr_info("This processor supports shared memory solution, you can enable it with amd_pstate.shared_mem=1\n");
+ 		return -ENODEV;
+ 	}
+ 
+-- 
+2.25.1
+
+
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Return-Path: <linux-kernel-owner@kernel.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
+	aws-us-west-2-korg-lkml-1.web.codeaurora.org
+Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 04D7AC433FE
+	for <linux-kernel@archiver.kernel.org>; Fri, 24 Dec 2021 01:06:45 +0000 (UTC)
+Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
+        id S1350623AbhLXBGm (ORCPT
+        <rfc822;linux-kernel@archiver.kernel.org>);
+        Thu, 23 Dec 2021 20:06:42 -0500
+Received: from mail-mw2nam12on2064.outbound.protection.outlook.com ([40.107.244.64]:51360
+        "EHLO NAM12-MW2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1350458AbhLXBGe (ORCPT <rfc822;linux-kernel@vger.kernel.org>);
+        Thu, 23 Dec 2021 20:06:34 -0500
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=NqCO+kd153uocLhSQgsBMS/RcQqK4lQZY+8vRaJ4PvneF9WXTLqd3f5gjoiYYc1zSFg+3Z15TWJsJdCyTYqsFBoEEBCHsXBhmkhOb5bxQoHEvgrJHd/4r5JG04u4ID4YyvdEsXB2xGrmC4Y1bblJLcDtNqW4TvkUfnisxZstwJB+1iuHgNO9UMr2f/AZUNo+v53jYsGBK5HasPpOCpUiwN7LX6dWJdDlYpgeyTA8LsFFSM2vO8+aV4qoA7yrVODnoPPPNY4Jl2yvhtqrtKgk9nwjGg1JReuYGs2GB93kUV06k/JNWIl/XU1ZhzxXQuBsgWTBVES5mqUUHlqCv+sOGA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=JIu8TTFQvNoBuGVFVvUTiRSFusqNEuS4LIum8FGwcxc=;
+ b=fzDWflO8ioAV2JZvkkITqLUPVgqFVjH03JNlchoXVquoU4oFvvH9qQFssh74rX2pF0mhOS0Y0ENHjDHTq4ymxmTHsIba66TEq5QWvMc/N5Xlk1GdJFnscFMM0up81hHSXpNQXBx+Z2ZEgXOPpXC8BGE1j7SMRt5fe0pFwcMSMCxz/CEYZloBG1sKp8NacrExcM68JHKDcnvK7MJ37Buxm348AGrGNlSMXeJ0at/ZGzzno12ilIrC4oHPmi48ZdIm9I2vKDH7Y9LVG026dF5dx9O3DbmxQvTAiI8QfrQsAEOdMjeo1F9iIFiWuXKLr12rkMwxgL1XHoYgunu2PVKd6g==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 165.204.84.17) smtp.rcpttodomain=intel.com smtp.mailfrom=amd.com; dmarc=pass
+ (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
+ dkim=none (message not signed); arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=JIu8TTFQvNoBuGVFVvUTiRSFusqNEuS4LIum8FGwcxc=;
+ b=yed6nQ2L67BfvzOwmIXM4z8SNQ7l+FY4eQoH3Tm978Sd8EgYkQqNP+Kkg6xVSdIQkn+cY1Bd0v3bshILFW8Wp70MDDw16e0m9gGK9pxJT5iNpot1JJKMYVtl1rlcOEL17gKgVL8DSLls19Fg5fwAHFj4ubn4Dtz6miOvu9VIGnU=
+Received: from DM6PR06CA0060.namprd06.prod.outlook.com (2603:10b6:5:54::37) by
+ DM6PR12MB3786.namprd12.prod.outlook.com (2603:10b6:5:14a::14) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.4801.20; Fri, 24 Dec 2021 01:06:31 +0000
+Received: from DM6NAM11FT021.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:5:54:cafe::75) by DM6PR06CA0060.outlook.office365.com
+ (2603:10b6:5:54::37) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4823.19 via Frontend
+ Transport; Fri, 24 Dec 2021 01:06:31 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
+ smtp.mailfrom=amd.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=amd.com;
+Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
+ 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
+ client-ip=165.204.84.17; helo=SATLEXMB03.amd.com;
+Received: from SATLEXMB03.amd.com (165.204.84.17) by
+ DM6NAM11FT021.mail.protection.outlook.com (10.13.173.76) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.20.4823.18 via Frontend Transport; Fri, 24 Dec 2021 01:06:31 +0000
+Received: from hr-amd.amd.com (10.180.168.240) by SATLEXMB03.amd.com
+ (10.181.40.144) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.17; Thu, 23 Dec
+ 2021 19:06:26 -0600
+From:   Huang Rui <ray.huang@amd.com>
+To:     "Rafael J . Wysocki" <rafael.j.wysocki@intel.com>,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        Shuah Khan <skhan@linuxfoundation.org>,
+        "Borislav Petkov" <bp@suse.de>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Ingo Molnar <mingo@kernel.org>,
+        Giovanni Gherdovich <ggherdovich@suse.cz>,
+        Steven Rostedt <rostedt@goodmis.org>,
+        <linux-pm@vger.kernel.org>
+CC:     Deepak Sharma <deepak.sharma@amd.com>,
+        Alex Deucher <alexander.deucher@amd.com>,
+        Mario Limonciello <mario.limonciello@amd.com>,
+        Steven Noonan <steven@valvesoftware.com>,
+        Nathan Fontenot <nathan.fontenot@amd.com>,
+        Jinzhou Su <Jinzhou.Su@amd.com>,
+        Xiaojian Du <Xiaojian.Du@amd.com>,
+        <linux-kernel@vger.kernel.org>, <x86@kernel.org>,
+        Huang Rui <ray.huang@amd.com>
+Subject: [PATCH v7 09/14] cpufreq: amd-pstate: Add trace for AMD P-State module
+Date:   Fri, 24 Dec 2021 09:05:03 +0800
+Message-ID: <20211224010508.110159-10-ray.huang@amd.com>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20211224010508.110159-1-ray.huang@amd.com>
+References: <20211224010508.110159-1-ray.huang@amd.com>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-Originating-IP: [10.180.168.240]
+X-ClientProxiedBy: SATLEXMB04.amd.com (10.181.40.145) To SATLEXMB03.amd.com
+ (10.181.40.144)
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: 7c8070a2-4a7b-4c22-f9ad-08d9c6799f20
+X-MS-TrafficTypeDiagnostic: DM6PR12MB3786:EE_
+X-Microsoft-Antispam-PRVS: <DM6PR12MB3786B7A162417996153330A4EC7F9@DM6PR12MB3786.namprd12.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:635;
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: CBXnn/BPt1FSrcHbzTmQ3R6Fb6y4DauQzwgfP/kp1iYmuyqx5dpLPmE1brlU9tNKsXhO84mp7f3DDXJhzR2MbKwah2+FcpUrAPD0/Uk+/b3IB8qPGxTB2ma8JbBzlg63Jz1uvo+V1ohU7YZjHfQes1y+dG68L4dfdlZAU8/iEhB3Vu5qZX4y6ojqKMIYyItVk0j58GQlvSYFDRHxHpHTmQKwFkSRKZiMhuA/cZij5Fiw8u0VAYs/eyQ84WIzsSlJl3/5GvpsSSL2cJnGuImVH1cD1CGJTv4X7+Hr3l8JXKP7UJNYpSWvID5RtlbOsOiCbX18Te0u6J3a4Ln+ybu6tFw4WcwUMSTLddVFW3iL1z+YRwyp684x3h8cfOp+flENjQ4QVc6mIa39f+UxlWwLs1Z0mOW5NRt0uRwZA6/vStoNzBvApnk0JDiNxpwXm388W9cUXdqttxF8eF8KJ8NKPcrXBLVwnxrlen+jp2ZWfmsJlq8QrLskiANBAzrgB379WsP11faL5k1WrAiie1TipXfYm3rqXeML9z5+DbrQJOOuCZ/k7UjPu79RY8UwHH0fpfZA++XJm4avKqnOkrlfY0fOHvZq7YI0vFoyH7CG2O17o814C9zlSr99hZQGw3OkWDmiRa+/zXvvBX3TfQBmHo5Jf04Vx+trbC/T2RZ4cMm8Y2nqfnX8A2/JD0WNinZPqz8ffRxmzE8XoOqEilxARcZxm2fY3OgH8fDKk56HzgSxEe8ELSqhD0ELTOh5UgJRlEedPlDXt16/314rzKmSvDs1WflBziblURljGaQfIFM=
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB03.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(4636009)(36840700001)(40470700002)(46966006)(8936002)(47076005)(110136005)(2616005)(6666004)(83380400001)(54906003)(2906002)(426003)(336012)(16526019)(36756003)(316002)(36860700001)(8676002)(508600001)(86362001)(40460700001)(7696005)(70586007)(7416002)(26005)(356005)(5660300002)(81166007)(70206006)(4326008)(186003)(1076003)(82310400004)(36900700001);DIR:OUT;SFP:1101;
+X-OriginatorOrg: amd.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 24 Dec 2021 01:06:31.1935
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: 7c8070a2-4a7b-4c22-f9ad-08d9c6799f20
+X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB03.amd.com]
+X-MS-Exchange-CrossTenant-AuthSource: DM6NAM11FT021.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM6PR12MB3786
+Precedence: bulk
+List-ID: <linux-kernel.vger.kernel.org>
+X-Mailing-List: linux-kernel@vger.kernel.org
+
+Add trace event to monitor the performance value changes which is
+controlled by cpu governors.
+
+Signed-off-by: Huang Rui <ray.huang@amd.com>
+---
+ drivers/cpufreq/Makefile           |  6 ++-
+ drivers/cpufreq/amd-pstate-trace.c |  2 +
+ drivers/cpufreq/amd-pstate-trace.h | 77 ++++++++++++++++++++++++++++++
+ drivers/cpufreq/amd-pstate.c       |  4 ++
+ 4 files changed, 88 insertions(+), 1 deletion(-)
+ create mode 100644 drivers/cpufreq/amd-pstate-trace.c
+ create mode 100644 drivers/cpufreq/amd-pstate-trace.h
+
+diff --git a/drivers/cpufreq/Makefile b/drivers/cpufreq/Makefile
+index c8d307010922..285de70af877 100644
+--- a/drivers/cpufreq/Makefile
++++ b/drivers/cpufreq/Makefile
+@@ -17,6 +17,10 @@ obj-$(CONFIG_CPU_FREQ_GOV_ATTR_SET)	+= cpufreq_governor_attr_set.o
+ obj-$(CONFIG_CPUFREQ_DT)		+= cpufreq-dt.o
+ obj-$(CONFIG_CPUFREQ_DT_PLATDEV)	+= cpufreq-dt-platdev.o
+ 
++# Traces
++CFLAGS_amd-pstate-trace.o               := -I$(src)
++amd_pstate-y				:= amd-pstate.o amd-pstate-trace.o
++
+ ##################################################################################
+ # x86 drivers.
+ # Link order matters. K8 is preferred to ACPI because of firmware bugs in early
+@@ -25,7 +29,7 @@ obj-$(CONFIG_CPUFREQ_DT_PLATDEV)	+= cpufreq-dt-platdev.o
+ # speedstep-* is preferred over p4-clockmod.
+ 
+ obj-$(CONFIG_X86_ACPI_CPUFREQ)		+= acpi-cpufreq.o
+-obj-$(CONFIG_X86_AMD_PSTATE)		+= amd-pstate.o
++obj-$(CONFIG_X86_AMD_PSTATE)		+= amd_pstate.o
+ obj-$(CONFIG_X86_POWERNOW_K8)		+= powernow-k8.o
+ obj-$(CONFIG_X86_PCC_CPUFREQ)		+= pcc-cpufreq.o
+ obj-$(CONFIG_X86_POWERNOW_K6)		+= powernow-k6.o
+diff --git a/drivers/cpufreq/amd-pstate-trace.c b/drivers/cpufreq/amd-pstate-trace.c
+new file mode 100644
+index 000000000000..891b696dcd69
+--- /dev/null
++++ b/drivers/cpufreq/amd-pstate-trace.c
+@@ -0,0 +1,2 @@
++#define CREATE_TRACE_POINTS
++#include "amd-pstate-trace.h"
+diff --git a/drivers/cpufreq/amd-pstate-trace.h b/drivers/cpufreq/amd-pstate-trace.h
+new file mode 100644
+index 000000000000..647505957d4f
+--- /dev/null
++++ b/drivers/cpufreq/amd-pstate-trace.h
+@@ -0,0 +1,77 @@
++/* SPDX-License-Identifier: GPL-2.0 */
++/*
++ * amd-pstate-trace.h - AMD Processor P-state Frequency Driver Tracer
++ *
++ * Copyright (C) 2021 Advanced Micro Devices, Inc. All Rights Reserved.
++ *
++ * Author: Huang Rui <ray.huang@amd.com>
++ */
++
++#if !defined(_AMD_PSTATE_TRACE_H) || defined(TRACE_HEADER_MULTI_READ)
++#define _AMD_PSTATE_TRACE_H
++
++#include <linux/cpufreq.h>
++#include <linux/tracepoint.h>
++#include <linux/trace_events.h>
++
++#undef TRACE_SYSTEM
++#define TRACE_SYSTEM amd_cpu
++
++#undef TRACE_INCLUDE_FILE
++#define TRACE_INCLUDE_FILE amd-pstate-trace
++
++#define TPS(x)  tracepoint_string(x)
++
++TRACE_EVENT(amd_pstate_perf,
++
++	TP_PROTO(unsigned long min_perf,
++		 unsigned long target_perf,
++		 unsigned long capacity,
++		 unsigned int cpu_id,
++		 bool changed,
++		 bool fast_switch
++		 ),
++
++	TP_ARGS(min_perf,
++		target_perf,
++		capacity,
++		cpu_id,
++		changed,
++		fast_switch
++		),
++
++	TP_STRUCT__entry(
++		__field(unsigned long, min_perf)
++		__field(unsigned long, target_perf)
++		__field(unsigned long, capacity)
++		__field(unsigned int, cpu_id)
++		__field(bool, changed)
++		__field(bool, fast_switch)
++		),
++
++	TP_fast_assign(
++		__entry->min_perf = min_perf;
++		__entry->target_perf = target_perf;
++		__entry->capacity = capacity;
++		__entry->cpu_id = cpu_id;
++		__entry->changed = changed;
++		__entry->fast_switch = fast_switch;
++		),
++
++	TP_printk("amd_min_perf=%lu amd_des_perf=%lu amd_max_perf=%lu cpu_id=%u changed=%s fast_switch=%s",
++		  (unsigned long)__entry->min_perf,
++		  (unsigned long)__entry->target_perf,
++		  (unsigned long)__entry->capacity,
++		  (unsigned int)__entry->cpu_id,
++		  (__entry->changed) ? "true" : "false",
++		  (__entry->fast_switch) ? "true" : "false"
++		 )
++);
++
++#endif /* _AMD_PSTATE_TRACE_H */
++
++/* This part must be outside protection */
++#undef TRACE_INCLUDE_PATH
++#define TRACE_INCLUDE_PATH .
++
++#include <trace/define_trace.h>
+diff --git a/drivers/cpufreq/amd-pstate.c b/drivers/cpufreq/amd-pstate.c
+index cc62f7484007..63efd5de98a2 100644
+--- a/drivers/cpufreq/amd-pstate.c
++++ b/drivers/cpufreq/amd-pstate.c
+@@ -44,6 +44,7 @@
+ #include <asm/processor.h>
+ #include <asm/cpufeature.h>
+ #include <asm/cpu_device_id.h>
++#include "amd-pstate-trace.h"
+ 
+ #define AMD_PSTATE_TRANSITION_LATENCY	0x20000
+ #define AMD_PSTATE_TRANSITION_DELAY	500
+@@ -220,6 +221,9 @@ static void amd_pstate_update(struct amd_cpudata *cpudata, u32 min_perf,
+ 	value &= ~AMD_CPPC_MAX_PERF(~0L);
+ 	value |= AMD_CPPC_MAX_PERF(max_perf);
+ 
++	trace_amd_pstate_perf(min_perf, des_perf, max_perf,
++			      cpudata->cpu, (value != prev), fast_switch);
++
+ 	if (value == prev)
+ 		return;
+ 
+-- 
+2.25.1
+
+
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Return-Path: <linux-kernel-owner@kernel.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
+	aws-us-west-2-korg-lkml-1.web.codeaurora.org
+Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C7B9EC433EF
+	for <linux-kernel@archiver.kernel.org>; Fri, 24 Dec 2021 01:06:48 +0000 (UTC)
+Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
+        id S1350664AbhLXBGs (ORCPT
+        <rfc822;linux-kernel@archiver.kernel.org>);
+        Thu, 23 Dec 2021 20:06:48 -0500
+Received: from mail-dm6nam11on2086.outbound.protection.outlook.com ([40.107.223.86]:7265
+        "EHLO NAM11-DM6-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1350627AbhLXBGk (ORCPT <rfc822;linux-kernel@vger.kernel.org>);
+        Thu, 23 Dec 2021 20:06:40 -0500
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=fCYQN415f3IhT51sQpNtbc8d4UszrHobCp3oGNXAAM6YGmK1t7PZK8vBFQU/K+QOhQgWV9V0Q2WL+OjYhlSi6gEBwEnjTD+perltkhw0xagzMbx+1TApX0M7ld879z+juHiaTD8+yCf10OZbBpunVd9A0ZefSh8iMz1QoXaWI07LeJjQCylFxpeyddHRCzWxxOUZxdIFy4u7xuhGkQW3bzOnJ0z4InTSvR5brRRAOA+vQNTU9DxIC0n/9HnUMhwBmbvExanG//1dlPIbIRbe93+yBsgYCJdGnuy4hFcWIWN0oW2iOIy/vCcJsP/jhNc+817XBQJM+qQKypG1PG9+Zg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=CqYZm80jBoV7PpjGr1WcXjku6+NjEe0Pp/axryI3Y+g=;
+ b=YXlwVbk5qvAGRfwNQmoi9QHcA7cIc7PaXmB2Ss4w5lycvZmDyG4nxPrHpNV6KqnNba98sk7D6FHLV+CMV4/T/pTOgcYTOF+89isL2k2D8P1p9yL44bIloDLrW2zZ4xqh3wymvYU9z/Mk9ClPRc2cakeEgC1z97Cj8cVTE6fRduMp8HCK0olYFkM//W6CtnewuiiS4jFkAChrO5I65ZqXx+c1cUbcGPfA6udJ887VPCbtHxW1zyBBHsfMbAdjxxMNjnIARnM93VvUSDm4MOlW2gsW2DtPVqfZArWaMYEGaAtFXCk9kxeNMf4nA1H05tsUr/1tQDpLsGkxjXSX+VkLtA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 165.204.84.17) smtp.rcpttodomain=intel.com smtp.mailfrom=amd.com; dmarc=pass
+ (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
+ dkim=none (message not signed); arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=CqYZm80jBoV7PpjGr1WcXjku6+NjEe0Pp/axryI3Y+g=;
+ b=v0n8wMKcgirmbODMZwSdI4NReDgrKdkYKsD0BdSfLYQWP3D2j/rPJVFyNb8ErXq09RmPj9h5E0EVnOBWdXtRHG7DuFJQU6aGP6xa1LnoooLUFg3foFGbMWIEyzrQnicnR8GsLsmZGm6sAGeXs5XgFdR6M3YR080bNduWe5gJ+54=
+Received: from DM5PR19CA0004.namprd19.prod.outlook.com (2603:10b6:3:151::14)
+ by BY5PR12MB5511.namprd12.prod.outlook.com (2603:10b6:a03:1d8::13) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4801.17; Fri, 24 Dec
+ 2021 01:06:36 +0000
+Received: from DM6NAM11FT031.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:3:151:cafe::50) by DM5PR19CA0004.outlook.office365.com
+ (2603:10b6:3:151::14) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4823.18 via Frontend
+ Transport; Fri, 24 Dec 2021 01:06:35 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
+ smtp.mailfrom=amd.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=amd.com;
+Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
+ 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
+ client-ip=165.204.84.17; helo=SATLEXMB03.amd.com;
+Received: from SATLEXMB03.amd.com (165.204.84.17) by
+ DM6NAM11FT031.mail.protection.outlook.com (10.13.172.203) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.20.4823.18 via Frontend Transport; Fri, 24 Dec 2021 01:06:35 +0000
+Received: from hr-amd.amd.com (10.180.168.240) by SATLEXMB03.amd.com
+ (10.181.40.144) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.17; Thu, 23 Dec
+ 2021 19:06:30 -0600
+From:   Huang Rui <ray.huang@amd.com>
+To:     "Rafael J . Wysocki" <rafael.j.wysocki@intel.com>,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        Shuah Khan <skhan@linuxfoundation.org>,
+        "Borislav Petkov" <bp@suse.de>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Ingo Molnar <mingo@kernel.org>,
+        Giovanni Gherdovich <ggherdovich@suse.cz>,
+        Steven Rostedt <rostedt@goodmis.org>,
+        <linux-pm@vger.kernel.org>
+CC:     Deepak Sharma <deepak.sharma@amd.com>,
+        Alex Deucher <alexander.deucher@amd.com>,
+        Mario Limonciello <mario.limonciello@amd.com>,
+        Steven Noonan <steven@valvesoftware.com>,
+        Nathan Fontenot <nathan.fontenot@amd.com>,
+        Jinzhou Su <Jinzhou.Su@amd.com>,
+        Xiaojian Du <Xiaojian.Du@amd.com>,
+        <linux-kernel@vger.kernel.org>, <x86@kernel.org>,
+        Huang Rui <ray.huang@amd.com>
+Subject: [PATCH v7 10/14] cpufreq: amd-pstate: Add boost mode support for AMD P-State
+Date:   Fri, 24 Dec 2021 09:05:04 +0800
+Message-ID: <20211224010508.110159-11-ray.huang@amd.com>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20211224010508.110159-1-ray.huang@amd.com>
+References: <20211224010508.110159-1-ray.huang@amd.com>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-Originating-IP: [10.180.168.240]
+X-ClientProxiedBy: SATLEXMB04.amd.com (10.181.40.145) To SATLEXMB03.amd.com
+ (10.181.40.144)
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: 3fef9fda-e1df-4bd3-0cee-08d9c679a1d1
+X-MS-TrafficTypeDiagnostic: BY5PR12MB5511:EE_
+X-Microsoft-Antispam-PRVS: <BY5PR12MB551150855A4B804DBF63BDCBEC7F9@BY5PR12MB5511.namprd12.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:2733;
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: +SUEequgtmzzq7t2zyq6NJJVGXVJyhTqlT2ioKWQR2T1WVK/N4BR35ZESc4ZHYnsSkhBHknlkTikJW6zRhJJuD5GbmJBW3lXOLJDXJg/Zi21NMl/cJ/R9Ox+ocuZsajH7r+jkqMkK8YIVzlPOzW6ECqn9KoHOM7syqbqQILkX0MAj0VcldwBwNfXxHjY77q5Dx7+duQknWsYo8yOa3pNngCpZEEPx83R9hjSgQ+vr4cjrKTGLASmJq9iTI39JRS4F8oFlxwu8dADhhmUr3U8KPG7dBKF5XBqx/jvG4PTw/TnuFYthciIB3bvrUqUvhjzr7rXuxj7IDHjghm8E1pK4Pr+m/vXpVTG7t3W2VGpDpnAmel/IueFoeMct7VTerdYVuRGBsY1B/eOw+SZ1Nhis4vvsvQG0omksuSD/eBTJ21h4UvVhmCc/3WmxVlxOwGoZ/3di6Wz3e1SUrojtofGOqHjuUek84F0vvjSKQXDcDhxWnYkK6Q5I/7XHNaC5eC/cm3jUk1DVroGbszmCOrTKZcwKgpw2C0zjvlWpLVx6xYVFUOFD6C2059Lk0WCnvqG/qzokErEZdlNhA0EKADfLBO1LLxj7hPM2gRWKZdVZHmvF0jdLMNBOLHNy0MWtS9BKBb81fihb9IV3O33TqzUcC27TkvLSZCNPyxXnR/X8gZgbgLyjjrUyUytcFKWQI0Fa3+eqUu1/L4KS5KG1dPYv/uL8oYZBAFJzi/eAkFzN9SNYz8qSNuZtSEX6hgu8IqUKYXOUqjmVshND6HYMLmjJ6wHFWowuM4RmVlWUNuYeVw=
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB03.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(4636009)(46966006)(36840700001)(40470700002)(316002)(86362001)(83380400001)(7416002)(36756003)(8676002)(54906003)(110136005)(8936002)(36860700001)(82310400004)(5660300002)(81166007)(426003)(6666004)(356005)(47076005)(26005)(508600001)(70206006)(16526019)(40460700001)(186003)(1076003)(7696005)(2616005)(336012)(70586007)(2906002)(4326008)(36900700001);DIR:OUT;SFP:1101;
+X-OriginatorOrg: amd.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 24 Dec 2021 01:06:35.6716
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: 3fef9fda-e1df-4bd3-0cee-08d9c679a1d1
+X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB03.amd.com]
+X-MS-Exchange-CrossTenant-AuthSource: DM6NAM11FT031.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BY5PR12MB5511
+Precedence: bulk
+List-ID: <linux-kernel.vger.kernel.org>
+X-Mailing-List: linux-kernel@vger.kernel.org
+
+If the sbios supports the boost mode of AMD P-State, let's switch to
+boost enabled by default.
+
+Signed-off-by: Huang Rui <ray.huang@amd.com>
+---
+ drivers/cpufreq/amd-pstate.c | 69 ++++++++++++++++++++++++++++++++++--
+ 1 file changed, 66 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/cpufreq/amd-pstate.c b/drivers/cpufreq/amd-pstate.c
+index 63efd5de98a2..9e23efc7b9eb 100644
+--- a/drivers/cpufreq/amd-pstate.c
++++ b/drivers/cpufreq/amd-pstate.c
+@@ -87,6 +87,7 @@ static struct cpufreq_driver amd_pstate_driver;
+ struct amd_cpudata {
+ 	int	cpu;
+ 
++	struct	freq_qos_request req[2];
+ 	u64	cppc_req_cached;
+ 
+ 	u32	highest_perf;
+@@ -98,6 +99,8 @@ struct amd_cpudata {
+ 	u32	min_freq;
+ 	u32	nominal_freq;
+ 	u32	lowest_nonlinear_freq;
++
++	bool	boost_supported;
+ };
+ 
+ static inline int pstate_enable(bool enable)
+@@ -374,6 +377,45 @@ static int amd_get_lowest_nonlinear_freq(struct amd_cpudata *cpudata)
+ 	return lowest_nonlinear_freq * 1000;
+ }
+ 
++static int amd_pstate_set_boost(struct cpufreq_policy *policy, int state)
++{
++	struct amd_cpudata *cpudata = policy->driver_data;
++	int ret;
++
++	if (!cpudata->boost_supported) {
++		pr_err("Boost mode is not supported by this processor or SBIOS\n");
++		return -EINVAL;
++	}
++
++	if (state)
++		policy->cpuinfo.max_freq = cpudata->max_freq;
++	else
++		policy->cpuinfo.max_freq = cpudata->nominal_freq;
++
++	policy->max = policy->cpuinfo.max_freq;
++
++	ret = freq_qos_update_request(&cpudata->req[1],
++				      policy->cpuinfo.max_freq);
++	if (ret < 0)
++		return ret;
++
++	return 0;
++}
++
++static void amd_pstate_boost_init(struct amd_cpudata *cpudata)
++{
++	u32 highest_perf, nominal_perf;
++
++	highest_perf = READ_ONCE(cpudata->highest_perf);
++	nominal_perf = READ_ONCE(cpudata->nominal_perf);
++
++	if (highest_perf <= nominal_perf)
++		return;
++
++	cpudata->boost_supported = true;
++	amd_pstate_driver.boost_enabled = true;
++}
++
+ static int amd_pstate_cpu_init(struct cpufreq_policy *policy)
+ {
+ 	int min_freq, max_freq, nominal_freq, lowest_nonlinear_freq, ret;
+@@ -392,7 +434,7 @@ static int amd_pstate_cpu_init(struct cpufreq_policy *policy)
+ 
+ 	ret = amd_pstate_init_perf(cpudata);
+ 	if (ret)
+-		goto free_cpudata;
++		goto free_cpudata1;
+ 
+ 	min_freq = amd_get_min_freq(cpudata);
+ 	max_freq = amd_get_max_freq(cpudata);
+@@ -403,7 +445,7 @@ static int amd_pstate_cpu_init(struct cpufreq_policy *policy)
+ 		dev_err(dev, "min_freq(%d) or max_freq(%d) value is incorrect\n",
+ 			min_freq, max_freq);
+ 		ret = -EINVAL;
+-		goto free_cpudata;
++		goto free_cpudata1;
+ 	}
+ 
+ 	policy->cpuinfo.transition_latency = AMD_PSTATE_TRANSITION_LATENCY;
+@@ -421,6 +463,20 @@ static int amd_pstate_cpu_init(struct cpufreq_policy *policy)
+ 	if (boot_cpu_has(X86_FEATURE_CPPC))
+ 		policy->fast_switch_possible = true;
+ 
++	ret = freq_qos_add_request(&policy->constraints, &cpudata->req[0],
++				   FREQ_QOS_MIN, policy->cpuinfo.min_freq);
++	if (ret < 0) {
++		dev_err(dev, "Failed to add min-freq constraint (%d)\n", ret);
++		goto free_cpudata1;
++	}
++
++	ret = freq_qos_add_request(&policy->constraints, &cpudata->req[1],
++				   FREQ_QOS_MAX, policy->cpuinfo.max_freq);
++	if (ret < 0) {
++		dev_err(dev, "Failed to add max-freq constraint (%d)\n", ret);
++		goto free_cpudata2;
++	}
++
+ 	/* Initial processor data capability frequencies */
+ 	cpudata->max_freq = max_freq;
+ 	cpudata->min_freq = min_freq;
+@@ -429,9 +485,13 @@ static int amd_pstate_cpu_init(struct cpufreq_policy *policy)
+ 
+ 	policy->driver_data = cpudata;
+ 
++	amd_pstate_boost_init(cpudata);
++
+ 	return 0;
+ 
+-free_cpudata:
++free_cpudata2:
++	freq_qos_remove_request(&cpudata->req[0]);
++free_cpudata1:
+ 	kfree(cpudata);
+ 	return ret;
+ }
+@@ -442,6 +502,8 @@ static int amd_pstate_cpu_exit(struct cpufreq_policy *policy)
+ 
+ 	cpudata = policy->driver_data;
+ 
++	freq_qos_remove_request(&cpudata->req[1]);
++	freq_qos_remove_request(&cpudata->req[0]);
+ 	kfree(cpudata);
+ 
+ 	return 0;
+@@ -453,6 +515,7 @@ static struct cpufreq_driver amd_pstate_driver = {
+ 	.target		= amd_pstate_target,
+ 	.init		= amd_pstate_cpu_init,
+ 	.exit		= amd_pstate_cpu_exit,
++	.set_boost	= amd_pstate_set_boost,
+ 	.name		= "amd-pstate",
+ };
+ 
+-- 
+2.25.1
+
+
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Return-Path: <linux-kernel-owner@kernel.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
+	aws-us-west-2-korg-lkml-1.web.codeaurora.org
+Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 13DACC433EF
+	for <linux-kernel@archiver.kernel.org>; Fri, 24 Dec 2021 01:06:51 +0000 (UTC)
+Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
+        id S1350678AbhLXBGt (ORCPT
+        <rfc822;linux-kernel@archiver.kernel.org>);
+        Thu, 23 Dec 2021 20:06:49 -0500
+Received: from mail-dm6nam12on2046.outbound.protection.outlook.com ([40.107.243.46]:19937
+        "EHLO NAM12-DM6-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1350607AbhLXBGm (ORCPT <rfc822;linux-kernel@vger.kernel.org>);
+        Thu, 23 Dec 2021 20:06:42 -0500
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=JMR7n70RolcbyHPxWJuprMOfxue3exjr5eIdu1JBCzCX7AQzte3aef7DWPFmJcHucXdmXd8Tidx96kZY5q9ympNZzTiXIDExIYx0PaAA/gwcAiofZxN2NLTeYmQ9IR2TBGkB+J4oKDf09+wQiyTqfshUMhXEoo2ALGnidw7lwBm86ZJA6tVEaxqdhGwOePhayu1Atu/81ZCMetKuRx4K2o1ZKmo+do0QdACUapWvYb27EDzj3M4CTXiPyJw81PW2gtwMwK2352gtEsc56hAx5obXf4cfL7jylX8007VYmgEshWmNG3MfaKeUq07na8dF2KwG6Kq7dq2T5SI/bwabUA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=hfHVOR5MJ3VyX0YfHVKUZEdogqkMGGtH17rk3ghUFLw=;
+ b=bBxNyP2tOt7BN70d9XbRTf+u9ImT6h0R6NnxEF1L84VailUFsX+PVbBVgZy9ve5xIK8aMyZqkl2Z9Heeqr/MjxyKE8oYFCgTwgoKe8Q/I/mtV8mdHEKVTI0EheriYBnjghMCJBCCmYNuZqGXuMOD/HL8dQQgoEVJ52POoH0UwLfEajMJ1WCYM5asrDwlw5PkGGQXXe7u1DMAY4knE7OrG1jm3liVqy+XRJTFaHz9Sk6S0QEqQh8xpM5me2AGURiH5m/hTda1YF+3JHbe8ewxih4DWLkSoi4ToZbPwR5Xqe4nmGqnfWuS9MGHu2/msyX9YK2p9OuAbAEMU2DxIXRhaQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 165.204.84.17) smtp.rcpttodomain=intel.com smtp.mailfrom=amd.com; dmarc=pass
+ (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
+ dkim=none (message not signed); arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=hfHVOR5MJ3VyX0YfHVKUZEdogqkMGGtH17rk3ghUFLw=;
+ b=Ui3ag+a39iht0ngN7cFwhnpvl4F/65YyA2aNIxweu2opfcCyELWwV60zI/gZoHr42rvo3vEVihuJbyRDV/jl949n18Lf6xcKTOjS17Q2JCMvbeCCZDgm0Grr/cYCeOiCQwTw73n0BTFjp9y90yGwLRrGcxlLv2WUOEU2xXO5rYM=
+Received: from DM6PR07CA0088.namprd07.prod.outlook.com (2603:10b6:5:337::21)
+ by DM8PR12MB5430.namprd12.prod.outlook.com (2603:10b6:8:28::6) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.4823.19; Fri, 24 Dec 2021 01:06:40 +0000
+Received: from DM6NAM11FT062.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:5:337:cafe::45) by DM6PR07CA0088.outlook.office365.com
+ (2603:10b6:5:337::21) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4823.18 via Frontend
+ Transport; Fri, 24 Dec 2021 01:06:40 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
+ smtp.mailfrom=amd.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=amd.com;
+Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
+ 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
+ client-ip=165.204.84.17; helo=SATLEXMB03.amd.com;
+Received: from SATLEXMB03.amd.com (165.204.84.17) by
+ DM6NAM11FT062.mail.protection.outlook.com (10.13.173.40) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.20.4823.18 via Frontend Transport; Fri, 24 Dec 2021 01:06:40 +0000
+Received: from hr-amd.amd.com (10.180.168.240) by SATLEXMB03.amd.com
+ (10.181.40.144) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.17; Thu, 23 Dec
+ 2021 19:06:35 -0600
+From:   Huang Rui <ray.huang@amd.com>
+To:     "Rafael J . Wysocki" <rafael.j.wysocki@intel.com>,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        Shuah Khan <skhan@linuxfoundation.org>,
+        "Borislav Petkov" <bp@suse.de>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Ingo Molnar <mingo@kernel.org>,
+        Giovanni Gherdovich <ggherdovich@suse.cz>,
+        Steven Rostedt <rostedt@goodmis.org>,
+        <linux-pm@vger.kernel.org>
+CC:     Deepak Sharma <deepak.sharma@amd.com>,
+        Alex Deucher <alexander.deucher@amd.com>,
+        Mario Limonciello <mario.limonciello@amd.com>,
+        Steven Noonan <steven@valvesoftware.com>,
+        Nathan Fontenot <nathan.fontenot@amd.com>,
+        Jinzhou Su <Jinzhou.Su@amd.com>,
+        Xiaojian Du <Xiaojian.Du@amd.com>,
+        <linux-kernel@vger.kernel.org>, <x86@kernel.org>,
+        Huang Rui <ray.huang@amd.com>
+Subject: [PATCH v7 11/14] cpufreq: amd-pstate: Add AMD P-State frequencies attributes
+Date:   Fri, 24 Dec 2021 09:05:05 +0800
+Message-ID: <20211224010508.110159-12-ray.huang@amd.com>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20211224010508.110159-1-ray.huang@amd.com>
+References: <20211224010508.110159-1-ray.huang@amd.com>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-Originating-IP: [10.180.168.240]
+X-ClientProxiedBy: SATLEXMB04.amd.com (10.181.40.145) To SATLEXMB03.amd.com
+ (10.181.40.144)
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: aee38677-fe8a-42f6-5dd4-08d9c679a491
+X-MS-TrafficTypeDiagnostic: DM8PR12MB5430:EE_
+X-Microsoft-Antispam-PRVS: <DM8PR12MB5430B395E4DCE2217B08BF72EC7F9@DM8PR12MB5430.namprd12.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:5236;
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: pZc3x4PLDZd6UdYO8O9ul4T4HrQpOssNqcoTW9j1+JPCzwwDe6v4Jy/0kCWBvot+lJ9RoBAh2TgJ1ImQZxA66oEKBeHk9R35csvBlmJPFjNPt804SvS74aAdMqIHGnjQC1WtvT0SHy/UvEK1uP5ddgH0AEsfHntauMngXnbsvTP+gGC3VhuRwJt6BGS+b9VGlXA40R5pkEDe4Rk2/8DhLo7snsdZlLid3TaeAGmsIqIbdTe9VBn6RygqjSZjPwVLal/Jyj0TvQ1kPf9ZusL6i6tmFbQslTMq2oMe4SC93r2lez4LTDmxS5f+r362Qo9rPYnqEEawPLuxRDRnEwB8YVp/FFbAdJ4YafrkEwHsUgo/aSxhlyIYaoFzRQh4MbBtp63s1+NEE0tA9oPex0gZRqCEJwI5w6J84puJb9q6fH/2wXnEFr2FG5OtSx3d7e1g/R1YoNlrKh+lUgyfV0apJzLmAjYMOrjYrnm8neMqghI+C1YnAw7Lb3LYxvvzY1Y14h7BfmPfZjQv+y+feZhnZ+tDzPGTRtSSTEiWfgPTjzVs8OJ7ErGbsFOICdo3kfW2Wm1JjQSCVQqE5PCy1633qTh1zfRPCt1GdF02qBD8duzuA+Umbv/wGi+wHFZCtnzx4dfog/E0f4qUOPpVsJtoj2cWKiYpGxjbphADrx4t8VXj4iEOL+Zy8s+K9D9FZ0d6686A4d0rHez9mnAyxpZsRen2VcCuCBw2G/GL9zwYVtJw+OAPr+6ndcpFQlBBoYp3zI9+6FMQDgWVEmXcp0rPHZ6Ib+eTfpXL8ea0R5EUZkk=
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB03.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(4636009)(36840700001)(40470700002)(46966006)(356005)(47076005)(83380400001)(36860700001)(110136005)(54906003)(336012)(4326008)(5660300002)(316002)(1076003)(2906002)(16526019)(7416002)(186003)(2616005)(81166007)(36756003)(7696005)(6666004)(426003)(26005)(8936002)(8676002)(70586007)(508600001)(86362001)(40460700001)(82310400004)(70206006)(36900700001);DIR:OUT;SFP:1101;
+X-OriginatorOrg: amd.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 24 Dec 2021 01:06:40.3031
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: aee38677-fe8a-42f6-5dd4-08d9c679a491
+X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB03.amd.com]
+X-MS-Exchange-CrossTenant-AuthSource: DM6NAM11FT062.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM8PR12MB5430
+Precedence: bulk
+List-ID: <linux-kernel.vger.kernel.org>
+X-Mailing-List: linux-kernel@vger.kernel.org
+
+Introduce sysfs attributes to get the different level processor
+frequencies.
+
+Signed-off-by: Huang Rui <ray.huang@amd.com>
+---
+ drivers/cpufreq/amd-pstate.c | 47 ++++++++++++++++++++++++++++++++++++
+ 1 file changed, 47 insertions(+)
+
+diff --git a/drivers/cpufreq/amd-pstate.c b/drivers/cpufreq/amd-pstate.c
+index 9e23efc7b9eb..dbb7eee11170 100644
+--- a/drivers/cpufreq/amd-pstate.c
++++ b/drivers/cpufreq/amd-pstate.c
+@@ -509,6 +509,52 @@ static int amd_pstate_cpu_exit(struct cpufreq_policy *policy)
+ 	return 0;
+ }
+ 
++/* Sysfs attributes */
++
++/*
++ * This frequency is to indicate the maximum hardware frequency.
++ * If boost is not active but supported, the frequency will be larger than the
++ * one in cpuinfo.
++ */
++static ssize_t show_amd_pstate_max_freq(struct cpufreq_policy *policy,
++					char *buf)
++{
++	int max_freq;
++	struct amd_cpudata *cpudata;
++
++	cpudata = policy->driver_data;
++
++	max_freq = amd_get_max_freq(cpudata);
++	if (max_freq < 0)
++		return max_freq;
++
++	return sprintf(&buf[0], "%u\n", max_freq);
++}
++
++static ssize_t show_amd_pstate_lowest_nonlinear_freq(struct cpufreq_policy *policy,
++						     char *buf)
++{
++	int freq;
++	struct amd_cpudata *cpudata;
++
++	cpudata = policy->driver_data;
++
++	freq = amd_get_lowest_nonlinear_freq(cpudata);
++	if (freq < 0)
++		return freq;
++
++	return sprintf(&buf[0], "%u\n", freq);
++}
++
++cpufreq_freq_attr_ro(amd_pstate_max_freq);
++cpufreq_freq_attr_ro(amd_pstate_lowest_nonlinear_freq);
++
++static struct freq_attr *amd_pstate_attr[] = {
++	&amd_pstate_max_freq,
++	&amd_pstate_lowest_nonlinear_freq,
++	NULL,
++};
++
+ static struct cpufreq_driver amd_pstate_driver = {
+ 	.flags		= CPUFREQ_CONST_LOOPS | CPUFREQ_NEED_UPDATE_LIMITS,
+ 	.verify		= amd_pstate_verify,
+@@ -517,6 +563,7 @@ static struct cpufreq_driver amd_pstate_driver = {
+ 	.exit		= amd_pstate_cpu_exit,
+ 	.set_boost	= amd_pstate_set_boost,
+ 	.name		= "amd-pstate",
++	.attr           = amd_pstate_attr,
+ };
+ 
+ static int __init amd_pstate_init(void)
+-- 
+2.25.1
+
+
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Return-Path: <linux-kernel-owner@kernel.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
+	aws-us-west-2-korg-lkml-1.web.codeaurora.org
+Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 47EB5C433F5
+	for <linux-kernel@archiver.kernel.org>; Fri, 24 Dec 2021 01:06:58 +0000 (UTC)
+Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
+        id S1350741AbhLXBG5 (ORCPT
+        <rfc822;linux-kernel@archiver.kernel.org>);
+        Thu, 23 Dec 2021 20:06:57 -0500
+Received: from mail-bn8nam11on2082.outbound.protection.outlook.com ([40.107.236.82]:35681
+        "EHLO NAM11-BN8-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1350657AbhLXBGs (ORCPT <rfc822;linux-kernel@vger.kernel.org>);
+        Thu, 23 Dec 2021 20:06:48 -0500
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=RlugO3gaPXevngz9BICGsivvV0NzgzOS4NiaxLbEDoxhbcH5Q5xKDEWOUMt3L+iu44baNA/MP3PucLL7pSLe4LJ5ACWwJ5EIMWPO4MCALwAjnjI828R//EDc1ZgC9L1exR7wGFRfjGdsvenY6tUTp+hS6Md/qVwBOJCFwVphFfb5qZq3fNntGrJqsg9rtYa/tgnoipNxWLFPx/mx1UYaJnaJ54a3ksqr2qeqXAw9rK7tf6npAYNCI15EeVgL15q59n8nAzasbbxhctRnDbnHwRTY17M1FSqnRbVC7cRNRbU+MoLDLwF10yctYgwawKAuhlzchWMGsKi1D2vxesixEw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=Y3T8IutR7NEgnK4LWinnjTp3gj+WMAyBspZE7yihd/4=;
+ b=izk+HB9yYRg2SRF5FJ38nMghHUwQWb8DWz4laVIm07frdanJx8t9T2oRZFYr/ipvpviy4P0bgd3oiGnV+sDvt7A2tci8zWQnvpOE+OTm9RConNcEChzjfihL4xHuhcb0nrPFbrErn3CPZe9oDIDcRSme/BCXGRUWW1AA8DegTV7ox6s9O0afVgf6QTYysyznx9F2CAm1CAmNv06TL68GRjVPGWtyqu+AeKHkoyD5ehsjB8DTpB+KWRvBp0gbETcfqcDvm/ou0jVEQDXfMJK92sOhUkOdyzOammUVfPKE65prKTVBBFKPW+mVeEnqjknsiBlxqoKc58/Z1i12NDVQmg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 165.204.84.17) smtp.rcpttodomain=intel.com smtp.mailfrom=amd.com; dmarc=pass
+ (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
+ dkim=none (message not signed); arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=Y3T8IutR7NEgnK4LWinnjTp3gj+WMAyBspZE7yihd/4=;
+ b=zc4hQM4sWlrpGVUUCnkvH/8sXpbSNu87QL/zJ/+abb3Ddv4VsyOr+zmARjVE1dqY1NhudZ2li34Ou3UcnXsMghv3phUzil+YJMrop81T5i7kGaJn7wYgFlBQSXbGIS3qVfZTkXAnGhtbYTjteN7/a42HRXMMdiwYy6WY80x3SPY=
+Received: from DM5PR06CA0048.namprd06.prod.outlook.com (2603:10b6:3:5d::34) by
+ BYAPR12MB2742.namprd12.prod.outlook.com (2603:10b6:a03:6a::16) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.4823.19; Fri, 24 Dec 2021 01:06:45 +0000
+Received: from DM6NAM11FT056.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:3:5d:cafe::4a) by DM5PR06CA0048.outlook.office365.com
+ (2603:10b6:3:5d::34) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4823.19 via Frontend
+ Transport; Fri, 24 Dec 2021 01:06:45 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
+ smtp.mailfrom=amd.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=amd.com;
+Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
+ 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
+ client-ip=165.204.84.17; helo=SATLEXMB03.amd.com;
+Received: from SATLEXMB03.amd.com (165.204.84.17) by
+ DM6NAM11FT056.mail.protection.outlook.com (10.13.173.99) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.20.4823.18 via Frontend Transport; Fri, 24 Dec 2021 01:06:45 +0000
+Received: from hr-amd.amd.com (10.180.168.240) by SATLEXMB03.amd.com
+ (10.181.40.144) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.17; Thu, 23 Dec
+ 2021 19:06:39 -0600
+From:   Huang Rui <ray.huang@amd.com>
+To:     "Rafael J . Wysocki" <rafael.j.wysocki@intel.com>,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        Shuah Khan <skhan@linuxfoundation.org>,
+        "Borislav Petkov" <bp@suse.de>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Ingo Molnar <mingo@kernel.org>,
+        Giovanni Gherdovich <ggherdovich@suse.cz>,
+        Steven Rostedt <rostedt@goodmis.org>,
+        <linux-pm@vger.kernel.org>
+CC:     Deepak Sharma <deepak.sharma@amd.com>,
+        Alex Deucher <alexander.deucher@amd.com>,
+        Mario Limonciello <mario.limonciello@amd.com>,
+        Steven Noonan <steven@valvesoftware.com>,
+        Nathan Fontenot <nathan.fontenot@amd.com>,
+        Jinzhou Su <Jinzhou.Su@amd.com>,
+        Xiaojian Du <Xiaojian.Du@amd.com>,
+        <linux-kernel@vger.kernel.org>, <x86@kernel.org>,
+        Huang Rui <ray.huang@amd.com>
+Subject: [PATCH v7 12/14] cpufreq: amd-pstate: Add AMD P-State performance attributes
+Date:   Fri, 24 Dec 2021 09:05:06 +0800
+Message-ID: <20211224010508.110159-13-ray.huang@amd.com>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20211224010508.110159-1-ray.huang@amd.com>
+References: <20211224010508.110159-1-ray.huang@amd.com>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-Originating-IP: [10.180.168.240]
+X-ClientProxiedBy: SATLEXMB04.amd.com (10.181.40.145) To SATLEXMB03.amd.com
+ (10.181.40.144)
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: f678ff36-efa1-442f-8682-08d9c679a765
+X-MS-TrafficTypeDiagnostic: BYAPR12MB2742:EE_
+X-Microsoft-Antispam-PRVS: <BYAPR12MB2742E659BF4E9C5C43CFCC7CEC7F9@BYAPR12MB2742.namprd12.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:3513;
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: Vaz96KFGt6fYx/Tuo7z9lvDkRY/nXZeaNFgLdpGPC6VTCAPCNqBGf+jgUSgaMlvSmhkdFZCYGqgGKPBpYe/5CB6mP5+jLKlU+h0Ai6+ZZWS9Itqp5xHubujdDeugikAIJ2kQW1/y8ZRcYePIEiBsB7ADtRhTSHGdGNdi90OS5gP8KDe/RGnh30Ux/Dh85njpa36AMSIAz9GZZYFrOdSTCd/usEfrc1RjZRRSzjcotnJUfmzIr6LBTAQHABMu6KzQ6wf90RXhl87OjnopCbM9lre9M3PYPOkNuXSDHgFGCS5r1nPj+u0jSpwK5LIEP7DEGw3JMf3z+oO72Zeg1NLJ8O2NasR+JhP5vyP+aJLVXQZpoyG35Qq8bJP0Gm/QX6w01OB/caXcHA+WJuD8op4qg6XdpexJsRLSlEdUnNKqLFvZjfmpqVIspbUV+C/IhsHBRxQWEd/3yC1kFLG3Lu1/nunoBlw9GLpu3iI+TsgJ8BnsL8oASK9SrFoBjdrdUu9uRsA7I8ByN4lXtDygp6lWW6SAX1CzjFJUBd+ws7kz3F/iP+EEJjLiG6Q38OnGa/DbFZI+5YYn47mZzdwx4A7g7KnBUbs53oti2EJxiweJYibBhjjbalYLPbHcBJq8bT/on7UyKJwKz6Vdg+7R2VrXX0bzQwYVa3yWbFsVSv9BJn2lbvnMppE6w36DTxZKjvqAPKluosIhM10/16jVfBu3yeUZ+pqeWIrdwEWCYuqdKRV82XJeNRjgrbIdLiNrT4/EiwiZIM7fFgXv9CCnkbO1eKiH3lCnBLgXklgxlUd/R5w=
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB03.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(4636009)(36840700001)(40470700002)(46966006)(86362001)(1076003)(5660300002)(426003)(4326008)(70586007)(8936002)(16526019)(26005)(70206006)(2906002)(2616005)(47076005)(36860700001)(336012)(186003)(8676002)(316002)(508600001)(7696005)(7416002)(36756003)(6666004)(40460700001)(82310400004)(83380400001)(110136005)(81166007)(54906003)(356005)(36900700001);DIR:OUT;SFP:1101;
+X-OriginatorOrg: amd.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 24 Dec 2021 01:06:45.0333
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: f678ff36-efa1-442f-8682-08d9c679a765
+X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB03.amd.com]
+X-MS-Exchange-CrossTenant-AuthSource: DM6NAM11FT056.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BYAPR12MB2742
+Precedence: bulk
+List-ID: <linux-kernel.vger.kernel.org>
+X-Mailing-List: linux-kernel@vger.kernel.org
+
+Introduce sysfs attributes to get the different level AMD P-State
+performances.
+
+Signed-off-by: Huang Rui <ray.huang@amd.com>
+---
+ drivers/cpufreq/amd-pstate.c | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
+
+diff --git a/drivers/cpufreq/amd-pstate.c b/drivers/cpufreq/amd-pstate.c
+index dbb7eee11170..40ceb031abf5 100644
+--- a/drivers/cpufreq/amd-pstate.c
++++ b/drivers/cpufreq/amd-pstate.c
+@@ -546,12 +546,30 @@ static ssize_t show_amd_pstate_lowest_nonlinear_freq(struct cpufreq_policy *poli
+ 	return sprintf(&buf[0], "%u\n", freq);
+ }
+ 
++/*
++ * In some of ASICs, the highest_perf is not the one in the _CPC table, so we
++ * need to expose it to sysfs.
++ */
++static ssize_t show_amd_pstate_highest_perf(struct cpufreq_policy *policy,
++					    char *buf)
++{
++	u32 perf;
++	struct amd_cpudata *cpudata = policy->driver_data;
++
++	perf = READ_ONCE(cpudata->highest_perf);
++
++	return sprintf(&buf[0], "%u\n", perf);
++}
++
+ cpufreq_freq_attr_ro(amd_pstate_max_freq);
+ cpufreq_freq_attr_ro(amd_pstate_lowest_nonlinear_freq);
+ 
++cpufreq_freq_attr_ro(amd_pstate_highest_perf);
++
+ static struct freq_attr *amd_pstate_attr[] = {
+ 	&amd_pstate_max_freq,
+ 	&amd_pstate_lowest_nonlinear_freq,
++	&amd_pstate_highest_perf,
+ 	NULL,
+ };
+ 
+-- 
+2.25.1
+
+
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Return-Path: <linux-kernel-owner@kernel.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
+	aws-us-west-2-korg-lkml-1.web.codeaurora.org
+Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 93834C433F5
+	for <linux-kernel@archiver.kernel.org>; Fri, 24 Dec 2021 01:07:03 +0000 (UTC)
+Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
+        id S1350727AbhLXBHC (ORCPT
+        <rfc822;linux-kernel@archiver.kernel.org>);
+        Thu, 23 Dec 2021 20:07:02 -0500
+Received: from mail-bn8nam12on2048.outbound.protection.outlook.com ([40.107.237.48]:40306
+        "EHLO NAM12-BN8-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1350726AbhLXBGz (ORCPT <rfc822;linux-kernel@vger.kernel.org>);
+        Thu, 23 Dec 2021 20:06:55 -0500
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=bVUnfa5OB6U/4vFciNIPoatI1/9NQ6LSf8pB5f4DDPuXaSuAQyngIcBFEEhP37u4GfajzrKTXnEDGd71EnQo2qICY4h/9P4rHiEHPJBs8sPuTIQxShpRXIbt/HUFKACRFnJUggAfuULSRhSwpiESbuQ+EWzzaH7xr3RLbillUP5MSmGZYGtShe7s1BASEoUR2+0be/0UANNO5gkQUbQMm6/UwveAm193+WxgRJ8FQ7Timxze4YSrawo/PBUAt9M3xYva9vn8PEdb1QhBU/3ciAjEEYFi2ImKnq2pcv+ANDJp/RNrjNfIBqgobwf6GwGFqypRGFL6aN/0YBvlXRcFew==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=koNtPSRgnko5x3Y1jjoBr1Ls45ZLJ7VzID3sQ5ygSQY=;
+ b=OmM0/AaDoySiyyzXw5I4c2AFyT8LDCQg5R1dAG5cTYcY/um40Pk4VzIFTZPLowpVWHs+dM4k3Pg5jBwLbhl14vdA+Idfq2irhkcSTA9Kbf2OVRBjtFkBZVqVrS0IH7kkwxzn3tN+RP9j6IHv93swCgnCMk7Wk4MY7Az4e4Sigvhn7ayn6MSvJ544a9kVEwRITenMjhFXDaWF1TOS7L49K2thut7siK7KSMB/qKKjdvZ4xaKwcoH3gHEVr3VGDrntdYroEUPwlg2Ubhx1ZNH++T00Grvoi+a9uVP0m7rRJHVcLVB1stJlk+Wkhb6KuhVIsVifv3m3x+HXNm4zauzyoA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 165.204.84.17) smtp.rcpttodomain=intel.com smtp.mailfrom=amd.com; dmarc=pass
+ (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
+ dkim=none (message not signed); arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=koNtPSRgnko5x3Y1jjoBr1Ls45ZLJ7VzID3sQ5ygSQY=;
+ b=EEZ8tlJEweMNl+PGLIfwfJ3IIpKuRsWBguZeiwmBf8gLHcHVO7SWrCeRXWmaXu/nJA2RDVGe737VsfpEqBFVh4zyMv+OeDrC2MAqBRt95wiMvrEK4+e4V2aaqXlNzhzJLv1RMm+2Opsub+6RdhB/5vNCnkcKeA25odVEs6gy+o0=
+Received: from DM6PR03CA0040.namprd03.prod.outlook.com (2603:10b6:5:100::17)
+ by DM6PR12MB4251.namprd12.prod.outlook.com (2603:10b6:5:21e::12) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4823.19; Fri, 24 Dec
+ 2021 01:06:50 +0000
+Received: from DM6NAM11FT036.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:5:100:cafe::9a) by DM6PR03CA0040.outlook.office365.com
+ (2603:10b6:5:100::17) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4823.19 via Frontend
+ Transport; Fri, 24 Dec 2021 01:06:50 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
+ smtp.mailfrom=amd.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=amd.com;
+Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
+ 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
+ client-ip=165.204.84.17; helo=SATLEXMB03.amd.com;
+Received: from SATLEXMB03.amd.com (165.204.84.17) by
+ DM6NAM11FT036.mail.protection.outlook.com (10.13.172.64) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.20.4823.18 via Frontend Transport; Fri, 24 Dec 2021 01:06:50 +0000
+Received: from hr-amd.amd.com (10.180.168.240) by SATLEXMB03.amd.com
+ (10.181.40.144) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.17; Thu, 23 Dec
+ 2021 19:06:44 -0600
+From:   Huang Rui <ray.huang@amd.com>
+To:     "Rafael J . Wysocki" <rafael.j.wysocki@intel.com>,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        Shuah Khan <skhan@linuxfoundation.org>,
+        "Borislav Petkov" <bp@suse.de>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Ingo Molnar <mingo@kernel.org>,
+        Giovanni Gherdovich <ggherdovich@suse.cz>,
+        Steven Rostedt <rostedt@goodmis.org>,
+        <linux-pm@vger.kernel.org>
+CC:     Deepak Sharma <deepak.sharma@amd.com>,
+        Alex Deucher <alexander.deucher@amd.com>,
+        Mario Limonciello <mario.limonciello@amd.com>,
+        Steven Noonan <steven@valvesoftware.com>,
+        Nathan Fontenot <nathan.fontenot@amd.com>,
+        Jinzhou Su <Jinzhou.Su@amd.com>,
+        Xiaojian Du <Xiaojian.Du@amd.com>,
+        <linux-kernel@vger.kernel.org>, <x86@kernel.org>,
+        Huang Rui <ray.huang@amd.com>
+Subject: [PATCH v7 13/14] Documentation: amd-pstate: Add AMD P-State driver introduction
+Date:   Fri, 24 Dec 2021 09:05:07 +0800
+Message-ID: <20211224010508.110159-14-ray.huang@amd.com>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20211224010508.110159-1-ray.huang@amd.com>
+References: <20211224010508.110159-1-ray.huang@amd.com>
+MIME-Version: 1.0
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain
+X-Originating-IP: [10.180.168.240]
+X-ClientProxiedBy: SATLEXMB04.amd.com (10.181.40.145) To SATLEXMB03.amd.com
+ (10.181.40.144)
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: 94eceebf-2cb4-4b68-7845-08d9c679aa70
+X-MS-TrafficTypeDiagnostic: DM6PR12MB4251:EE_
+X-Microsoft-Antispam-PRVS: <DM6PR12MB4251D90036F3E70CAB187B25EC7F9@DM6PR12MB4251.namprd12.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:10000;
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: =?us-ascii?Q?MqAG/kLXOgNi3LjC0bS27PFwZNiFDOJm9wbb8+l3a+p3AMU7NnCrnjTZ1+Ne?=
+ =?us-ascii?Q?OTgsFVFhTBMMIZUtJyVJ1moJ0bEtPd5JIvLK+ztutVwx5ZOgaxBH8xg2+olq?=
+ =?us-ascii?Q?urA1y7y3AQas8qjMarnwNVNNDkJIPMLDC6QD4yST/UPmVGVkL2UTAn+liK5q?=
+ =?us-ascii?Q?fnSW3MoDIlm7nPXTV+vTRBLCye/5vrnDplOmrq/NhOv+kNQStncu8S/Zi4rG?=
+ =?us-ascii?Q?8OzA4ETgT+Hrhq1mEczQYRRWTD8EtLsRI7a7IR9RKcaMPg9/i9q8Ad4is6Cp?=
+ =?us-ascii?Q?S9kNrsqk9/dNDAp9/n2VljSAp6QbzHWjjIFaYjiPtxInn5CmPfJExy8tr9l6?=
+ =?us-ascii?Q?sitlQrNLDG94ddVeDWLDWJS7EUq/ZIZNKaGSk73TWq5voD7hZeZQWuwbR3Xf?=
+ =?us-ascii?Q?D/gskC7FHtZTb4d98dL3m3eCFCFbfYGLeD73h/UyBvfTgh0Q/+Rk9ujHDgJL?=
+ =?us-ascii?Q?lt1NuR1fhnhzfbHNmWX7mBACxjiYhNakG3DNKcyJqxR8ya9Zq58Qk8sjEZNm?=
+ =?us-ascii?Q?/E5XpkWrOXwEvcu8UwgiUhsGb1ATgIfEVams0tkMOFFwu9qvZ/MHKDD6gYSY?=
+ =?us-ascii?Q?zPsqXzJmKlgKriGt6RYMSp7Jfv2481Va0mEZ8CM5IKg9qWeBvtpjEhyzrolX?=
+ =?us-ascii?Q?1FlqSYQpOcDlYV1jlNbIOej+QcwlUwaCX+4s8gPMGHz2O6ohWvcYN3chYmGq?=
+ =?us-ascii?Q?z1VhGSkbecCUHsPN+PFBQk9olu9P02VxPZDemx5CVGm5XqjwirMwAA9WPiKQ?=
+ =?us-ascii?Q?TPMuLd8Ri8zIdXpLcO4rHmbCVrYXnFBJudvRisbtGwhqAXc3IvQpf8ULMMSs?=
+ =?us-ascii?Q?2NgrLgYtVtUECbO/29/7OdI0ZF5rJD0uSkFSpmVEjzYNeoaXZCSvni+m4NRJ?=
+ =?us-ascii?Q?QT3ceQHp9v32ABXbX4ch9vrX+4n3ovcFyNF6r00vk2DfLr8sX0+TE9rrXvD4?=
+ =?us-ascii?Q?TUEVqlrYTk4TBqnC0ZbwqKf/mgagq8T0Cih9Tcbz/wA=3D?=
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB03.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(4636009)(40470700002)(46966006)(36840700001)(356005)(8676002)(4326008)(186003)(81166007)(36756003)(36860700001)(16526019)(2906002)(966005)(83380400001)(7416002)(40460700001)(7696005)(508600001)(70586007)(30864003)(110136005)(86362001)(54906003)(316002)(5660300002)(426003)(82310400004)(2616005)(8936002)(1076003)(26005)(70206006)(6666004)(47076005)(336012)(21314003)(36900700001)(473944003);DIR:OUT;SFP:1101;
+X-OriginatorOrg: amd.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 24 Dec 2021 01:06:50.1538
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: 94eceebf-2cb4-4b68-7845-08d9c679aa70
+X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB03.amd.com]
+X-MS-Exchange-CrossTenant-AuthSource: DM6NAM11FT036.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM6PR12MB4251
+Precedence: bulk
+List-ID: <linux-kernel.vger.kernel.org>
+X-Mailing-List: linux-kernel@vger.kernel.org
+
+Introduce the AMD P-State driver design and implementation.
+
+Signed-off-by: Huang Rui <ray.huang@amd.com>
+---
+ Documentation/admin-guide/acpi/cppc_sysfs.rst |   2 +
+ Documentation/admin-guide/pm/amd-pstate.rst   | 383 ++++++++++++++++++
+ .../admin-guide/pm/working-state.rst          |   1 +
+ 3 files changed, 386 insertions(+)
+ create mode 100644 Documentation/admin-guide/pm/amd-pstate.rst
+
+
+diff --git a/Documentation/admin-guide/pm/working-state.rst b/Documentation=
+/admin-guide/pm/working-state.rst
+index f40994c422dc..5d2757e2de65 100644
+--- a/Documentation/admin-guide/pm/working-state.rst
++++ b/Documentation/admin-guide/pm/working-state.rst
+@@ -11,6 +11,7 @@ Working-State Power Management
+    intel_idle
+    cpufreq
+    intel_pstate
++   amd-pstate
+    cpufreq_drivers
+    intel_epb
+    intel-speed-select
+--=20
+2.25.1
+
+
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Return-Path: <linux-kernel-owner@kernel.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
+	aws-us-west-2-korg-lkml-1.web.codeaurora.org
+Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2F052C433F5
+	for <linux-kernel@archiver.kernel.org>; Fri, 24 Dec 2021 01:07:13 +0000 (UTC)
+Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
+        id S245145AbhLXBHI (ORCPT <rfc822;linux-kernel@archiver.kernel.org>);
+        Thu, 23 Dec 2021 20:07:08 -0500
+Received: from mail-bn7nam10on2082.outbound.protection.outlook.com ([40.107.92.82]:55392
+        "EHLO NAM10-BN7-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1350733AbhLXBG6 (ORCPT <rfc822;linux-kernel@vger.kernel.org>);
+        Thu, 23 Dec 2021 20:06:58 -0500
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=LYIB2XeEQoDjdWIT5g/+H+bcRYDabEvYrMuWDpX9hm/Q2m+tT7OBHYtfIuudQZnJ0MgYsV7bBQFXyP7/v18yQg2xCkQpzYlna31cNEjC//ye17b2Q74MEyT0W1Aqn0ntE1B1aYm2LAmyVFqKxqPo3m8APN0b4xv7vspDy4+LjBH3a0/VL0i+qdhi5EZ1Nxwl9RzE+tDCBr+NaoKHlSZ+jWPMDC1+7gVPEsuvLUqUA+v+E7V80gSrf/O8EtASkzGJbmH368aMZJykfX8qiUmi+cRUtN1ykX5MlHn/gvEALThvHxIs98HmNfPQv4+FyuxhfJ2Nhi/1OihbX3mU48pYvw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=t/LfjMYioRuigC5rv4WSx+ehE7yjhQnxsEcC3qCNrDc=;
+ b=NToqFLkZfy1nhlj8rYuI9qvpXzMdbJSHntReEmvtnMQuoUArUVI+XrUAeXkXJ4Z+49qrVDlUmGpMvIXsU9ghUa6Gx9AL6dSNMu4Ufp4gusz9RXiSBQ0GbF2qViL6Sei/wgT2bjNicXLhaZtJo5+76V51JfYY4sotqr9zUHTLgr3MwDwljB/qbubgHeKCyPr9k/byWQv1DneAHKoJa4O6shPJcQHhNsK0zgNc1O/kul629PE35vvh2R47+oraYyQhlKW/M73kHWcvszW2aRvwa0rSqLGOZAgKmnaEt/D3keIVLiygpwffhdEYCoAVB715O2frH/2A5I4SKX6fNhfKuw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 165.204.84.17) smtp.rcpttodomain=intel.com smtp.mailfrom=amd.com; dmarc=pass
+ (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
+ dkim=none (message not signed); arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=t/LfjMYioRuigC5rv4WSx+ehE7yjhQnxsEcC3qCNrDc=;
+ b=atMQDaH9ca93sxTL8XoOpmInzFWGwnj11fdkw0doql0w5vzRaWdGwu3JCdIZGcvCEpJmF/T4YhpDTh6uO8eQ11y6MBHucusRy7ZUMEG+SA/8y2RZPaDm09EnNGOneqDSjxZ2mf7HvnYH83z1Am3UU0TAQuHfcvJ8IfGguXxDGCs=
+Received: from DS7PR03CA0052.namprd03.prod.outlook.com (2603:10b6:5:3b5::27)
+ by MWHPR1201MB0192.namprd12.prod.outlook.com (2603:10b6:301:5a::14) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4823.19; Fri, 24 Dec
+ 2021 01:06:54 +0000
+Received: from DM6NAM11FT013.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:5:3b5:cafe::68) by DS7PR03CA0052.outlook.office365.com
+ (2603:10b6:5:3b5::27) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4823.18 via Frontend
+ Transport; Fri, 24 Dec 2021 01:06:54 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
+ smtp.mailfrom=amd.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=amd.com;
+Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
+ 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
+ client-ip=165.204.84.17; helo=SATLEXMB03.amd.com;
+Received: from SATLEXMB03.amd.com (165.204.84.17) by
+ DM6NAM11FT013.mail.protection.outlook.com (10.13.173.142) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.20.4823.18 via Frontend Transport; Fri, 24 Dec 2021 01:06:54 +0000
+Received: from hr-amd.amd.com (10.180.168.240) by SATLEXMB03.amd.com
+ (10.181.40.144) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.17; Thu, 23 Dec
+ 2021 19:06:49 -0600
+From:   Huang Rui <ray.huang@amd.com>
+To:     "Rafael J . Wysocki" <rafael.j.wysocki@intel.com>,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        Shuah Khan <skhan@linuxfoundation.org>,
+        "Borislav Petkov" <bp@suse.de>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Ingo Molnar <mingo@kernel.org>,
+        Giovanni Gherdovich <ggherdovich@suse.cz>,
+        Steven Rostedt <rostedt@goodmis.org>,
+        <linux-pm@vger.kernel.org>
+CC:     Deepak Sharma <deepak.sharma@amd.com>,
+        Alex Deucher <alexander.deucher@amd.com>,
+        Mario Limonciello <mario.limonciello@amd.com>,
+        Steven Noonan <steven@valvesoftware.com>,
+        Nathan Fontenot <nathan.fontenot@amd.com>,
+        Jinzhou Su <Jinzhou.Su@amd.com>,
+        Xiaojian Du <Xiaojian.Du@amd.com>,
+        <linux-kernel@vger.kernel.org>, <x86@kernel.org>,
+        Huang Rui <ray.huang@amd.com>
+Subject: [PATCH v7 14/14] MAINTAINERS: Add AMD P-State driver maintainer entry
+Date:   Fri, 24 Dec 2021 09:05:08 +0800
+Message-ID: <20211224010508.110159-15-ray.huang@amd.com>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20211224010508.110159-1-ray.huang@amd.com>
+References: <20211224010508.110159-1-ray.huang@amd.com>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-Originating-IP: [10.180.168.240]
+X-ClientProxiedBy: SATLEXMB04.amd.com (10.181.40.145) To SATLEXMB03.amd.com
+ (10.181.40.144)
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: 7b3cf9d9-f502-4232-8b16-08d9c679ad21
+X-MS-TrafficTypeDiagnostic: MWHPR1201MB0192:EE_
+X-Microsoft-Antispam-PRVS: <MWHPR1201MB0192C67C030B00762A6482C4EC7F9@MWHPR1201MB0192.namprd12.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:3968;
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: 0KcXhUa+QLyuNZUrNMFIw0zf0Pz9htbi3DWwZmyJogK8Agj8UkcV64+RvF5tGZ/UVU0fr6bsEhCjCIc7jtpnLXssrMkB1hcVH+YUkQFQ4xXQCiVCqXSDBx0U8CX5ZCUSjKnbVapINCeS0BfD/iwd8kgTGVG60SgO5j2NVKvbwrUqQ9qbcZY9WlMCVYo/y35zcBsK6DTOvQ1sU9v8oNAfyvnAfvrmjH/tNVhBskW8NBFZSH6q3g2Z0GR/zn53xiVnnGe2GXWR4uzgnSszfli01LQat/FeZ646ie6lV2aGyQ3mTZxCOdJ8LcOFE9SPe2GCPzL0Gkm9UqicQjEM7bAZ7nmTfbnDP44KORC373N6iwpw25PNcKuTOvFNVPbGt94l57vNeAw30v1uxDrw9MYGNFFq4z0TWBiQimtuOdL7feKVWG43yErjFjOQ84AIOIC3+CpT3NrMJw0sOwe9F94w9X+QGB5LorTRR3TAcpzWBRRNgP2HDWdB8thsi3r3xyIYDr92LyqBrfihdDD91uUMLn8KUYc7zMrQwJPSZkwKTeuR+dbCsgiIXxxunEUFDbKLjlCJaDK2Ps1TeJLE2viAu+Z9b2JcWgVYL8nOWyKC5SuefpKWB1WW+vfzMEKjqRz2ahWn/JFBLRhNPdwLoWY7GUqJ/mPE84Ixcaang9qVIaAqg/hMvCKhL5EFdu6eWFcPQUrOY2hw172N7gpHRIXJRpW5gRGzfpANFCGS9JxNbSiidCC9GvsC5qd0x4T/rYlmcd7S/EtZirOc62wWrTr6BqmPJ+t+isOyqQWBP0HFpgU=
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB03.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(4636009)(46966006)(40470700002)(36840700001)(70206006)(110136005)(8676002)(70586007)(5660300002)(86362001)(316002)(36756003)(40460700001)(82310400004)(4326008)(6666004)(54906003)(8936002)(2616005)(966005)(83380400001)(47076005)(1076003)(2906002)(336012)(7696005)(186003)(426003)(36860700001)(26005)(16526019)(356005)(81166007)(4744005)(508600001)(7416002)(36900700001);DIR:OUT;SFP:1101;
+X-OriginatorOrg: amd.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 24 Dec 2021 01:06:54.6853
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: 7b3cf9d9-f502-4232-8b16-08d9c679ad21
+X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB03.amd.com]
+X-MS-Exchange-CrossTenant-AuthSource: DM6NAM11FT013.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MWHPR1201MB0192
+Precedence: bulk
+List-ID: <linux-kernel.vger.kernel.org>
+X-Mailing-List: linux-kernel@vger.kernel.org
+
+I will continue to add new feature and processor support, optimize the
+performance, and handle the issues for AMD P-State driver.
+
+Signed-off-by: Huang Rui <ray.huang@amd.com>
+---
+ MAINTAINERS | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/MAINTAINERS b/MAINTAINERS
+index fe347675fb5c..8e0666a552df 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -975,6 +975,13 @@ S:	Supported
+ T:	git https://gitlab.freedesktop.org/agd5f/linux.git
+ F:	drivers/gpu/drm/amd/pm/
+ 
++AMD PSTATE DRIVER
++M:	Huang Rui <ray.huang@amd.com>
++L:	linux-pm@vger.kernel.org
++S:	Supported
++F:	Documentation/admin-guide/pm/amd-pstate.rst
++F:	drivers/cpufreq/amd-pstate*
++
+ AMD PTDMA DRIVER
+ M:	Sanjay R Mehta <sanju.mehta@amd.com>
+ L:	dmaengine@vger.kernel.org
+-- 
+2.25.1
+
+
