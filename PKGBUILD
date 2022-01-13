@@ -1,7 +1,7 @@
 # Maintainer: Jan Alexander Steffens (heftig) <jan.steffens@gmail.com>
 
 pkgbase=linux-g14
-pkgver=5.15.13.arch1
+pkgver=5.16.arch1
 pkgrel=1
 pkgdesc='Linux'
 _srctag=v${pkgver%.*}-${pkgver##*.}
@@ -24,7 +24,6 @@ source=(
 
   "sys-kernel_arch-sources-g14_files-0004-5.15+--more-uarches-for-kernel.patch"::"https://raw.githubusercontent.com/graysky2/kernel_compiler_patch/master/more-uarches-for-kernel-5.15+.patch"
   "sys-kernel_arch-sources-g14_files-0005-lru-multi-generational.patch"
-  "sys-kernel_arch-sources-g14_files-0006-zstd.patch"
   
   "https://gitlab.com/asus-linux/fedora-kernel/-/archive/$_fedora_kernel_commit_id/fedora-kernel-$_fedora_kernel_commit_id.zip"
 
@@ -35,12 +34,12 @@ source=(
   "sys-kernel_arch-sources-g14_files-0048-asus-nb-wmi-fix-tablet_mode_sw_int.patch"
 
   # mediatek mt7921 bt/wifi patches
-  "sys-kernel_arch-sources-g14_files-8012-mt76-mt7915-send-EAPOL-frames-at-lowest-rate.patch"
-  "sys-kernel_arch-sources-g14_files-8013-mt76-mt7921-robustify-hardware-initialization-flow.patch"
-  "sys-kernel_arch-sources-g14_files-8015-mt76-mt7921-send-EAPOL-frames-at-lowest-rate.patch"
-  "sys-kernel_arch-sources-g14_files-8016-mt76-mt7921-Add-mt7922-support.patch"
+  #"sys-kernel_arch-sources-g14_files-8012-mt76-mt7915-send-EAPOL-frames-at-lowest-rate.patch"
+  #"sys-kernel_arch-sources-g14_files-8013-mt76-mt7921-robustify-hardware-initialization-flow.patch"
+  #"sys-kernel_arch-sources-g14_files-8015-mt76-mt7921-send-EAPOL-frames-at-lowest-rate.patch"
+  #"sys-kernel_arch-sources-g14_files-8016-mt76-mt7921-Add-mt7922-support.patch"
   "sys-kernel_arch-sources-g14_files-8017-mt76-mt7921-enable-VO-tx-aggregation.patch"
-  "sys-kernel_arch-sources-g14_files-8024-mediatek-more-bt-patches.patch"
+  #"sys-kernel_arch-sources-g14_files-8024-mediatek-more-bt-patches.patch"
   "sys-kernel_arch-sources-g14_files-8026-cfg80211-dont-WARN-if-a-self-managed-device.patch"
 
   "sys-kernel_arch-sources-g14_files-8050-r8152-fix-spurious-wakeups-from-s0i3.patch"
@@ -52,12 +51,12 @@ source=(
   
   "sys-kernel_arch-sources-g14_files-9006-amd-c3-entry.patch"
   
-  "sys-kernel_arch-sources-g14_files-9007-squashed-net-tcp_bbr-bbr2-for-5.14.y.patch"
+  #"sys-kernel_arch-sources-g14_files-9007-squashed-net-tcp_bbr-bbr2-for-5.14.y.patch"
 
-  "sys-kernel_arch-sources-g14_files-9008-fix-cpu-hotplug.patch"
+  #"sys-kernel_arch-sources-g14_files-9008-fix-cpu-hotplug.patch"
   "sys-kernel_arch-sources-g14_files-9009-amd-pstate-sqashed-v7.patch"
   "sys-kernel_arch-sources-g14_files-9010-ACPI-PM-s2idle-Don-t-report-missing-devices-as-faili.patch"
-  "sys-kernel_arch-sources-g14_files-9012-x86-change-default-to-spec_store_bypass_disable-prct.patch"
+  #"sys-kernel_arch-sources-g14_files-9012-x86-change-default-to-spec_store_bypass_disable-prct.patch"
 
   "sys-kernel_arch-sources-g14_files-9052-x86-csum-Rewrite-optimize-csum_partial.patch"
 )
@@ -70,33 +69,24 @@ validpgpkeys=(
 )
 
 sha256sums=('SKIP'
-            '0eecdc29b3bde4bccda282c4c04ef114250fedddcf3dbf07a3cc201dce35838f'
+            '0707fea88a6b1ff6ec807fd42be595363592db78fdc74da645bfadb940372402'
             '5b8eddb90671f3e8469a023b7ed0d3c5a9521f662affa1d541063e273b64dba8'
             '5e5fcb9500c469f49db4b893bd88ff96f420b9ae1e7aea8d86adca939c132b9b'
-            '76ce4379907ecc7047776bfcf9dc26268d1d526389f976b9ac8d52d3f8d5fce1'
-            '50fee0bcd896c4fe1494e3b5d40ea8592210ea3b35d947bb7feb62b46b47ca82'
+            '7ff5a1fb7fdda19cab12d295e14180e43047ce132ac42aaee8346b045e3e9487'
             '6806c034b7480245a0b9eec448bd79042ff5ff3f9f5efbf2af78227bc56004a8'
             '32bbcde83406810f41c9ed61206a7596eb43707a912ec9d870fd94f160d247c1'
             '0c422d8f420c1518aab1b980c6cdb6e029a4fa9cde1fd99a63670bb105a44f36'
             '15e912a66e4bbce1cf0450f1dc6610653df29df8dd6d5426f9c1b039490436c8'
             'e9e4b03b836e1a86a2a5dc70b0d5512348eb19742f83bee794a3ab7d91bd41cf'
-            '4bfbff4eba07fc9de2ce78097a4a269509468ba0e24c15a82905cd94e093ad55'
-            'c368cc4eefff20b7ae904eec686b7e72b46ff02b32c8a4fbd6bd4039f087e7ba'
-            '021f8539ab2fb722b46937b95fdab22a2308236a24ecc1a9ea8db4853721dd39'
-            'a01cf700d79b983807e2285be1b30df6e02db6adfd9c9027fe2dfa8ca5a74bc9'
             '1ce9fd988201c4d2e48794c58acda5b768ec0fea1d29555e99d35cd2712281e4'
-            'f7afab5f2d872dbb66774a189ed462750985aed0df1d81b3a49db9809e8557b6'
             '3d8961438b5c8110588ff0b881d472fc71a4304d306808d78a4055a4150f351e'
             'f47a5a5e329e410a0ae7d46b450707d5575a4deda5b3b58281f5eca14938fb21'
-            'd2267cad50e2c18a4ffa69171b396e4ed9eaf95bb588a0b1d350c88858e920de'
+            '3a6d1cd31fb4258b2a4df2221a4a6d43cdfca9d57d5532ebdce79dee3047cf8a'
             '544464bf0807b324120767d55867f03014a9fda4e1804768ca341be902d7ade4'
             'f7a4bf6293912bfc4a20743e58a5a266be8c4dbe3c1862d196d3a3b45f2f7c90'
             'ee8794a551e33226900654d5c806183bf3b9b2e06f64fdc322987215d233d399'
-            '2d854fc70297bb52bbc27dbf35ca019800530e40565be9740704d7f81bc4c763'
-            '1cec0be41732a23c709e66d4a67e71bc5a75c77a3e4b73faafb5d7bfd3fafc0f'
             '8f62b1b6b1bade3f0cc04a72292e9307d00f87f02e097e7cb59a7f76c9f92758'
             'e7bd53abc9fddc66790a2e63637b4e2b54ed541f41a2f0fb3aca91ea64ff90dc'
-            'cc401107f1bf7b7d8e8a78ee594f9db4b6fa252b7239b6aa88f678aef84d935c'
             '261807a9bc838709bd04e65a83eba2fefd8554699e5dfc8da9a1ee8499807813')
 
 # notable microarch levels:
@@ -292,6 +282,9 @@ _package-headers() {
 
   # add objtool for external module building and enabled VALIDATION_STACK option
   install -Dt "$builddir/tools/objtool" tools/objtool/objtool
+
+  # required when DEBUG_INFO_BTF_MODULES is enabled
+  install -Dt "$builddir/tools/bpf/resolve_btfids" tools/bpf/resolve_btfids/resolve_btfids
 
   # add xfs and shmem for aufs building
   mkdir -p "$builddir"/{fs/xfs,mm}
