@@ -1,8 +1,8 @@
 # Maintainer: Jan Alexander Steffens (heftig) <jan.steffens@gmail.com>
 
 pkgbase=linux-g14
-pkgver=5.16.1.arch1
-pkgrel=2
+pkgver=5.16.5.arch1
+pkgrel=1
 pkgdesc='Linux'
 _srctag=v${pkgver%.*}-${pkgver##*.}
 url="https://gitlab.com/dragonn/linux-g14.git"
@@ -32,6 +32,7 @@ source=(
   "sys-kernel_arch-sources-g14_files-0046-fan-curvers.patch"
   "sys-kernel_arch-sources-g14_files-0047-asus-nb-wmi-Add-tablet_mode_sw-lid-flip.patch"
   "sys-kernel_arch-sources-g14_files-0048-asus-nb-wmi-fix-tablet_mode_sw_int.patch"
+  "sys-kernel_arch-sources-g14_files-0049-ALSA-hda-realtek-Add-quirk-for-ASUS-M16-GU603H.patch"
 
   # mediatek mt7921 bt/wifi patches
   "sys-kernel_arch-sources-g14_files-8017-mt76-mt7921-enable-VO-tx-aggregation.patch"
@@ -41,8 +42,8 @@ source=(
   "sys-kernel_arch-sources-g14_files-8050-r8152-fix-spurious-wakeups-from-s0i3.patch"
 
   # squashed s0ix enablement through
-  "sys-kernel_arch-sources-g14_files-9001-v5.16-s0ix-patch-2021-01-17.patch"
-  "sys-kernel_arch-sources-g14_files-9002-v2-drm-amdgpu-Use-correct-VIEWPORT_DIMENSION-for-DCN2.patch"
+  "sys-kernel_arch-sources-g14_files-9001-v5.16-s0ix-patch-2022-02-01.patch"
+  #"sys-kernel_arch-sources-g14_files-9002-v2-drm-amdgpu-Use-correct-VIEWPORT_DIMENSION-for-DCN2.patch"
   "sys-kernel_arch-sources-g14_files-9004-HID-asus-Reduce-object-size-by-consolidating-calls.patch"
   "sys-kernel_arch-sources-g14_files-9005-acpi-battery-Always-read-fresh-battery-state-on-update.patch"
   
@@ -63,17 +64,21 @@ validpgpkeys=(
 
 sha256sums=('SKIP'
             '0707fea88a6b1ff6ec807fd42be595363592db78fdc74da645bfadb940372402'
-            '5b8eddb90671f3e8469a023b7ed0d3c5a9521f662affa1d541063e273b64dba8'
-            '5e5fcb9500c469f49db4b893bd88ff96f420b9ae1e7aea8d86adca939c132b9b'
+            '278118011d7a2eeca9971ac97b31bf0c55ab55e99c662ab9ae4717b55819c9a2'
+            '380bcf40cc8396e97bd1d7f2577ab2ace51885858d3f155b1fb2dd5469efd00d'
             '7ff5a1fb7fdda19cab12d295e14180e43047ce132ac42aaee8346b045e3e9487'
             '6806c034b7480245a0b9eec448bd79042ff5ff3f9f5efbf2af78227bc56004a8'
             '32bbcde83406810f41c9ed61206a7596eb43707a912ec9d870fd94f160d247c1'
             '0c422d8f420c1518aab1b980c6cdb6e029a4fa9cde1fd99a63670bb105a44f36'
             '15e912a66e4bbce1cf0450f1dc6610653df29df8dd6d5426f9c1b039490436c8'
             'e9e4b03b836e1a86a2a5dc70b0d5512348eb19742f83bee794a3ab7d91bd41cf'
+            '3bdfbd0f053aba9f8875d3cfa7763765762bbfeab579f52a62f3ea0e436fe546'
             '1ce9fd988201c4d2e48794c58acda5b768ec0fea1d29555e99d35cd2712281e4'
+            '6dccebe5fb07b6c938ca77854582162088eebbd8cf7e80416c257bfd1b0f9f60'
             '3d8961438b5c8110588ff0b881d472fc71a4304d306808d78a4055a4150f351e'
             'f47a5a5e329e410a0ae7d46b450707d5575a4deda5b3b58281f5eca14938fb21'
+            '241f01f06849fcec462d72355ca3ab6bd34931731dec89876d785912ac532398'
+            'dd01bd3f774c3a9af42b6d89f534f39c4a5f200db32cd6d4b72a29325645100e'
             'c9e46df90b9bd721fcd3c84205efce5a6963daf0cadad46c29f5d57be3ec6187'
             'abfc143482bb993f12bc1e8b94b98e419a09641c68e8be7ece29b5a1f0b0f43b'
             '544464bf0807b324120767d55867f03014a9fda4e1804768ca341be902d7ade4'
