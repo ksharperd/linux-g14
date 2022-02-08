@@ -1,7 +1,7 @@
 # Maintainer: Jan Alexander Steffens (heftig) <jan.steffens@gmail.com>
 
 pkgbase=linux-g14
-pkgver=5.16.5.arch1
+pkgver=5.16.7.arch1
 pkgrel=1
 pkgdesc='Linux'
 _srctag=v${pkgver%.*}-${pkgver##*.}
@@ -42,8 +42,8 @@ source=(
   "sys-kernel_arch-sources-g14_files-8050-r8152-fix-spurious-wakeups-from-s0i3.patch"
 
   # squashed s0ix enablement through
-  "sys-kernel_arch-sources-g14_files-9001-v5.16-s0ix-patch-2022-02-01.patch"
-  #"sys-kernel_arch-sources-g14_files-9002-v2-drm-amdgpu-Use-correct-VIEWPORT_DIMENSION-for-DCN2.patch"
+  "sys-kernel_arch-sources-g14_files-9001-v5.16.7-s0ix-patch-2022-02-06.patch"
+  "sys-kernel_arch-sources-g14_files-9002-iommu-amd-Fix-loop-timeout-issue-in-iommu_ga_log_enable.patch"
   "sys-kernel_arch-sources-g14_files-9004-HID-asus-Reduce-object-size-by-consolidating-calls.patch"
   "sys-kernel_arch-sources-g14_files-9005-acpi-battery-Always-read-fresh-battery-state-on-update.patch"
   
@@ -72,19 +72,17 @@ sha256sums=('SKIP'
             '0c422d8f420c1518aab1b980c6cdb6e029a4fa9cde1fd99a63670bb105a44f36'
             '15e912a66e4bbce1cf0450f1dc6610653df29df8dd6d5426f9c1b039490436c8'
             'e9e4b03b836e1a86a2a5dc70b0d5512348eb19742f83bee794a3ab7d91bd41cf'
-            '3bdfbd0f053aba9f8875d3cfa7763765762bbfeab579f52a62f3ea0e436fe546'
+            '982a31e47d3d586789e1b3cdda25f75e3b71d810e7494202089b8f2cef7c0ef9'
             '1ce9fd988201c4d2e48794c58acda5b768ec0fea1d29555e99d35cd2712281e4'
             '6dccebe5fb07b6c938ca77854582162088eebbd8cf7e80416c257bfd1b0f9f60'
             '3d8961438b5c8110588ff0b881d472fc71a4304d306808d78a4055a4150f351e'
             'f47a5a5e329e410a0ae7d46b450707d5575a4deda5b3b58281f5eca14938fb21'
-            '241f01f06849fcec462d72355ca3ab6bd34931731dec89876d785912ac532398'
-            'dd01bd3f774c3a9af42b6d89f534f39c4a5f200db32cd6d4b72a29325645100e'
-            'c9e46df90b9bd721fcd3c84205efce5a6963daf0cadad46c29f5d57be3ec6187'
-            'abfc143482bb993f12bc1e8b94b98e419a09641c68e8be7ece29b5a1f0b0f43b'
+            '4615ffcd5e6f41a39fd11e94a3840ff181edf0bd75b26c6812df8d3250ed99b7'
+            '7b68a13653fd468725e1029951ac0eb4295aac873cb0a31f16eb65ab666279df'
             '544464bf0807b324120767d55867f03014a9fda4e1804768ca341be902d7ade4'
             'f7a4bf6293912bfc4a20743e58a5a266be8c4dbe3c1862d196d3a3b45f2f7c90'
             'ee8794a551e33226900654d5c806183bf3b9b2e06f64fdc322987215d233d399'
-            '8f62b1b6b1bade3f0cc04a72292e9307d00f87f02e097e7cb59a7f76c9f92758'
+            'a3ad5931f6d90a0bdd7258a2b44c21cd2409eb805891d45e8332ae2affd9da3f'
             'e7bd53abc9fddc66790a2e63637b4e2b54ed541f41a2f0fb3aca91ea64ff90dc'
             '261807a9bc838709bd04e65a83eba2fefd8554699e5dfc8da9a1ee8499807813')
 
