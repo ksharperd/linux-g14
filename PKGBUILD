@@ -1,7 +1,7 @@
 # Maintainer: Jan Alexander Steffens (heftig) <jan.steffens@gmail.com>
 
 pkgbase=linux-g14
-pkgver=5.16.7.arch1
+pkgver=5.16.8.arch1
 pkgrel=1
 pkgdesc='Linux'
 _srctag=v${pkgver%.*}-${pkgver##*.}
@@ -33,6 +33,7 @@ source=(
   "sys-kernel_arch-sources-g14_files-0047-asus-nb-wmi-Add-tablet_mode_sw-lid-flip.patch"
   "sys-kernel_arch-sources-g14_files-0048-asus-nb-wmi-fix-tablet_mode_sw_int.patch"
   "sys-kernel_arch-sources-g14_files-0049-ALSA-hda-realtek-Add-quirk-for-ASUS-M16-GU603H.patch"
+  "sys-kernel_arch-sources-g14_files-0050-asus-flow-x13-support_sw_tablet_mode.patch"
 
   # mediatek mt7921 bt/wifi patches
   "sys-kernel_arch-sources-g14_files-8017-mt76-mt7921-enable-VO-tx-aggregation.patch"
@@ -42,8 +43,7 @@ source=(
   "sys-kernel_arch-sources-g14_files-8050-r8152-fix-spurious-wakeups-from-s0i3.patch"
 
   # squashed s0ix enablement through
-  "sys-kernel_arch-sources-g14_files-9001-v5.16.7-s0ix-patch-2022-02-06.patch"
-  "sys-kernel_arch-sources-g14_files-9002-iommu-amd-Fix-loop-timeout-issue-in-iommu_ga_log_enable.patch"
+  "sys-kernel_arch-sources-g14_files-9001-v5.16.8-s0ix-patch-2022-02-08.patch"
   "sys-kernel_arch-sources-g14_files-9004-HID-asus-Reduce-object-size-by-consolidating-calls.patch"
   "sys-kernel_arch-sources-g14_files-9005-acpi-battery-Always-read-fresh-battery-state-on-update.patch"
   
@@ -73,12 +73,12 @@ sha256sums=('SKIP'
             '15e912a66e4bbce1cf0450f1dc6610653df29df8dd6d5426f9c1b039490436c8'
             'e9e4b03b836e1a86a2a5dc70b0d5512348eb19742f83bee794a3ab7d91bd41cf'
             '982a31e47d3d586789e1b3cdda25f75e3b71d810e7494202089b8f2cef7c0ef9'
+            '7ece5cf3e4400ad383fa1bb74ca0633d1eaf5ee2b2819f3d341ab3ed021c66e2'
             '1ce9fd988201c4d2e48794c58acda5b768ec0fea1d29555e99d35cd2712281e4'
             '6dccebe5fb07b6c938ca77854582162088eebbd8cf7e80416c257bfd1b0f9f60'
             '3d8961438b5c8110588ff0b881d472fc71a4304d306808d78a4055a4150f351e'
             'f47a5a5e329e410a0ae7d46b450707d5575a4deda5b3b58281f5eca14938fb21'
-            '4615ffcd5e6f41a39fd11e94a3840ff181edf0bd75b26c6812df8d3250ed99b7'
-            '7b68a13653fd468725e1029951ac0eb4295aac873cb0a31f16eb65ab666279df'
+            '70c3253a70ce50b1241591df14e4749a1040398a1b2a5a5d0f899fe079208319'
             '544464bf0807b324120767d55867f03014a9fda4e1804768ca341be902d7ade4'
             'f7a4bf6293912bfc4a20743e58a5a266be8c4dbe3c1862d196d3a3b45f2f7c90'
             'ee8794a551e33226900654d5c806183bf3b9b2e06f64fdc322987215d233d399'
