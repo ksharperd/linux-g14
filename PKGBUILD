@@ -1,7 +1,7 @@
 # Maintainer: Jan Alexander Steffens (heftig) <jan.steffens@gmail.com>
 
 pkgbase=linux-g14
-pkgver=5.16.8.arch1
+pkgver=5.16.9.arch1
 pkgrel=1
 pkgdesc='Linux'
 _srctag=v${pkgver%.*}-${pkgver##*.}
@@ -24,6 +24,7 @@ source=(
 
   "sys-kernel_arch-sources-g14_files-0004-5.15+--more-uarches-for-kernel.patch"::"https://raw.githubusercontent.com/graysky2/kernel_compiler_patch/master/more-uarches-for-kernel-5.15+.patch"
   "sys-kernel_arch-sources-g14_files-0005-lru-multi-generational.patch"
+  "sys-kernel_arch-sources-g14_files-0006-btrfs-fix-autodefrag-on-5.16.9.patch"
   
   "https://gitlab.com/asus-linux/fedora-kernel/-/archive/$_fedora_kernel_commit_id/fedora-kernel-$_fedora_kernel_commit_id.zip"
 
@@ -41,9 +42,10 @@ source=(
   "sys-kernel_arch-sources-g14_files-8026-cfg80211-dont-WARN-if-a-self-managed-device.patch"
 
   "sys-kernel_arch-sources-g14_files-8050-r8152-fix-spurious-wakeups-from-s0i3.patch"
+  "sys-kernel_arch-sources-g14_files-8051-iwlwifi-fix-use-after-free.patch"
 
   # squashed s0ix enablement through
-  "sys-kernel_arch-sources-g14_files-9001-v5.16.8-s0ix-patch-2022-02-08.patch"
+  "sys-kernel_arch-sources-g14_files-9001-v5.16.9-s0ix-patch-2022-02-10.patch"
   "sys-kernel_arch-sources-g14_files-9004-HID-asus-Reduce-object-size-by-consolidating-calls.patch"
   "sys-kernel_arch-sources-g14_files-9005-acpi-battery-Always-read-fresh-battery-state-on-update.patch"
   
@@ -51,6 +53,8 @@ source=(
   
   "sys-kernel_arch-sources-g14_files-9009-amd-pstate-sqashed-v7.patch"
   "sys-kernel_arch-sources-g14_files-9010-ACPI-PM-s2idle-Don-t-report-missing-devices-as-faili.patch"
+  "sys-kernel_arch-sources-g14_files-9011-cpufreq-CPPC-Fix-performance-frequency-conversion.patch"
+  
 
   "sys-kernel_arch-sources-g14_files-9052-x86-csum-Rewrite-optimize-csum_partial.patch"
 )
@@ -67,6 +71,7 @@ sha256sums=('SKIP'
             '278118011d7a2eeca9971ac97b31bf0c55ab55e99c662ab9ae4717b55819c9a2'
             '380bcf40cc8396e97bd1d7f2577ab2ace51885858d3f155b1fb2dd5469efd00d'
             '7ff5a1fb7fdda19cab12d295e14180e43047ce132ac42aaee8346b045e3e9487'
+            'cd2795ab2c355eb0182cba2940712552ff46eee95b04abb41327c208f7f3e546'
             '6806c034b7480245a0b9eec448bd79042ff5ff3f9f5efbf2af78227bc56004a8'
             '32bbcde83406810f41c9ed61206a7596eb43707a912ec9d870fd94f160d247c1'
             '0c422d8f420c1518aab1b980c6cdb6e029a4fa9cde1fd99a63670bb105a44f36'
@@ -78,12 +83,14 @@ sha256sums=('SKIP'
             '6dccebe5fb07b6c938ca77854582162088eebbd8cf7e80416c257bfd1b0f9f60'
             '3d8961438b5c8110588ff0b881d472fc71a4304d306808d78a4055a4150f351e'
             'f47a5a5e329e410a0ae7d46b450707d5575a4deda5b3b58281f5eca14938fb21'
-            '70c3253a70ce50b1241591df14e4749a1040398a1b2a5a5d0f899fe079208319'
+            '7b6825a43b4173750768a1a50bfd38dcbd326aec6d56cc886490d97e323b7ce9'
+            '1f2986be3e8fb64ab3ef27fbe11350e9cb97cafb41238fc5e1f2c23976208889'
             '544464bf0807b324120767d55867f03014a9fda4e1804768ca341be902d7ade4'
             'f7a4bf6293912bfc4a20743e58a5a266be8c4dbe3c1862d196d3a3b45f2f7c90'
             'ee8794a551e33226900654d5c806183bf3b9b2e06f64fdc322987215d233d399'
             'a3ad5931f6d90a0bdd7258a2b44c21cd2409eb805891d45e8332ae2affd9da3f'
             'e7bd53abc9fddc66790a2e63637b4e2b54ed541f41a2f0fb3aca91ea64ff90dc'
+            '5c6c7778bc2d873657a885272956e232138b8b4935c3a3d6b11ef1619d344b20'
             '261807a9bc838709bd04e65a83eba2fefd8554699e5dfc8da9a1ee8499807813')
 
 # notable microarch levels:
@@ -208,7 +215,8 @@ prepare() {
                   --disable CONFIG_IWL3945 \
                   --disable CONFIG_IWL4965 \
                   --disable CONFIG_IPW2200 \
-                  --disable CONFIG_IPW2100
+                  --disable CONFIG_IPW2100 \
+                  --disable CONFIG_FB_NVIDIA
 
   # select slightly more sane block device driver options; NVMe really should be built in 
   scripts/config  --disable CONFIG_RAPIDIO \
