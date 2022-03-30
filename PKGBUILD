@@ -1,7 +1,7 @@
 # Maintainer: Jan Alexander Steffens (heftig) <jan.steffens@gmail.com>
 
 pkgbase=linux-g14
-pkgver=5.16.11.arch1
+pkgver=5.17.arch1
 pkgrel=1
 pkgdesc='Linux'
 _srctag=v${pkgver%.*}-${pkgver##*.}
@@ -24,13 +24,12 @@ source=(
 
   "sys-kernel_arch-sources-g14_files-0004-5.15+--more-uarches-for-kernel.patch"::"https://raw.githubusercontent.com/graysky2/kernel_compiler_patch/master/more-uarches-for-kernel-5.15+.patch"
   "sys-kernel_arch-sources-g14_files-0005-lru-multi-generational.patch"
-  "sys-kernel_arch-sources-g14_files-0006-btrfs-fix-autodefrag-on-5.16.11.patch"
+  #"sys-kernel_arch-sources-g14_files-0006-btrfs-fix-autodefrag-on-5.16.11.patch"
   
   "https://gitlab.com/asus-linux/fedora-kernel/-/archive/$_fedora_kernel_commit_id/fedora-kernel-$_fedora_kernel_commit_id.zip"
 
   # pull newer version from fedora repo
   "sys-kernel_arch-sources-g14_files-0043-ALSA-hda-realtek-Fix-speakers-not-working-on-Asus-Fl.patch"
-  "sys-kernel_arch-sources-g14_files-0046-fan-curvers.patch"
   "sys-kernel_arch-sources-g14_files-0047-asus-nb-wmi-Add-tablet_mode_sw-lid-flip.patch"
   "sys-kernel_arch-sources-g14_files-0048-asus-nb-wmi-fix-tablet_mode_sw_int.patch"
   "sys-kernel_arch-sources-g14_files-0049-ALSA-hda-realtek-Add-quirk-for-ASUS-M16-GU603H.patch"
@@ -50,12 +49,9 @@ source=(
   
   "sys-kernel_arch-sources-g14_files-9006-amd-c3-entry.patch"
   
-  "sys-kernel_arch-sources-g14_files-9009-amd-pstate-sqashed-v7.patch"
   "sys-kernel_arch-sources-g14_files-9010-ACPI-PM-s2idle-Don-t-report-missing-devices-as-faili.patch"
   "sys-kernel_arch-sources-g14_files-9011-cpufreq-CPPC-Fix-performance-frequency-conversion.patch"
-  
-
-  "sys-kernel_arch-sources-g14_files-9052-x86-csum-Rewrite-optimize-csum_partial.patch"
+  "sys-kernel_arch-sources-g14_files-9012-Improve-usability-for-amd-pstate.patch"
 )
 
 validpgpkeys=(
