@@ -1,7 +1,7 @@
 # Maintainer: Jan Alexander Steffens (heftig) <jan.steffens@gmail.com>
 
 pkgbase=linux-g14
-pkgver=5.18.arch1
+pkgver=5.18.3.arch1
 pkgrel=1
 pkgdesc='Linux'
 _srctag=v${pkgver%.*}-${pkgver##*.}
@@ -36,9 +36,7 @@ source=(
   "sys-kernel_arch-sources-g14_files-0050-asus-flow-x13-support_sw_tablet_mode.patch"
 
   # mediatek mt7921 bt/wifi patches
-  "sys-kernel_arch-sources-g14_files-8017-mt76-mt7921-enable-VO-tx-aggregation.patch"
-  #"sys-kernel_arch-sources-g14_files-8018-mt76-mt7921e-fix-possible-probe-failure-after-reboot.patch"
-  "sys-kernel_arch-sources-g14_files-8026-cfg80211-dont-WARN-if-a-self-managed-device.patch"
+  "sys-kernel_arch-sources-g14_files-8017-add_imc_networks_pid_0x3568.patch"
 
   "sys-kernel_arch-sources-g14_files-8050-r8152-fix-spurious-wakeups-from-s0i3.patch"
 
@@ -222,7 +220,7 @@ prepare() {
                   --disable CMDLINE_OVERRIDE
 
   # HACK: forcibly fixup CONFIG_CMDLINE here as using scripts/config mangles escaped quotes
-  sed -i 's#makepkgplaceholderyolo#pm_debug_messages amd_pmc.enable_stb=1 amd_pmc.dyndbg=\\"+p\\" acpi.dyndbg=\\"file drivers/acpi/x86/s2idle.c +p\\"#' .config
+  sed -i 's#makepkgplaceholderyolo#ibt=off pm_debug_messages amd_pmc.enable_stb=1 amd_pmc.dyndbg=\\"+p\\" acpi.dyndbg=\\"file drivers/acpi/x86/s2idle.c +p\\"#' .config
 
   # Note the double escaped quotes above, sed strips one; the final result in .config needs to contain single slash
   # escaped quotes (eg: `CONFIG_CMDLINE="foo.dyndbg=\"+p\""`) to avoid dyndbg parse errors at boot. This is impossible
