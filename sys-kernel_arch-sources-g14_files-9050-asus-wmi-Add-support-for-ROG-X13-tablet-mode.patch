@@ -1,0 +1,137 @@
+From ce75139f8d704b03d8182ba55ad18b30f3b7db7a Mon Sep 17 00:00:00 2001
+From: "Luke D. Jones" <luke@ljones.dev>
+Date: Tue, 2 Aug 2022 19:00:25 +1200
+Subject: [PATCH 1/2] asus-wmi: Add support for ROG X13 tablet mode
+
+Adds quirk for the ASUS ROG X13 to enable tablet mode with
+lid flip.
+
+Signed-off-by: Luke D. Jones <luke@ljones.dev>
+---
+ drivers/platform/x86/asus-nb-wmi.c | 25 +++++++++++++++++++++++++
+ drivers/platform/x86/asus-wmi.c    | 18 +++++++++++++++++-
+ drivers/platform/x86/asus-wmi.h    |  1 +
+ 3 files changed, 43 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/platform/x86/asus-nb-wmi.c b/drivers/platform/x86/asus-nb-wmi.c
+index 478dd300b9c9..0f156e1584d3 100644
+--- a/drivers/platform/x86/asus-nb-wmi.c
++++ b/drivers/platform/x86/asus-nb-wmi.c
+@@ -123,6 +123,12 @@ static struct quirk_entry quirk_asus_use_lid_flip_devid = {
+ 	.use_lid_flip_devid = true,
+ };
+ 
++static struct quirk_entry quirk_asus_gv301qe = {
++	.wmi_backlight_set_devstate = true,
++	.use_lid_flip_devid = true,
++	.enodev_as_tablet_mode = true,
++};
++
+ static int dmi_matched(const struct dmi_system_id *dmi)
+ {
+ 	pr_info("Identified laptop model '%s'\n", dmi->ident);
+@@ -471,6 +477,24 @@ static const struct dmi_system_id asus_quirks[] = {
+ 		},
+ 		.driver_data = &quirk_asus_use_lid_flip_devid,
+ 	},
++	{
++		.callback = dmi_matched,
++		.ident = "ASUS ROG FLOW X13",
++		.matches = {
++			DMI_MATCH(DMI_SYS_VENDOR, "ASUSTeK COMPUTER INC."),
++			DMI_MATCH(DMI_PRODUCT_NAME, "GV301QE"),
++		},
++		.driver_data = &quirk_asus_gv301qe,
++	},
++	{
++		.callback = dmi_matched,
++		.ident = "ASUS ROG FLOW X13",
++		.matches = {
++			DMI_MATCH(DMI_SYS_VENDOR, "ASUSTeK COMPUTER INC."),
++			DMI_MATCH(DMI_PRODUCT_NAME, "GV301QH"),
++		},
++		.driver_data = &quirk_asus_gv301qe,
++	},
+ 	{},
+ };
+ 
+@@ -581,6 +605,7 @@ static const struct key_entry asus_nb_wmi_keymap[] = {
+ 	{ KE_KEY, 0xC5, { KEY_KBDILLUMDOWN } },
+ 	{ KE_IGNORE, 0xC6, },  /* Ambient Light Sensor notification */
+ 	{ KE_KEY, 0xFA, { KEY_PROG2 } },           /* Lid flip action */
++	{ KE_KEY, 0xBD, { KEY_PROG2 } },           /* Lid flip action on rog flow laptops */
+ 	{ KE_END, 0},
+ };
+ 
+diff --git a/drivers/platform/x86/asus-wmi.c b/drivers/platform/x86/asus-wmi.c
+index 62ce198a3463..e4189d0e08e5 100644
+--- a/drivers/platform/x86/asus-wmi.c
++++ b/drivers/platform/x86/asus-wmi.c
+@@ -56,6 +56,8 @@ module_param(fnlock_default, bool, 0444);
+ 
+ #define ASUS_WMI_MGMT_GUID	"97845ED0-4E6D-11DE-8A39-0800200C9A66"
+ 
++#define ASUS_ROG_FLOW_WMI_DEVID_LID_FLIP 0x00060077
++
+ #define NOTIFY_BRNUP_MIN		0x11
+ #define NOTIFY_BRNUP_MAX		0x1f
+ #define NOTIFY_BRNDOWN_MIN		0x20
+@@ -68,6 +70,7 @@ module_param(fnlock_default, bool, 0444);
+ #define NOTIFY_KBD_FBM			0x99
+ #define NOTIFY_KBD_TTP			0xae
+ #define NOTIFY_LID_FLIP			0xfa
++#define NOTIFY_LID_FLIP_ROG		0xbd
+ 
+ #define ASUS_WMI_FNLOCK_BIOS_DISABLED	BIT(0)
+ 
+@@ -516,6 +519,12 @@ static int asus_wmi_input_init(struct asus_wmi *asus)
+ 
+ 	if (asus->driver->quirks->use_lid_flip_devid) {
+ 		result = asus_wmi_get_devstate_simple(asus, ASUS_WMI_DEVID_LID_FLIP);
++		if (result < 0) {
++			result = asus_wmi_get_devstate_simple(asus, ASUS_ROG_FLOW_WMI_DEVID_LID_FLIP);
++		}
++		if (result == -ENODEV && asus->driver->quirks->enodev_as_tablet_mode) {
++			result = 1;
++		}
+ 		if (result < 0)
+ 			asus->driver->quirks->use_lid_flip_devid = 0;
+ 		if (result >= 0) {
+@@ -553,6 +562,13 @@ static void lid_flip_tablet_mode_get_state(struct asus_wmi *asus)
+ {
+ 	int result = asus_wmi_get_devstate_simple(asus, ASUS_WMI_DEVID_LID_FLIP);
+ 
++	if (result < 0) {
++		result = asus_wmi_get_devstate_simple(asus, ASUS_ROG_FLOW_WMI_DEVID_LID_FLIP);
++	}
++	if(result == -ENODEV && asus->driver->quirks->enodev_as_tablet_mode) {
++		result = 1;
++	}
++
+ 	if (result >= 0) {
+ 		input_report_switch(asus->inputdev, SW_TABLET_MODE, result);
+ 		input_sync(asus->inputdev);
+@@ -3094,7 +3110,7 @@ static void asus_wmi_handle_event_code(int code, struct asus_wmi *asus)
+ 		return;
+ 	}
+ 
+-	if (asus->driver->quirks->use_lid_flip_devid && code == NOTIFY_LID_FLIP) {
++	if (asus->driver->quirks->use_lid_flip_devid && (code == NOTIFY_LID_FLIP || code == NOTIFY_LID_FLIP_ROG)) {
+ 		lid_flip_tablet_mode_get_state(asus);
+ 		return;
+ 	}
+diff --git a/drivers/platform/x86/asus-wmi.h b/drivers/platform/x86/asus-wmi.h
+index b302415bf1d9..ac9023aae838 100644
+--- a/drivers/platform/x86/asus-wmi.h
++++ b/drivers/platform/x86/asus-wmi.h
+@@ -35,6 +35,7 @@ struct quirk_entry {
+ 	bool wmi_force_als_set;
+ 	bool use_kbd_dock_devid;
+ 	bool use_lid_flip_devid;
++	bool enodev_as_tablet_mode;
+ 	int wapf;
+ 	/*
+ 	 * For machines with AMD graphic chips, it will send out WMI event
+-- 
+2.37.1
+

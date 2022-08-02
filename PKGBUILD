@@ -1,7 +1,7 @@
 # Maintainer: Jan Alexander Steffens (heftig) <jan.steffens@gmail.com>
 
 pkgbase=linux-g14
-pkgver=5.18.12.arch1
+pkgver=5.18.15.arch1
 pkgrel=1
 pkgdesc='Linux'
 _srctag=v${pkgver%.*}-${pkgver##*.}
@@ -24,16 +24,12 @@ source=(
 
   "sys-kernel_arch-sources-g14_files-0004-5.15+--more-uarches-for-kernel.patch"::"https://raw.githubusercontent.com/graysky2/kernel_compiler_patch/master/more-uarches-for-kernel-5.15+.patch"
   "sys-kernel_arch-sources-g14_files-0005-lru-multi-generational.patch"
-  #"sys-kernel_arch-sources-g14_files-0006-btrfs-fix-autodefrag-on-5.16.11.patch"
-  
-  "https://gitlab.com/asus-linux/fedora-kernel/-/archive/$_fedora_kernel_commit_id/fedora-kernel-$_fedora_kernel_commit_id.zip"
 
   # pull newer version from fedora repo
   "sys-kernel_arch-sources-g14_files-0043-ALSA-hda-realtek-Fix-speakers-not-working-on-Asus-Fl.patch"
   "sys-kernel_arch-sources-g14_files-0047-asus-nb-wmi-Add-tablet_mode_sw-lid-flip.patch"
   "sys-kernel_arch-sources-g14_files-0048-asus-nb-wmi-fix-tablet_mode_sw_int.patch"
   "sys-kernel_arch-sources-g14_files-0049-ALSA-hda-realtek-Add-quirk-for-ASUS-M16-GU603H.patch"
-  "sys-kernel_arch-sources-g14_files-0050-asus-flow-x13-support_sw_tablet_mode.patch"
 
   # mediatek mt7921 bt/wifi patches
   "sys-kernel_arch-sources-g14_files-8017-add_imc_networks_pid_0x3568.patch"
@@ -45,6 +41,10 @@ source=(
   
   "sys-kernel_arch-sources-g14_files-9010-ACPI-PM-s2idle-Don-t-report-missing-devices-as-faili.patch"
   "sys-kernel_arch-sources-g14_files-9012-Improve-usability-for-amd-pstate.patch"
+
+  "sys-kernel_arch-sources-g14_files-9050-asus-wmi-Add-support-for-ROG-X13-tablet-mode.patch"
+  "sys-kernel_arch-sources-g14_files-9051-asus-wmi-Add-support-for-TUF-laptop-keyboard-RGB.patch"
+  "sys-kernel_arch-sources-g14_files-9052-HID-amd_sfh-Add-keyguard-for-ASUS-ROG-X13-tablet.patch"
 )
 
 validpgpkeys=(
@@ -55,30 +55,22 @@ validpgpkeys=(
 )
 
 sha256sums=('SKIP'
-            '0707fea88a6b1ff6ec807fd42be595363592db78fdc74da645bfadb940372402'
+            '3f02a0f2fe820f678d15fb0efce04e3716bdc7590d452317bf1b0b63f3b31cd2'
             '278118011d7a2eeca9971ac97b31bf0c55ab55e99c662ab9ae4717b55819c9a2'
             '380bcf40cc8396e97bd1d7f2577ab2ace51885858d3f155b1fb2dd5469efd00d'
-            '7ff5a1fb7fdda19cab12d295e14180e43047ce132ac42aaee8346b045e3e9487'
-            'd8ba1c49cc16eaf9ed9f18ba414cff2d5f96f8070690d42e3cc57b95b4b3c7c1'
+            '894c5c0217d2c4824a3b85d534c206ac16c2990149e05198fb04ec231b4e1037'
             '6806c034b7480245a0b9eec448bd79042ff5ff3f9f5efbf2af78227bc56004a8'
             '32bbcde83406810f41c9ed61206a7596eb43707a912ec9d870fd94f160d247c1'
-            '0c422d8f420c1518aab1b980c6cdb6e029a4fa9cde1fd99a63670bb105a44f36'
             '15e912a66e4bbce1cf0450f1dc6610653df29df8dd6d5426f9c1b039490436c8'
             'e9e4b03b836e1a86a2a5dc70b0d5512348eb19742f83bee794a3ab7d91bd41cf'
             '982a31e47d3d586789e1b3cdda25f75e3b71d810e7494202089b8f2cef7c0ef9'
             '7ece5cf3e4400ad383fa1bb74ca0633d1eaf5ee2b2819f3d341ab3ed021c66e2'
-            '1ce9fd988201c4d2e48794c58acda5b768ec0fea1d29555e99d35cd2712281e4'
-            '6dccebe5fb07b6c938ca77854582162088eebbd8cf7e80416c257bfd1b0f9f60'
-            '3d8961438b5c8110588ff0b881d472fc71a4304d306808d78a4055a4150f351e'
+            '2e9d8117bf43dd71d5d44321e2fbd3205095c8184e913255f226715f69248e04'
             'f47a5a5e329e410a0ae7d46b450707d5575a4deda5b3b58281f5eca14938fb21'
-            'bc67bea8cb065289bfd0463dd37742b663187438c54550f790aeffa5dbb534b5'
             '544464bf0807b324120767d55867f03014a9fda4e1804768ca341be902d7ade4'
             'f7a4bf6293912bfc4a20743e58a5a266be8c4dbe3c1862d196d3a3b45f2f7c90'
-            'ee8794a551e33226900654d5c806183bf3b9b2e06f64fdc322987215d233d399'
-            'a3ad5931f6d90a0bdd7258a2b44c21cd2409eb805891d45e8332ae2affd9da3f'
             'e7bd53abc9fddc66790a2e63637b4e2b54ed541f41a2f0fb3aca91ea64ff90dc'
-            '5c6c7778bc2d873657a885272956e232138b8b4935c3a3d6b11ef1619d344b20'
-            '261807a9bc838709bd04e65a83eba2fefd8554699e5dfc8da9a1ee8499807813')
+            'f61452c84bc8b8e6907e26d1503be583aa0534516ea7d5607be315ab198c060b')
 
 # notable microarch levels:
 #
@@ -92,33 +84,9 @@ if [ -z ${_microarchitecture+x} ]; then
   _microarchitecture=93
 fi
 
-_fedora_kernel_patch_skip_list=(
-  # fedora kernel patches to skip
-  # use plain file names or bash glob syntax, ** don't quote globs **
-
-  # multi-select and ranges examples
-  # 00{03,05,08}-drm-amdgpu*.patch
-  # 00{01..12}-drm-amdgpu*.patch
-  
-  "linux-kernel-test.patch"           # test patch, please ignore
-  patch-*-redhat.patch                # wildcard match any redhat patch version
-  
-  0001-asus-wmi-Add-support-for-platform_profile.patch
-  0001-asus-wmi-Add-panel-overdrive-functionality.patch
-  0002-asus-wmi-Add-dgpu-disable-method.patch
-  0004-HID-asus-Remove-check-for-same-LED-brightness-on-set.patch
-  0001-HID-asus-Prevent-Claymore-sending-suspend-event.patch
-  0015-PCI-quirks-Quirk-PCI-d3hot-delay-for-AMD-xhci.patch
-)
-
 export KBUILD_BUILD_HOST=archlinux
 export KBUILD_BUILD_USER=$pkgbase
 export KBUILD_BUILD_TIMESTAMP="$(date -Ru${SOURCE_DATE_EPOCH:+d @$SOURCE_DATE_EPOCH})"
-
-_fedora_patch_in_skip_list() {
-  for p in "${_fedora_kernel_patch_skip_list[@]}"; do [[ "$1" == $p ]] && return 0; done
-  return 1
-}
 
 prepare() {
   cd $_srcname
@@ -138,31 +106,6 @@ prepare() {
     patch -Np1 < "../$src"
   done
 
-  msg2 "Applying asus-linux patches..."
-  local p_err=()
-  local p_meh=()
-
-  # this will apply only enabled patches from the fedora-linux kernel.spec
-  # this stops us from applying broken or in-progress patches that are in git but aren't actually in use
-
-  local _fkernel_path="../fedora-kernel-${_fedora_kernel_commit_id}"
-  for src in $(awk -F ' ' '/^ApplyOptionalPatch.*(patch|diff)$/{print $2}' "${_fkernel_path}/kernel.spec"); do
-    src="${src##*/}"
-    _fedora_patch_in_skip_list "$src" && continue
-    echo "Applying patch $src..."
-    if OUT="$(patch --forward -Np1 < "${_fkernel_path}/$src")"; then
-      : #plain "Applied patch $src..."
-    else
-      # if you want to ignore a specific patch failure for some reason do it right here, then 'continue'
-      if { echo "$OUT" | grep -qiE 'hunk(|s) FAILED'; }; then
-        error "Patch failed $src" && echo "$OUT" && p_err+=("$src") && _throw=y
-      else
-        warning "Duplicate patch $src" && p_meh+=("$src")
-      fi
-    fi
-  done
-  (( ${#p_err[@]} > 0 )) && error "Failed patches:" && for p in ${p_err[@]}; do plain "$p"; done
-  (( ${#p_meh[@]} > 0 )) && warning "Duplicate patches:" && for p in ${p_meh[@]}; do plain "$p"; done
   # if throw is defined we had a hard patch failure, propagate it and stop so we can address
   [[ -z "$_throw" ]]
 
