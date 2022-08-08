@@ -1,0 +1,190 @@
+From 4400511a0b5c59d602aa8249bdefff2df1276c23 Mon Sep 17 00:00:00 2001
+From: "Luke D. Jones" <luke@ljones.dev>
+Date: Mon, 8 Aug 2022 10:29:26 +1200
+Subject: [PATCH v2 6/6] asus-wmi: Add support for dGPU-only mode
+
+Adds support for a dGPU-only mode on some laptops where when enabled
+the boot GPU is the dGPU, and the iGPU is not visible.
+
+Signed-off-by: Luke D. Jones <luke@ljones.dev>
+---
+ .../ABI/testing/sysfs-platform-asus-wmi       |  9 ++
+ drivers/platform/x86/asus-wmi.c               | 92 +++++++++++++++++++
+ include/linux/platform_data/x86/asus-wmi.h    |  3 +
+ 3 files changed, 104 insertions(+)
+
+diff --git a/Documentation/ABI/testing/sysfs-platform-asus-wmi b/Documentation/ABI/testing/sysfs-platform-asus-wmi
+index 66b262476d92..93d111a65313 100644
+--- a/Documentation/ABI/testing/sysfs-platform-asus-wmi
++++ b/Documentation/ABI/testing/sysfs-platform-asus-wmi
+@@ -77,6 +77,15 @@ Description:
+ 			* 0 - Disable,
+ 			* 1 - Enable,
+ 
++What:		/sys/devices/platform/<platform>/dgpu_only
++Date:		Aug 2022
++KernelVersion:	6.0
++Contact:	"Luke Jones" <luke@ljones.dev>
++Description:
++		Set the dGPU to be the only GPU available:
++			* 0 - Disable,
++			* 1 - Enable,
++
+ What:		/sys/devices/platform/<platform>/panel_od
+ Date:		Aug 2022
+ KernelVersion:	5.17
+diff --git a/drivers/platform/x86/asus-wmi.c b/drivers/platform/x86/asus-wmi.c
+index b9e5d87e3e18..840299828512 100644
+--- a/drivers/platform/x86/asus-wmi.c
++++ b/drivers/platform/x86/asus-wmi.c
+@@ -246,6 +246,9 @@ struct asus_wmi {
+ 	bool dgpu_disable_available;
+ 	bool dgpu_disable;
+ 
++	bool dgpu_only_available;
++	bool dgpu_only;
++
+ 	bool keyboard_rgb_state_available;
+ 	bool keyboard_rgb_mode_available;
+ 	struct keyboard_rgb_led keyboard_rgb_mode;
+@@ -750,6 +753,87 @@ static ssize_t egpu_enable_store(struct device *dev,
+ 
+ static DEVICE_ATTR_RW(egpu_enable);
+ 
++/* dedicated GPU only *********************************************************/
++static int dgpu_only_check_present(struct asus_wmi *asus)
++{
++	u32 result;
++	int err;
++
++	asus->dgpu_only_available = false;
++
++	err = asus_wmi_get_devstate(asus, ASUS_WMI_DEVID_DGPU, &result);
++	if (err) {
++		if (err == -ENODEV)
++			return 0;
++		return err;
++	}
++
++	if (result & ASUS_WMI_DSTS_PRESENCE_BIT) {
++		asus->dgpu_only_available = true;
++		asus->dgpu_only = result & ASUS_WMI_DSTS_STATUS_BIT;
++	}
++
++	return 0;
++}
++
++static int dgpu_only_write(struct asus_wmi *asus)
++{
++	u32 retval;
++	u8 value;
++	int err;
++
++	/* Don't rely on type conversion */
++	value = asus->dgpu_only ? 1 : 0;
++
++	err = asus_wmi_set_devstate(ASUS_WMI_DEVID_DGPU, value, &retval);
++	if (err) {
++		pr_warn("Failed to set dGPU-only mode: %d\n", err);
++		return err;
++	}
++
++	if (retval > 1) {
++		pr_warn("Failed to set dGPU-only mode (retval): 0x%x\n", retval);
++		return -EIO;
++	}
++
++	sysfs_notify(&asus->platform_device->dev.kobj, NULL, "dgpu_only");
++
++	return 0;
++}
++
++static ssize_t dgpu_only_show(struct device *dev,
++				   struct device_attribute *attr, char *buf)
++{
++	struct asus_wmi *asus = dev_get_drvdata(dev);
++	u8 mode = asus->dgpu_only;
++
++	return sysfs_emit(buf, "%d\n", mode);
++}
++
++static ssize_t dgpu_only_store(struct device *dev,
++				    struct device_attribute *attr,
++				    const char *buf, size_t count)
++{
++	bool enable;
++	int result;
++
++	struct asus_wmi *asus = dev_get_drvdata(dev);
++
++	result = kstrtobool(buf, &enable);
++	if (result)
++		return result;
++
++	asus->dgpu_only = enable;
++
++	result = dgpu_only_write(asus);
++	if (result)
++		return result;
++
++	return count;
++}
++
++static DEVICE_ATTR_RW(dgpu_only);
++
+ /* TUF Laptop Keyboard RGB Modes **********************************************/
+ static int keyboard_rgb_mode_check_present(struct asus_wmi *asus)
+ {
+@@ -3473,6 +3557,7 @@ static struct attribute *platform_attributes[] = {
+ 	&dev_attr_touchpad.attr,
+ 	&dev_attr_egpu_enable.attr,
+ 	&dev_attr_dgpu_disable.attr,
++	&dev_attr_dgpu_only.attr,
+ 	&dev_attr_keyboard_rgb_mode.attr,
+ 	&dev_attr_keyboard_rgb_mode_index.attr,
+ 	&dev_attr_keyboard_rgb_state.attr,
+@@ -3507,6 +3592,8 @@ static umode_t asus_sysfs_is_visible(struct kobject *kobj,
+ 		ok = asus->egpu_enable_available;
+ 	else if (attr == &dev_attr_dgpu_disable.attr)
+ 		ok = asus->dgpu_disable_available;
++	else if (attr == &dev_attr_dgpu_only.attr)
++		ok = asus->dgpu_only_available;
+ 	else if (attr == &dev_attr_keyboard_rgb_mode.attr)
+ 		ok = asus->keyboard_rgb_mode_available;
+ 	else if (attr == &dev_attr_keyboard_rgb_mode_index.attr)
+@@ -3784,6 +3871,10 @@ static int asus_wmi_add(struct platform_device *pdev)
+ 	if (err)
+ 		goto fail_dgpu_disable;
+ 
++	err = dgpu_only_check_present(asus);
++	if (err)
++		goto fail_dgpu_only;
++
+ 	err = keyboard_rgb_mode_check_present(asus);
+ 	if (err)
+ 		goto fail_keyboard_rgb_mode;
+@@ -3906,6 +3997,7 @@ static int asus_wmi_add(struct platform_device *pdev)
+ fail_fan_boost_mode:
+ fail_egpu_enable:
+ fail_dgpu_disable:
++fail_dgpu_only:
+ fail_keyboard_rgb_mode:
+ fail_keyboard_rgb_state:
+ fail_platform:
+diff --git a/include/linux/platform_data/x86/asus-wmi.h b/include/linux/platform_data/x86/asus-wmi.h
+index b5c966798ef8..76b0756a0666 100644
+--- a/include/linux/platform_data/x86/asus-wmi.h
++++ b/include/linux/platform_data/x86/asus-wmi.h
+@@ -98,6 +98,9 @@
+ /* dgpu on/off */
+ #define ASUS_WMI_DEVID_DGPU		0x00090020
+ 
++/* Dedicated GPU only. When active the dGPU will be the only visible GPU */
++#define ASUS_WMI_DEVID_DEDICATED	0x00090016
++
+ /* TUF laptop RGB control */
+ #define ASUS_WMI_DEVID_TUF_RGB_MODE	0x00100056
+ /* TUF laptop RGB state control */
+-- 
+2.37.1
+

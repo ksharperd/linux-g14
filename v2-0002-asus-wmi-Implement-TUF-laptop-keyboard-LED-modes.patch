@@ -1,0 +1,149 @@
+From 61ecc3f911ad6c536a4146c8303ed9b3a96462e2 Mon Sep 17 00:00:00 2001
+From: "Luke D. Jones" <luke@ljones.dev>
+Date: Sun, 7 Aug 2022 13:19:15 +1200
+Subject: [PATCH v2 2/6] asus-wmi: Implement TUF laptop keyboard LED modes
+
+Adds support for changing the laptop keyboard LED modes. These
+are visible effects such as static, rainbow, pulsing, colour cycles.
+
+Two sysfs attributes are added to asus-nb-wmi:
+- keyboard_rgb_mode
+- keyboard_rgb_mode_index
+
+Signed-off-by: Luke D. Jones <luke@ljones.dev>
+---
+ drivers/platform/x86/asus-wmi.c | 83 +++++++++++++++++++++++++++++++++
+ 1 file changed, 83 insertions(+)
+
+diff --git a/drivers/platform/x86/asus-wmi.c b/drivers/platform/x86/asus-wmi.c
+index 233e73f4313d..4c2bdd9dac30 100644
+--- a/drivers/platform/x86/asus-wmi.c
++++ b/drivers/platform/x86/asus-wmi.c
+@@ -246,6 +246,7 @@ struct asus_wmi {
+ 	bool dgpu_disable_available;
+ 	bool dgpu_disable;
+ 
++	bool keyboard_rgb_mode_available;
+ 	struct keyboard_rgb_led keyboard_rgb_mode;
+ 
+ 	bool throttle_thermal_policy_available;
+@@ -748,6 +749,77 @@ static ssize_t egpu_enable_store(struct device *dev,
+ 
+ static DEVICE_ATTR_RW(egpu_enable);
+ 
++/* TUF Laptop Keyboard RGB Modes **********************************************/
++static int keyboard_rgb_mode_check_present(struct asus_wmi *asus)
++{
++	u32 result;
++	int err;
++
++	asus->keyboard_rgb_mode_available = false;
++
++	err = asus_wmi_get_devstate(asus, ASUS_WMI_DEVID_TUF_RGB_MODE, &result);
++	if (err) {
++		if (err == -ENODEV)
++			return 0;
++		return err;
++	}
++
++	if (result & ASUS_WMI_DSTS_PRESENCE_BIT)
++		asus->keyboard_rgb_mode_available = true;
++
++	return 0;
++}
++
++static ssize_t keyboard_rgb_mode_store(struct device *device,
++				 struct device_attribute *attr,
++				 const char *buf, size_t count)
++{
++	u8 save, mode, speed;
++	int err;
++
++	struct asus_wmi *asus = dev_get_drvdata(device);
++	struct led_classdev *cdev = &asus->keyboard_rgb_mode.dev.led_cdev;
++
++	if (sscanf(buf, "%hhd %hhd %hhd", &save, &mode, &speed) != 3)
++		return -EINVAL;
++
++	asus->keyboard_rgb_mode.save = !!save;
++
++	/* These are the known usable modes across all TUF/ROG */
++	asus->keyboard_rgb_mode.mode = mode < 12 && mode != 9 ? mode : 0x0a;
++
++	switch (speed) {
++	case 0:
++		asus->keyboard_rgb_mode.speed = 0xe1;
++		break;
++	case 1:
++		asus->keyboard_rgb_mode.speed = 0xeb;
++		break;
++	case 2:
++		asus->keyboard_rgb_mode.speed = 0xf5;
++		break;
++	default:
++		asus->keyboard_rgb_mode.speed = 0xeb;
++	}
++
++	err = tuf_rgb_brightness_set(cdev, cdev->brightness);
++	if (err)
++		return err;
++
++	return count;
++}
++
++static DEVICE_ATTR_WO(keyboard_rgb_mode);
++
++static ssize_t keyboard_rgb_mode_index_show(struct device *device,
++						 struct device_attribute *attr,
++						 char *buf)
++{
++	return sysfs_emit(buf, "%s\n", "save mode speed");
++}
++
++static DEVICE_ATTR_RO(keyboard_rgb_mode_index);
++
+ /* Battery ********************************************************************/
+ 
+ /* The battery maximum charging percentage */
+@@ -3338,6 +3410,8 @@ static struct attribute *platform_attributes[] = {
+ 	&dev_attr_touchpad.attr,
+ 	&dev_attr_egpu_enable.attr,
+ 	&dev_attr_dgpu_disable.attr,
++	&dev_attr_keyboard_rgb_mode.attr,
++	&dev_attr_keyboard_rgb_mode_index.attr,
+ 	&dev_attr_lid_resume.attr,
+ 	&dev_attr_als_enable.attr,
+ 	&dev_attr_fan_boost_mode.attr,
+@@ -3368,6 +3442,10 @@ static umode_t asus_sysfs_is_visible(struct kobject *kobj,
+ 		ok = asus->egpu_enable_available;
+ 	else if (attr == &dev_attr_dgpu_disable.attr)
+ 		ok = asus->dgpu_disable_available;
++	else if (attr == &dev_attr_keyboard_rgb_mode.attr)
++		ok = asus->keyboard_rgb_mode_available;
++	else if (attr == &dev_attr_keyboard_rgb_mode_index.attr)
++		ok = asus->keyboard_rgb_mode_available;
+ 	else if (attr == &dev_attr_fan_boost_mode.attr)
+ 		ok = asus->fan_boost_mode_available;
+ 	else if (attr == &dev_attr_throttle_thermal_policy.attr)
+@@ -3637,6 +3715,10 @@ static int asus_wmi_add(struct platform_device *pdev)
+ 	if (err)
+ 		goto fail_dgpu_disable;
+ 
++	err = keyboard_rgb_mode_check_present(asus);
++	if (err)
++		goto fail_keyboard_rgb_mode;
++
+ 	err = fan_boost_mode_check_present(asus);
+ 	if (err)
+ 		goto fail_fan_boost_mode;
+@@ -3751,6 +3833,7 @@ static int asus_wmi_add(struct platform_device *pdev)
+ fail_fan_boost_mode:
+ fail_egpu_enable:
+ fail_dgpu_disable:
++fail_keyboard_rgb_mode:
+ fail_platform:
+ fail_panel_od:
+ 	kfree(asus);
+-- 
+2.37.1
+

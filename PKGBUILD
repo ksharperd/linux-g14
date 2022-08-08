@@ -1,7 +1,7 @@
 # Maintainer: Jan Alexander Steffens (heftig) <jan.steffens@gmail.com>
 
 pkgbase=linux-g14
-pkgver=5.18.15.arch1
+pkgver=5.18.16.arch1
 pkgrel=1
 pkgdesc='Linux'
 _srctag=v${pkgver%.*}-${pkgver##*.}
@@ -42,9 +42,18 @@ source=(
   "sys-kernel_arch-sources-g14_files-9010-ACPI-PM-s2idle-Don-t-report-missing-devices-as-faili.patch"
   "sys-kernel_arch-sources-g14_files-9012-Improve-usability-for-amd-pstate.patch"
 
-  "sys-kernel_arch-sources-g14_files-9050-asus-wmi-Add-support-for-ROG-X13-tablet-mode.patch"
-  "sys-kernel_arch-sources-g14_files-9051-asus-wmi-Add-support-for-TUF-laptop-keyboard-RGB.patch"
-  "sys-kernel_arch-sources-g14_files-9052-HID-amd_sfh-Add-keyguard-for-ASUS-ROG-X13-tablet.patch"
+  "0001-asus-wmi-Modify-behaviour-of-Fn-F5-fan-key.patch"
+  "0001-HID-amd_sfh-Add-keyguard-for-ASUS-ROG-X13-tablet.patch"
+  "0001-sound-realtek-Add-pincfg-for-ASUS-G533Z.patch"
+  "0002-asus-wmi-Support-the-GPU-fan-on-TUF-laptops.patch"
+  "v2-0001-asus-wmi-Adjust-tablet-lidflip-handling-to-use-en.patch"
+  "v2-0001-asus-wmi-Implement-TUF-laptop-keyboard-RGB-contro.patch"
+  "v2-0002-asus-wmi-Add-support-for-ROG-X13-tablet-mode.patch"
+  "v2-0002-asus-wmi-Implement-TUF-laptop-keyboard-LED-modes.patch"
+  "v2-0003-asus-wmi-Implement-TUF-laptop-keyboard-power-stat.patch"
+  "v2-0004-asus-wmi-Document-previously-added-attributes.patch"
+  "v2-0005-asus-wmi-Convert-all-attr-show-to-use-sysfs_emit.patch"
+  "v2-0006-asus-wmi-Add-support-for-dGPU-only-mode.patch"
 )
 
 validpgpkeys=(
@@ -69,9 +78,18 @@ sha256sums=('SKIP'
             'f7a4bf6293912bfc4a20743e58a5a266be8c4dbe3c1862d196d3a3b45f2f7c90'
             'e7bd53abc9fddc66790a2e63637b4e2b54ed541f41a2f0fb3aca91ea64ff90dc'
             'f61452c84bc8b8e6907e26d1503be583aa0534516ea7d5607be315ab198c060b'
-            'b3593ae9e6addb1b0fa3944de42bc50cadb1710e353a1f61f5b15d760774e68e'
-            'fdcd0b94c8a15806699ee49a26e9ebefdca9aa2a5af583e4a232accd0d17a313'
-            '5743e36c77ad3a2d1f5937887bc21e9524186e614ef858e55a84f1213c294341')
+            '7f0bb2fdd2ac77b7efbb6ef22618c318588daca6522e379e6d08a46c12000b8b'
+            'f6f7c233d982be80eb6cd13ba8223d1989eca82107201b6bc4673ce840877aa5'
+            '18a8fc2a6ddc8da48ce5662f8e4a63a324d2d5b63901094bf8f8f1e77a6ef300'
+            '9e8fa60b2ba3e69c19bb5569b3531ee194b5453a74d5b240ffcf075295092af0'
+            'ef9861af0cd014a674da21fa5035402f7875a0876ab25a8d34476a10f6b48131'
+            'a5d9a0fc1b4d89235da7fdf712f1d9d319fdfa9d405b12d0d6dd63f7e253463e'
+            'b0e82a888a9bb520016f3f1918fe6650a5ce14ef45f76f9d567b77b40f1b59cf'
+            '73c23058d503ed34723a4872e57c297c3b2f22ee8e1c56f455134a7782803d02'
+            'f9ba56cf91ecc96c119f25e9f79d434fba3afbee6919bd00db2c3257dba7b898'
+            'b048badd673543aa6ba1374e2bf4c05212286895e908c1060d2877e9ffbe70b8'
+            '2864b99de1d09f6c5f024a0453445086370edef4e6809403acce44bc1ea84de1'
+            'b99a90d669452e49ee9b3c9b8905232ad64fafa6d6081f9bc919d9071ff0d708')
 
 # notable microarch levels:
 #
