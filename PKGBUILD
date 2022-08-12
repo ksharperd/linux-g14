@@ -2,7 +2,7 @@
 
 pkgbase=linux-g14
 pkgver=5.18.16.arch1
-pkgrel=1
+pkgrel=2
 pkgdesc='Linux'
 _srctag=v${pkgver%.*}-${pkgver##*.}
 url="https://gitlab.com/dragonn/linux-g14.git"
@@ -42,18 +42,23 @@ source=(
   "sys-kernel_arch-sources-g14_files-9010-ACPI-PM-s2idle-Don-t-report-missing-devices-as-faili.patch"
   "sys-kernel_arch-sources-g14_files-9012-Improve-usability-for-amd-pstate.patch"
 
-  "0001-asus-wmi-Modify-behaviour-of-Fn-F5-fan-key.patch"
-  "0001-HID-amd_sfh-Add-keyguard-for-ASUS-ROG-X13-tablet.patch"
-  "0001-sound-realtek-Add-pincfg-for-ASUS-G533Z.patch"
-  "0002-asus-wmi-Support-the-GPU-fan-on-TUF-laptops.patch"
-  "v2-0001-asus-wmi-Adjust-tablet-lidflip-handling-to-use-en.patch"
-  "v2-0001-asus-wmi-Implement-TUF-laptop-keyboard-RGB-contro.patch"
-  "v2-0002-asus-wmi-Add-support-for-ROG-X13-tablet-mode.patch"
-  "v2-0002-asus-wmi-Implement-TUF-laptop-keyboard-LED-modes.patch"
-  "v2-0003-asus-wmi-Implement-TUF-laptop-keyboard-power-stat.patch"
-  "v2-0004-asus-wmi-Document-previously-added-attributes.patch"
-  "v2-0005-asus-wmi-Convert-all-attr-show-to-use-sysfs_emit.patch"
-  "v2-0006-asus-wmi-Add-support-for-dGPU-only-mode.patch"
+  0001-Fixes-98829e84dc67-asus-wmi-Add-dgpu-disable-method.patch
+  0002-Fixes-382b91db8044-asus-wmi-Add-egpu-enable-method.patch
+  0003-Fixes-ca91ea34778f-asus-wmi-Add-panel-overdrive-func.patch
+  0004-asus-wmi-Refactor-disable_gpu-attribute.patch
+  0005-asus-wmi-Refactor-egpu_enable-attribute.patch
+  0006-asus-wmi-Refactor-panel_od-attribute.patch
+  0007-asus-wmi-Convert-all-attr-show-to-use-sysfs_emit.patch
+  0008-asus-wmi-Support-the-hardware-GPU-MUX-on-some-laptop.patch
+  0009-asus-wmi-Adjust-tablet-lidflip-handling-to-use-enum.patch
+  0010-asus-wmi-Add-support-for-ROG-X13-tablet-mode.patch
+  0011-asus-wmi-Modify-behaviour-of-Fn-F5-fan-key.patch
+  0012-asus-wmi-Support-the-GPU-fan-on-TUF-laptops.patch
+  0013-sound-realtek-Add-pincfg-for-ASUS-G533Z.patch
+  0014-sound-realtek-Add-pincfg-for-ASUS-G513.patch
+  0015-HID-amd_sfh-Add-keyguard-for-ASUS-ROG-X13-tablet.patch
+  0016-asus-wmi-Implement-TUF-laptop-keyboard-LED-modes.patch
+  0017-asus-wmi-Implement-TUF-laptop-keyboard-power-states.patch
 )
 
 validpgpkeys=(

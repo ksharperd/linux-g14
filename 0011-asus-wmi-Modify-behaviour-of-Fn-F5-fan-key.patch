@@ -1,7 +1,7 @@
-From 9cc09284300b79789da67875b07060de6f7cc38f Mon Sep 17 00:00:00 2001
+From 2dafd6fe9535a47abd50e083905a7d3f78a00cf7 Mon Sep 17 00:00:00 2001
 From: "Luke D. Jones" <luke@ljones.dev>
-Date: Mon, 8 Aug 2022 16:30:38 +1200
-Subject: [PATCH 1/2] asus-wmi: Modify behaviour of Fn+F5 fan key
+Date: Tue, 9 Aug 2022 16:05:01 +1200
+Subject: [PATCH 11/17] asus-wmi: Modify behaviour of Fn+F5 fan key
 
 Some more recent TUF laptops have both fan_boost and thermal_throttle.
 The key code for Fn+F5 is also different and unmapped.
@@ -21,10 +21,10 @@ Signed-off-by: Luke D. Jones <luke@ljones.dev>
  2 files changed, 6 insertions(+), 6 deletions(-)
 
 diff --git a/drivers/platform/x86/asus-nb-wmi.c b/drivers/platform/x86/asus-nb-wmi.c
-index a81dc4b191b7..18eec80b7154 100644
+index d4cc6afc1861..c0a0d3f1db3e 100644
 --- a/drivers/platform/x86/asus-nb-wmi.c
 +++ b/drivers/platform/x86/asus-nb-wmi.c
-@@ -573,6 +573,7 @@ static const struct key_entry asus_nb_wmi_keymap[] = {
+@@ -584,6 +584,7 @@ static const struct key_entry asus_nb_wmi_keymap[] = {
  	{ KE_KEY, 0xA5, { KEY_SWITCHVIDEOMODE } }, /* SDSP LCD + TV + HDMI */
  	{ KE_KEY, 0xA6, { KEY_SWITCHVIDEOMODE } }, /* SDSP CRT + TV + HDMI */
  	{ KE_KEY, 0xA7, { KEY_SWITCHVIDEOMODE } }, /* SDSP LCD + CRT + TV + HDMI */
@@ -33,11 +33,11 @@ index a81dc4b191b7..18eec80b7154 100644
  	{ KE_KEY, 0xC4, { KEY_KBDILLUMUP } },
  	{ KE_KEY, 0xC5, { KEY_KBDILLUMDOWN } },
 diff --git a/drivers/platform/x86/asus-wmi.c b/drivers/platform/x86/asus-wmi.c
-index 0e7fbed8a50d..ac06fec0565c 100644
+index 123b311695b2..826a54ac5f2f 100644
 --- a/drivers/platform/x86/asus-wmi.c
 +++ b/drivers/platform/x86/asus-wmi.c
-@@ -3099,14 +3099,13 @@ static void asus_wmi_handle_event_code(int code, struct asus_wmi *asus)
- 		return;
+@@ -3138,14 +3138,13 @@ static void asus_wmi_handle_event_code(int code, struct asus_wmi *asus)
+ 		break;
  	}
  
 -	if (asus->fan_boost_mode_available && code == NOTIFY_KBD_FBM) {

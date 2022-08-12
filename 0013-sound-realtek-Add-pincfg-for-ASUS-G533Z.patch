@@ -1,7 +1,7 @@
-From 4110db945ee7a6fc8ea50b17e28f33bb8b5215f9 Mon Sep 17 00:00:00 2001
+From 9e20977532b8dbd5a311b347d4efa1da8bb98b75 Mon Sep 17 00:00:00 2001
 From: "Luke D. Jones" <luke@ljones.dev>
 Date: Thu, 4 Aug 2022 14:14:45 +1200
-Subject: [PATCH] sound: realtek: Add pincfg for ASUS G533Z
+Subject: [PATCH 13/17] sound: realtek: Add pincfg for ASUS G533Z
 
 Signed-off-by: Luke D. Jones <luke@ljones.dev>
 ---

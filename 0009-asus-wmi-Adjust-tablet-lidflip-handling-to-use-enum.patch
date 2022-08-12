@@ -1,17 +1,17 @@
-From 038f25c55866d00b2653bf01f027339a85a6939f Mon Sep 17 00:00:00 2001
+From b90b776aef0397b4b6bf32393d779c9d11205242 Mon Sep 17 00:00:00 2001
 From: "Luke D. Jones" <luke@ljones.dev>
-Date: Fri, 5 Aug 2022 09:39:18 +1200
-Subject: [PATCH v2 1/2] asus-wmi: Adjust tablet/lidflip handling to use enum
+Date: Tue, 9 Aug 2022 15:24:17 +1200
+Subject: [PATCH 09/17] asus-wmi: Adjust tablet/lidflip handling to use enum
 
 Due to multiple types of tablet/lidflip, the existing code for
-handlign these events is refactored to use an enum for each type.
+handling these events is refactored to use an enum for each type.
 
 Signed-off-by: Luke D. Jones <luke@ljones.dev>
 ---
- drivers/platform/x86/asus-nb-wmi.c | 13 +++-----
- drivers/platform/x86/asus-wmi.c    | 53 +++++++++++++++++++++---------
- drivers/platform/x86/asus-wmi.h    |  9 +++--
- 3 files changed, 49 insertions(+), 26 deletions(-)
+ drivers/platform/x86/asus-nb-wmi.c | 13 +++---
+ drivers/platform/x86/asus-wmi.c    | 67 ++++++++++++++++++++----------
+ drivers/platform/x86/asus-wmi.h    |  9 +++-
+ 3 files changed, 58 insertions(+), 31 deletions(-)
 
 diff --git a/drivers/platform/x86/asus-nb-wmi.c b/drivers/platform/x86/asus-nb-wmi.c
 index a81dc4b191b7..3a93e056c4e1 100644
@@ -53,10 +53,30 @@ index a81dc4b191b7..3a93e056c4e1 100644
  	}
  
 diff --git a/drivers/platform/x86/asus-wmi.c b/drivers/platform/x86/asus-wmi.c
-index 0e7fbed8a50d..a32e99205697 100644
+index 38783b159396..1c48bd4ff4e2 100644
 --- a/drivers/platform/x86/asus-wmi.c
 +++ b/drivers/platform/x86/asus-wmi.c
-@@ -504,7 +504,10 @@ static int asus_wmi_input_init(struct asus_wmi *asus)
+@@ -485,8 +485,11 @@ static bool asus_wmi_dev_is_present(struct asus_wmi *asus, u32 dev_id)
+ 
+ static int asus_wmi_input_init(struct asus_wmi *asus)
+ {
++	struct device *dev;
+ 	int err, result;
+ 
++	dev = &asus->platform_device->dev;
++
+ 	asus->inputdev = input_allocate_device();
+ 	if (!asus->inputdev)
+ 		return -ENOMEM;
+@@ -494,35 +497,38 @@ static int asus_wmi_input_init(struct asus_wmi *asus)
+ 	asus->inputdev->name = asus->driver->input_name;
+ 	asus->inputdev->phys = asus->driver->input_phys;
+ 	asus->inputdev->id.bustype = BUS_HOST;
+-	asus->inputdev->dev.parent = &asus->platform_device->dev;
++	asus->inputdev->dev.parent = dev;
+ 	set_bit(EV_REP, asus->inputdev->evbit);
+ 
+ 	err = sparse_keymap_setup(asus->inputdev, asus->driver->keymap, NULL);
  	if (err)
  		goto err_free_dev;
  
@@ -68,9 +88,10 @@ index 0e7fbed8a50d..a32e99205697 100644
  		result = asus_wmi_get_devstate_simple(asus, ASUS_WMI_DEVID_KBD_DOCK);
  		if (result >= 0) {
  			input_set_capability(asus->inputdev, EV_SW, SW_TABLET_MODE);
-@@ -512,12 +515,11 @@ static int asus_wmi_input_init(struct asus_wmi *asus)
+ 			input_report_switch(asus->inputdev, SW_TABLET_MODE, !result);
  		} else if (result != -ENODEV) {
- 			pr_err("Error checking for keyboard-dock: %d\n", result);
+-			pr_err("Error checking for keyboard-dock: %d\n", result);
++			dev_err(dev, "Error checking for keyboard-dock: %d\n", result);
  		}
 -	}
 -
@@ -84,15 +105,29 @@ index 0e7fbed8a50d..a32e99205697 100644
  		if (result >= 0) {
  			input_set_capability(asus->inputdev, EV_SW, SW_TABLET_MODE);
  			input_report_switch(asus->inputdev, SW_TABLET_MODE, result);
-@@ -526,6 +528,7 @@ static int asus_wmi_input_init(struct asus_wmi *asus)
+ 		} else if (result == -ENODEV) {
+-			pr_err("This device has lid_flip quirk but got ENODEV checking it. This is a bug.");
++			dev_err(dev, "This device has lid_flip quirk but got ENODEV checking it. This is a bug.");
  		} else {
- 			pr_err("Error checking for lid-flip: %d\n", result);
+-			pr_err("Error checking for lid-flip: %d\n", result);
++			dev_err(dev, "Error checking for lid-flip: %d\n", result);
  		}
 +		break;
  	}
  
  	err = input_register_device(asus->inputdev);
-@@ -3083,20 +3086,26 @@ static void asus_wmi_handle_event_code(int code, struct asus_wmi *asus)
+@@ -548,8 +554,9 @@ static void asus_wmi_input_exit(struct asus_wmi *asus)
+ 
+ static void lid_flip_tablet_mode_get_state(struct asus_wmi *asus)
+ {
+-	int result = asus_wmi_get_devstate_simple(asus, ASUS_WMI_DEVID_LID_FLIP);
++	int result;
+ 
++	result = asus_wmi_get_devstate_simple(asus, ASUS_WMI_DEVID_LID_FLIP);
+ 	if (result >= 0) {
+ 		input_report_switch(asus->inputdev, SW_TABLET_MODE, result);
+ 		input_sync(asus->inputdev);
+@@ -3078,20 +3085,26 @@ static void asus_wmi_handle_event_code(int code, struct asus_wmi *asus)
  		return;
  	}
  
@@ -128,7 +163,7 @@ index 0e7fbed8a50d..a32e99205697 100644
  	}
  
  	if (asus->fan_boost_mode_available && code == NOTIFY_KBD_FBM) {
-@@ -3731,8 +3740,14 @@ static int asus_hotk_resume(struct device *device)
+@@ -3734,8 +3747,14 @@ static int asus_hotk_resume(struct device *device)
  	if (asus_wmi_has_fnlock_key(asus))
  		asus_wmi_fnlock_update(asus);
  
@@ -144,7 +179,7 @@ index 0e7fbed8a50d..a32e99205697 100644
  
  	return 0;
  }
-@@ -3773,8 +3788,14 @@ static int asus_hotk_restore(struct device *device)
+@@ -3776,8 +3795,14 @@ static int asus_hotk_restore(struct device *device)
  	if (asus_wmi_has_fnlock_key(asus))
  		asus_wmi_fnlock_update(asus);
  

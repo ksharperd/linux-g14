@@ -1,21 +1,21 @@
-From 52495bcde23121caab4a20955056216b4ce47419 Mon Sep 17 00:00:00 2001
+From 54f9de78d1c7b55be24b93e06acf46032c175f60 Mon Sep 17 00:00:00 2001
 From: "Luke D. Jones" <luke@ljones.dev>
-Date: Fri, 5 Aug 2022 10:15:14 +1200
-Subject: [PATCH v2 2/2] asus-wmi: Add support for ROG X13 tablet mode
+Date: Tue, 9 Aug 2022 15:24:41 +1200
+Subject: [PATCH 10/17] asus-wmi: Add support for ROG X13 tablet mode
 
 Add quirk for ASUS ROG X13 Flow 2-in-1 to enable tablet mode with
 lid flip (all screen rotations).
 
 Signed-off-by: Luke D. Jones <luke@ljones.dev>
 ---
- drivers/platform/x86/asus-nb-wmi.c         | 17 +++++++++-
- drivers/platform/x86/asus-wmi.c            | 36 ++++++++++++++++++++++
+ drivers/platform/x86/asus-nb-wmi.c         | 15 +++++++++
+ drivers/platform/x86/asus-wmi.c            | 37 ++++++++++++++++++++++
  drivers/platform/x86/asus-wmi.h            |  1 +
  include/linux/platform_data/x86/asus-wmi.h |  1 +
- 4 files changed, 54 insertions(+), 1 deletion(-)
+ 4 files changed, 54 insertions(+)
 
 diff --git a/drivers/platform/x86/asus-nb-wmi.c b/drivers/platform/x86/asus-nb-wmi.c
-index 3a93e056c4e1..4aeaac92296f 100644
+index 3a93e056c4e1..d4cc6afc1861 100644
 --- a/drivers/platform/x86/asus-nb-wmi.c
 +++ b/drivers/platform/x86/asus-nb-wmi.c
 @@ -123,6 +123,11 @@ static struct quirk_entry quirk_asus_use_lid_flip_devid = {
@@ -46,18 +46,16 @@ index 3a93e056c4e1..4aeaac92296f 100644
  	{},
  };
  
-@@ -574,7 +588,8 @@ static const struct key_entry asus_nb_wmi_keymap[] = {
- 	{ KE_KEY, 0xC4, { KEY_KBDILLUMUP } },
+@@ -575,6 +589,7 @@ static const struct key_entry asus_nb_wmi_keymap[] = {
  	{ KE_KEY, 0xC5, { KEY_KBDILLUMDOWN } },
  	{ KE_IGNORE, 0xC6, },  /* Ambient Light Sensor notification */
--	{ KE_KEY, 0xFA, { KEY_PROG2 } },           /* Lid flip action */
-+	{ KE_KEY, 0xFA, { KEY_PROG2 } }, /* Lid flip action */
+ 	{ KE_KEY, 0xFA, { KEY_PROG2 } },           /* Lid flip action */
 +	{ KE_KEY, 0xBD, { KEY_PROG2 } }, /* Lid flip action on ROG xflow laptops */
  	{ KE_END, 0},
  };
  
 diff --git a/drivers/platform/x86/asus-wmi.c b/drivers/platform/x86/asus-wmi.c
-index a32e99205697..51610bd6b1c4 100644
+index 1c48bd4ff4e2..123b311695b2 100644
 --- a/drivers/platform/x86/asus-wmi.c
 +++ b/drivers/platform/x86/asus-wmi.c
 @@ -68,6 +68,7 @@ module_param(fnlock_default, bool, 0444);
@@ -69,7 +67,7 @@ index a32e99205697..51610bd6b1c4 100644
  #define ASUS_WMI_FNLOCK_BIOS_DISABLED	BIT(0)
  
 @@ -529,6 +530,19 @@ static int asus_wmi_input_init(struct asus_wmi *asus)
- 			pr_err("Error checking for lid-flip: %d\n", result);
+ 			dev_err(dev, "Error checking for lid-flip: %d\n", result);
  		}
  		break;
 +	case asus_wmi_lid_flip_rog_devid:
@@ -80,22 +78,23 @@ index a32e99205697..51610bd6b1c4 100644
 +			input_set_capability(asus->inputdev, EV_SW, SW_TABLET_MODE);
 +			input_report_switch(asus->inputdev, SW_TABLET_MODE, result);
 +		} else if (result == -ENODEV) {
-+			pr_err("This device has lid-flip-rog quirk but got ENODEV checking it. This is a bug.");
++			dev_err(dev, "This device has lid-flip-rog quirk but got ENODEV checking it. This is a bug.");
 +		} else {
-+			pr_err("Error checking for lid-flip: %d\n", result);
++			dev_err(dev, "Error checking for lid-flip: %d\n", result);
 +		}
 +		break;
  	}
  
  	err = input_register_device(asus->inputdev);
-@@ -562,6 +576,16 @@ static void lid_flip_tablet_mode_get_state(struct asus_wmi *asus)
+@@ -563,6 +577,17 @@ static void lid_flip_tablet_mode_get_state(struct asus_wmi *asus)
  	}
  }
  
 +static void lid_flip_rog_tablet_mode_get_state(struct asus_wmi *asus)
 +{
-+	int result = asus_wmi_get_devstate_simple(asus, ASUS_WMI_DEVID_LID_FLIP_ROG);
++	int result;
 +
++	result = asus_wmi_get_devstate_simple(asus, ASUS_WMI_DEVID_LID_FLIP_ROG);
 +	if (result >= 0) {
 +		input_report_switch(asus->inputdev, SW_TABLET_MODE, result);
 +		input_sync(asus->inputdev);
@@ -105,7 +104,7 @@ index a32e99205697..51610bd6b1c4 100644
  /* dGPU ********************************************************************/
  static int dgpu_disable_check_present(struct asus_wmi *asus)
  {
-@@ -3106,6 +3130,12 @@ static void asus_wmi_handle_event_code(int code, struct asus_wmi *asus)
+@@ -3105,6 +3130,12 @@ static void asus_wmi_handle_event_code(int code, struct asus_wmi *asus)
  			return;
  		}
  		break;
@@ -118,7 +117,7 @@ index a32e99205697..51610bd6b1c4 100644
  	}
  
  	if (asus->fan_boost_mode_available && code == NOTIFY_KBD_FBM) {
-@@ -3747,6 +3777,9 @@ static int asus_hotk_resume(struct device *device)
+@@ -3754,6 +3785,9 @@ static int asus_hotk_resume(struct device *device)
  	case asus_wmi_lid_flip_devid:
  		lid_flip_tablet_mode_get_state(asus);
  		break;
@@ -128,7 +127,7 @@ index a32e99205697..51610bd6b1c4 100644
  	}
  
  	return 0;
-@@ -3795,6 +3828,9 @@ static int asus_hotk_restore(struct device *device)
+@@ -3802,6 +3836,9 @@ static int asus_hotk_restore(struct device *device)
  	case asus_wmi_lid_flip_devid:
  		lid_flip_tablet_mode_get_state(asus);
  		break;
@@ -151,7 +150,7 @@ index 413920bad0c6..0187f13d2414 100644
  
  struct quirk_entry {
 diff --git a/include/linux/platform_data/x86/asus-wmi.h b/include/linux/platform_data/x86/asus-wmi.h
-index a571b47ff362..d54458431600 100644
+index c023332842a2..9132b43c2666 100644
 --- a/include/linux/platform_data/x86/asus-wmi.h
 +++ b/include/linux/platform_data/x86/asus-wmi.h
 @@ -64,6 +64,7 @@

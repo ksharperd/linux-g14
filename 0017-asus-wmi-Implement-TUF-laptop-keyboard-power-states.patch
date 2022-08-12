@@ -1,0 +1,150 @@
+From e9a81a588d0612fc6b80b12fd05f515f385506f8 Mon Sep 17 00:00:00 2001
+From: "Luke D. Jones" <luke@ljones.dev>
+Date: Fri, 12 Aug 2022 11:36:46 +1200
+Subject: [PATCH 17/17] asus-wmi: Implement TUF laptop keyboard power states
+
+Adds support for setting various power states of TUF keyboards.
+These states are combinations of:
+- boot, set if a boot animation is shown on keyboard
+- awake, set if the keyboard LEDs are visible while laptop is on
+- sleep, set if an animation is displayed while the laptop is suspended
+- keyboard (unknown effect)
+
+Adds two sysfs attributes to asus::kbd_backlight:
+- kbd_rgb_state
+- kbd_rgb_state_index
+
+Signed-off-by: Luke D. Jones <luke@ljones.dev>
+---
+ drivers/platform/x86/asus-wmi.c            | 69 ++++++++++++++++++++++
+ include/linux/platform_data/x86/asus-wmi.h |  3 +
+ 2 files changed, 72 insertions(+)
+
+diff --git a/drivers/platform/x86/asus-wmi.c b/drivers/platform/x86/asus-wmi.c
+index 3f6728a21d04..7a279bec3477 100644
+--- a/drivers/platform/x86/asus-wmi.c
++++ b/drivers/platform/x86/asus-wmi.c
+@@ -236,6 +236,7 @@ struct asus_wmi {
+ 	bool gpu_mux_mode_available;
+ 
+ 	bool kbd_rgb_mode_available;
++	bool kbd_rgb_state_available;
+ 
+ 	bool throttle_thermal_policy_available;
+ 	u8 throttle_thermal_policy_mode;
+@@ -854,9 +855,70 @@ static const struct attribute_group kbd_rgb_mode_group = {
+ 	.attrs = kbd_rgb_mode_attrs,
+ };
+ 
++/* TUF Laptop Keyboard RGB State **********************************************/
++static int kbd_rgb_state_check_present(struct asus_wmi *asus)
++{
++	asus->kbd_rgb_state_available =
++		asus_wmi_dev_is_present(asus, ASUS_WMI_DEVID_TUF_RGB_STATE);
++
++	return 0;
++}
++
++static ssize_t kbd_rgb_state_store(struct device *dev,
++				 struct device_attribute *attr,
++				 const char *buf, size_t count)
++{
++	u32 flags, cmd, boot, awake, sleep, keyboard;
++	int err;
++
++	if (sscanf(buf, "%d %d %d %d %d", &cmd, &boot, &awake, &sleep, &keyboard) != 5)
++		return -EINVAL;
++
++	if (cmd)
++		cmd = BIT(2);
++
++	flags = 0;
++	if (boot)
++		flags |= BIT(1);
++	if (awake)
++		flags |= BIT(3);
++	if (sleep)
++		flags |= BIT(5);
++	if (keyboard)
++		flags |= BIT(7);
++
++	/* 0xbd is the required default arg0 for the method. Nothing happens otherwise */
++	err = asus_wmi_evaluate_method3(ASUS_WMI_METHODID_DEVS,
++			ASUS_WMI_DEVID_TUF_RGB_STATE, 0xbd | cmd << 8 | (flags << 16), 0, NULL);
++	if (err)
++		return err;
++
++	return count;
++}
++static DEVICE_ATTR_WO(kbd_rgb_state);
++
++static ssize_t kbd_rgb_state_index_show(struct device *device,
++						 struct device_attribute *attr,
++						 char *buf)
++{
++	return sysfs_emit(buf, "%s\n", "cmd boot awake sleep keyboard");
++}
++static DEVICE_ATTR_RO(kbd_rgb_state_index);
++
++static struct attribute *kbd_rgb_state_attrs[] = {
++	&dev_attr_kbd_rgb_state.attr,
++	&dev_attr_kbd_rgb_state_index.attr,
++	NULL,
++};
++
++static const struct attribute_group kbd_rgb_state_group = {
++	.attrs = kbd_rgb_state_attrs,
++};
++
+ const struct attribute_group *kbd_rgb_mode_groups[] = {
+ 	NULL,
+ 	NULL,
++	NULL,
+ };
+ 
+ /* Battery ********************************************************************/
+@@ -1170,6 +1232,8 @@ static int asus_wmi_led_init(struct asus_wmi *asus)
+ 
+ 	if (asus->kbd_rgb_mode_available)
+ 		kbd_rgb_mode_groups[num_rgb_groups++] = &kbd_rgb_mode_group;
++	if (asus->kbd_rgb_state_available)
++		kbd_rgb_mode_groups[num_rgb_groups++] = &kbd_rgb_state_group;
+ 
+ 	asus->led_workqueue = create_singlethread_workqueue("led_workqueue");
+ 	if (!asus->led_workqueue)
+@@ -3758,6 +3822,10 @@ static int asus_wmi_add(struct platform_device *pdev)
+ 	if (err)
+ 		goto fail_kbd_rgb_mode;
+ 
++	err = kbd_rgb_state_check_present(asus);
++	if (err)
++		goto fail_kbd_rgb_state;
++
+ 	err = fan_boost_mode_check_present(asus);
+ 	if (err)
+ 		goto fail_fan_boost_mode;
+@@ -3876,6 +3944,7 @@ static int asus_wmi_add(struct platform_device *pdev)
+ fail_platform:
+ fail_panel_od:
+ fail_kbd_rgb_mode:
++fail_kbd_rgb_state:
+ 	kfree(asus);
+ 	return err;
+ }
+diff --git a/include/linux/platform_data/x86/asus-wmi.h b/include/linux/platform_data/x86/asus-wmi.h
+index eeaeecc49a62..956050edc6f3 100644
+--- a/include/linux/platform_data/x86/asus-wmi.h
++++ b/include/linux/platform_data/x86/asus-wmi.h
+@@ -106,6 +106,9 @@
+ /* TUF laptop RGB modes/colours */
+ #define ASUS_WMI_DEVID_TUF_RGB_MODE	0x00100056
+ 
++/* TUF laptop RGB power/state */
++#define ASUS_WMI_DEVID_TUF_RGB_STATE	0x00100057
++
+ /* DSTS masks */
+ #define ASUS_WMI_DSTS_STATUS_BIT	0x00000001
+ #define ASUS_WMI_DSTS_UNKNOWN_BIT	0x00000002
+-- 
+2.37.1
+
