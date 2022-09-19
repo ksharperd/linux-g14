@@ -1,0 +1,159 @@
+From 4e821f67963ae0c4dcceadb561077164da5ac79a Mon Sep 17 00:00:00 2001
+From: "Luke D. Jones" <luke@ljones.dev>
+Date: Fri, 26 Aug 2022 10:32:34 +1200
+Subject: [PATCH 17/19] asus-wmi: Implement TUF laptop keyboard LED modes
+
+Adds support for changing the laptop keyboard LED mode and colour.
+
+The modes are visible effects such as static, rainbow, pulsing,
+colour cycles.
+
+These sysfs attributes are added to asus::kbd_backlight:
+- kbd_rgb_mode
+- kbd_rgb_mode_index
+
+Signed-off-by: Luke D. Jones <luke@ljones.dev>
+---
+ drivers/platform/x86/asus-wmi.c            | 76 +++++++++++++++++++++-
+ include/linux/platform_data/x86/asus-wmi.h |  3 +
+ 2 files changed, 78 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/platform/x86/asus-wmi.c b/drivers/platform/x86/asus-wmi.c
+index 0f9f79f249c7..92f16bb9b4ef 100644
+--- a/drivers/platform/x86/asus-wmi.c
++++ b/drivers/platform/x86/asus-wmi.c
+@@ -237,6 +237,8 @@ struct asus_wmi {
+ 	bool dgpu_disable_available;
+ 	bool gpu_mux_mode_available;
+ 
++	bool kbd_rgb_mode_available;
++
+ 	bool throttle_thermal_policy_available;
+ 	u8 throttle_thermal_policy_mode;
+ 
+@@ -720,6 +722,69 @@ static ssize_t gpu_mux_mode_store(struct device *dev,
+ }
+ static DEVICE_ATTR_RW(gpu_mux_mode);
+ 
++/* TUF Laptop Keyboard RGB Modes **********************************************/
++static ssize_t kbd_rgb_mode_store(struct device *dev,
++				 struct device_attribute *attr,
++				 const char *buf, size_t count)
++{
++	u32 cmd, mode, r, g,  b,  speed;
++	int err;
++
++	if (sscanf(buf, "%d %d %d %d %d %d", &cmd, &mode, &r, &g, &b, &speed) != 6)
++		return -EINVAL;
++
++	cmd = !!cmd;
++
++	/* These are the known usable modes across all TUF/ROG */
++	if (mode >= 12 || mode == 9)
++		mode = 10;
++
++	switch (speed) {
++	case 0:
++		speed = 0xe1;
++		break;
++	case 1:
++		speed = 0xeb;
++		break;
++	case 2:
++		speed = 0xf5;
++		break;
++	default:
++		speed = 0xeb;
++	}
++
++	err = asus_wmi_evaluate_method3(ASUS_WMI_METHODID_DEVS, ASUS_WMI_DEVID_TUF_RGB_MODE,
++			cmd | (mode << 8) | (r << 16) | (g << 24), b | (speed << 8), NULL);
++	if (err)
++		return err;
++
++	return count;
++}
++static DEVICE_ATTR_WO(kbd_rgb_mode);
++
++static ssize_t kbd_rgb_mode_index_show(struct device *device,
++						 struct device_attribute *attr,
++						 char *buf)
++{
++	return sysfs_emit(buf, "%s\n", "cmd mode red green blue speed");
++}
++static DEVICE_ATTR_RO(kbd_rgb_mode_index);
++
++static struct attribute *kbd_rgb_mode_attrs[] = {
++	&dev_attr_kbd_rgb_mode.attr,
++	&dev_attr_kbd_rgb_mode_index.attr,
++	NULL,
++};
++
++static const struct attribute_group kbd_rgb_mode_group = {
++	.attrs = kbd_rgb_mode_attrs,
++};
++
++const struct attribute_group *kbd_rgb_mode_groups[] = {
++	NULL,
++	NULL,
++};
++
+ /* Battery ********************************************************************/
+ 
+ /* The battery maximum charging percentage */
+@@ -1038,7 +1103,10 @@ static void asus_wmi_led_exit(struct asus_wmi *asus)
+ 
+ static int asus_wmi_led_init(struct asus_wmi *asus)
+ {
+-	int rv = 0, led_val;
++	int rv = 0, num_rgb_groups = 0, led_val;
++
++	if (asus->kbd_rgb_mode_available)
++		kbd_rgb_mode_groups[num_rgb_groups++] = &kbd_rgb_mode_group;
+ 
+ 	asus->led_workqueue = create_singlethread_workqueue("led_workqueue");
+ 	if (!asus->led_workqueue)
+@@ -1066,6 +1134,9 @@ static int asus_wmi_led_init(struct asus_wmi *asus)
+ 		asus->kbd_led.brightness_get = kbd_led_get;
+ 		asus->kbd_led.max_brightness = 3;
+ 
++		if (num_rgb_groups != 0)
++			asus->kbd_led.groups = kbd_rgb_mode_groups;
++
+ 		rv = led_classdev_register(&asus->platform_device->dev,
+ 					   &asus->kbd_led);
+ 		if (rv)
+@@ -3253,6 +3324,8 @@ static umode_t asus_sysfs_is_visible(struct kobject *kobj,
+ 		ok = asus->egpu_enable_available;
+ 	else if (attr == &dev_attr_dgpu_disable.attr)
+ 		ok = asus->dgpu_disable_available;
++	else if (attr == &dev_attr_dgpu_disable.attr)
++		ok = asus->dgpu_disable_available;
+ 	else if (attr == &dev_attr_gpu_mux_mode.attr)
+ 		ok = asus->gpu_mux_mode_available;
+ 	else if (attr == &dev_attr_fan_boost_mode.attr)
+@@ -3519,6 +3592,7 @@ static int asus_wmi_add(struct platform_device *pdev)
+ 	asus->egpu_enable_available = asus_wmi_dev_is_present(asus, ASUS_WMI_DEVID_EGPU);
+ 	asus->dgpu_disable_available = asus_wmi_dev_is_present(asus, ASUS_WMI_DEVID_DGPU);
+ 	asus->gpu_mux_mode_available = asus_wmi_dev_is_present(asus, ASUS_WMI_DEVID_GPU_MUX);
++	asus->kbd_rgb_mode_available = asus_wmi_dev_is_present(asus, ASUS_WMI_DEVID_TUF_RGB_MODE);
+ 	asus->panel_overdrive_available = asus_wmi_dev_is_present(asus, ASUS_WMI_DEVID_PANEL_OD);
+ 
+ 	err = fan_boost_mode_check_present(asus);
+diff --git a/include/linux/platform_data/x86/asus-wmi.h b/include/linux/platform_data/x86/asus-wmi.h
+index 6e8a95c10d17..3d861477cb20 100644
+--- a/include/linux/platform_data/x86/asus-wmi.h
++++ b/include/linux/platform_data/x86/asus-wmi.h
+@@ -103,6 +103,9 @@
+ /* gpu mux switch, 0 = dGPU, 1 = Optimus */
+ #define ASUS_WMI_DEVID_GPU_MUX		0x00090016
+ 
++/* TUF laptop RGB modes/colours */
++#define ASUS_WMI_DEVID_TUF_RGB_MODE	0x00100056
++
+ /* DSTS masks */
+ #define ASUS_WMI_DSTS_STATUS_BIT	0x00000001
+ #define ASUS_WMI_DSTS_UNKNOWN_BIT	0x00000002
+-- 
+2.37.2
+

@@ -1,8 +1,8 @@
 # Maintainer: Jan Alexander Steffens (heftig) <jan.steffens@gmail.com>
 
 pkgbase=linux-g14
-pkgver=5.18.16.arch1
-pkgrel=2
+pkgver=5.19.9.arch1
+pkgrel=1
 pkgdesc='Linux'
 _srctag=v${pkgver%.*}-${pkgver##*.}
 url="https://gitlab.com/dragonn/linux-g14.git"
@@ -32,7 +32,7 @@ source=(
   "sys-kernel_arch-sources-g14_files-0049-ALSA-hda-realtek-Add-quirk-for-ASUS-M16-GU603H.patch"
 
   # mediatek mt7921 bt/wifi patches
-  "sys-kernel_arch-sources-g14_files-8017-add_imc_networks_pid_0x3568.patch"
+
 
   "sys-kernel_arch-sources-g14_files-8050-r8152-fix-spurious-wakeups-from-s0i3.patch"
 
@@ -42,23 +42,36 @@ source=(
   "sys-kernel_arch-sources-g14_files-9010-ACPI-PM-s2idle-Don-t-report-missing-devices-as-faili.patch"
   "sys-kernel_arch-sources-g14_files-9012-Improve-usability-for-amd-pstate.patch"
 
-  0001-Fixes-98829e84dc67-asus-wmi-Add-dgpu-disable-method.patch
-  0002-Fixes-382b91db8044-asus-wmi-Add-egpu-enable-method.patch
-  0003-Fixes-ca91ea34778f-asus-wmi-Add-panel-overdrive-func.patch
-  0004-asus-wmi-Refactor-disable_gpu-attribute.patch
-  0005-asus-wmi-Refactor-egpu_enable-attribute.patch
-  0006-asus-wmi-Refactor-panel_od-attribute.patch
-  0007-asus-wmi-Convert-all-attr-show-to-use-sysfs_emit.patch
-  0008-asus-wmi-Support-the-hardware-GPU-MUX-on-some-laptop.patch
-  0009-asus-wmi-Adjust-tablet-lidflip-handling-to-use-enum.patch
-  0010-asus-wmi-Add-support-for-ROG-X13-tablet-mode.patch
-  0011-asus-wmi-Modify-behaviour-of-Fn-F5-fan-key.patch
-  0012-asus-wmi-Support-the-GPU-fan-on-TUF-laptops.patch
-  0013-sound-realtek-Add-pincfg-for-ASUS-G533Z.patch
-  0014-sound-realtek-Add-pincfg-for-ASUS-G513.patch
-  0015-HID-amd_sfh-Add-keyguard-for-ASUS-ROG-X13-tablet.patch
-  0016-asus-wmi-Implement-TUF-laptop-keyboard-LED-modes.patch
-  0017-asus-wmi-Implement-TUF-laptop-keyboard-power-states.patch
+  0001-ga502-snd-test.patch
+  0001-asus-wmi-Increase-FAN_CURVE_BUF_LEN-to-32.patch
+  0001-HID-amd_sfh-Add-keyguard-for-ASUS-ROG-X13-tablet.patch
+  0001-platform-x86-asus-wmi-Convert-all-attr-show-to-use-s.patch
+  0002-platform-x86-asus-wmi-Use-kobj_to_dev.patch
+  0003-platform-x86-asus-wmi-Document-the-dgpu_disable-sysf.patch
+  0004-platform-x86-asus-wmi-Document-the-egpu_enable-sysfs.patch
+  0005-platform-x86-asus-wmi-Document-the-panel_od-sysfs-at.patch
+  0006-platform-x86-asus-wmi-Refactor-disable_gpu-attribute.patch
+  0007-platform-x86-asus-wmi-Refactor-egpu_enable-attribute.patch
+  0008-platform-x86-asus-wmi-Refactor-panel_od-attribute.patch
+  0009-platform-x86-asus-wmi-Simplify-some-of-the-_check_pr.patch
+  0010-platform-x86-asus-wmi-Support-the-hardware-GPU-MUX-o.patch
+  0011-platform-x86-asus-wmi-Adjust-tablet-lidflip-handling.patch
+  0012-platform-x86-asus-wmi-Add-support-for-ROG-X13-tablet.patch
+  0013-platform-x86-asus-wmi-Simplify-tablet-mode-switch-pr.patch
+  0014-platform-x86-asus-wmi-Simplify-tablet-mode-switch-ha.patch
+  0015-sound-realtek-Add-pincfg-for-ASUS-G533Z.patch
+  0016-sound-realtek-Add-pincfg-for-ASUS-G513.patch
+  0017-asus-wmi-Implement-TUF-laptop-keyboard-LED-modes.patch
+  0018-asus-wmi-Implement-TUF-laptop-keyboard-power-states.patch
+  #0019-HID-amd_sfh-Add-keyguard-for-ASUS-ROG-X13-tablet.patch
+  0020-asus-wmi-Modify-behaviour-of-Fn-F5-fan-key.patch
+  0021-asus-wmi-Support-the-GPU-fan-on-TUF-laptops.patch
+  0001-s2idle-use-microsoft-guid.patch
+  0002-s2idle-use-microsoft-guid.patch
+  0003-s2idle-use-microsoft-guid.patch
+  0004-s2idle-use-microsoft-guid.patch
+  0022-gpu-fan-rpm.patch
+  0023-acpi-x86-s2idle-Add-a-quirk-for-ASUS-ROG-Zephyrus-G1.patch
 )
 
 validpgpkeys=(
@@ -170,7 +183,9 @@ prepare() {
                   --disable CONFIG_IWL4965 \
                   --disable CONFIG_IPW2200 \
                   --disable CONFIG_IPW2100 \
-                  --disable CONFIG_FB_NVIDIA
+                  --disable CONFIG_FB_NVIDIA \
+                  --disable CONFIG_SENSORS_ASUS_EC \
+                  --disable CONFIG_SENSORS_ASUS_WMI_EC
 
   # select slightly more sane block device driver options; NVMe really should be built in 
   scripts/config  --disable CONFIG_RAPIDIO \
