@@ -1,7 +1,7 @@
 # Maintainer: Jan Alexander Steffens (heftig) <jan.steffens@gmail.com>
 
 pkgbase=linux-g14
-pkgver=5.19.9.arch1
+pkgver=5.19.11.arch1
 pkgrel=1
 pkgdesc='Linux'
 _srctag=v${pkgver%.*}-${pkgver##*.}
@@ -16,7 +16,7 @@ makedepends=(
 )
 options=('!strip')
 _srcname=archlinux-linux
-_fedora_kernel_commit_id=e087e6d70c49c685b4d7cc7364496ade3aed3609
+
 source=(
   "$_srcname::git+https://github.com/archlinux/linux?signed#tag=$_srctag"
   config         # the main kernel config file
