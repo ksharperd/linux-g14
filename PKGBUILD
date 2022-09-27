@@ -42,8 +42,8 @@ source=(
   "sys-kernel_arch-sources-g14_files-9010-ACPI-PM-s2idle-Don-t-report-missing-devices-as-faili.patch"
   "sys-kernel_arch-sources-g14_files-9012-Improve-usability-for-amd-pstate.patch"
 
-  0001-ga502-snd-test.patch
-  0001-asus-wmi-Increase-FAN_CURVE_BUF_LEN-to-32.patch
+  0001-acpi-proc-idle-skip-dummy-wait.patch
+  0001-ga502-snd.patch
   0001-HID-amd_sfh-Add-keyguard-for-ASUS-ROG-X13-tablet.patch
   0001-platform-x86-asus-wmi-Convert-all-attr-show-to-use-s.patch
   0002-platform-x86-asus-wmi-Use-kobj_to_dev.patch
@@ -70,6 +70,9 @@ source=(
   0002-s2idle-use-microsoft-guid.patch
   0003-s2idle-use-microsoft-guid.patch
   0004-s2idle-use-microsoft-guid.patch
+  0005-s2idle-use-microsoft-guid.patch
+  0006-s2idle-use-microsoft-guid.patch
+  0007-s2idle-use-microsoft-guid.patch
   0022-gpu-fan-rpm.patch
   0023-acpi-x86-s2idle-Add-a-quirk-for-ASUS-ROG-Zephyrus-G1.patch
 )
