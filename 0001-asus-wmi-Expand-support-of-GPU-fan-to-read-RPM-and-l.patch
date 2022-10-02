@@ -1,3 +1,8 @@
+From ded47e7197a4ce9d6c34c0c96c6551ecaca0b6bd Mon Sep 17 00:00:00 2001
+From: "Luke D. Jones" <luke@ljones.dev>
+Date: Fri, 16 Sep 2022 11:17:16 +1200
+Subject: [PATCH] asus-wmi: Expand support of GPU fan to read RPM and label
+
 The previously added patch to add support for pwm change for TUF laptops
 also is usuable for more than TUF. The same method `0x00110014` is
 used to read the fan RPM.

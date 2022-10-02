@@ -1,7 +1,7 @@
 # Maintainer: Jan Alexander Steffens (heftig) <jan.steffens@gmail.com>
 
 pkgbase=linux-g14
-pkgver=5.19.11.arch1
+pkgver=5.19.12.arch1
 pkgrel=1
 pkgdesc='Linux'
 _srctag=v${pkgver%.*}-${pkgver##*.}
@@ -25,8 +25,37 @@ source=(
   "sys-kernel_arch-sources-g14_files-0004-5.15+--more-uarches-for-kernel.patch"::"https://raw.githubusercontent.com/graysky2/kernel_compiler_patch/master/more-uarches-for-kernel-5.15+.patch"
   "sys-kernel_arch-sources-g14_files-0005-lru-multi-generational.patch"
 
+  0001-acpi-proc-idle-skip-dummy-wait.patch
+  0001-asus-wmi-tuf-gpu-fan.patch
+  0001-asus-wmi-Expand-support-of-GPU-fan-to-read-RPM-and-l.patch
+  0001-HID-amd_sfh-Add-keyguard-for-ASUS-ROG-X13-tablet.patch
+  0001-platform-x86-asus-wmi-Convert-all-attr-show-to-use-s.patch
+  0001-s2idle-use-microsoft-guid.patch
+  0002-platform-x86-asus-wmi-Use-kobj_to_dev.patch
+  0002-s2idle-use-microsoft-guid.patch
+  0003-platform-x86-asus-wmi-Document-the-dgpu_disable-sysf.patch
+  0003-s2idle-use-microsoft-guid.patch
+  0004-platform-x86-asus-wmi-Document-the-egpu_enable-sysfs.patch
+  0004-s2idle-use-microsoft-guid.patch
+  0005-platform-x86-asus-wmi-Document-the-panel_od-sysfs-at.patch
+  0005-s2idle-use-microsoft-guid.patch
+  0006-platform-x86-asus-wmi-Refactor-disable_gpu-attribute.patch
+  0006-s2idle-use-microsoft-guid.patch
+  0007-platform-x86-asus-wmi-Refactor-egpu_enable-attribute.patch
+  0007-s2idle-use-microsoft-guid.patch
+  0008-platform-x86-asus-wmi-Refactor-panel_od-attribute.patch
+  0009-platform-x86-asus-wmi-Simplify-some-of-the-_check_pr.patch
+  0010-platform-x86-asus-wmi-Support-the-hardware-GPU-MUX-o.patch
+  0011-platform-x86-asus-wmi-Adjust-tablet-lidflip-handling.patch
+  0012-platform-x86-asus-wmi-Add-support-for-ROG-X13-tablet.patch
+  0013-platform-x86-asus-wmi-Simplify-tablet-mode-switch-pr.patch
+  0014-platform-x86-asus-wmi-Simplify-tablet-mode-switch-ha.patch
+  0017-asus-wmi-Implement-TUF-laptop-keyboard-LED-modes.patch
+  0018-asus-wmi-Implement-TUF-laptop-keyboard-power-states.patch
+  #0019-HID-amd_sfh-Add-keyguard-for-ASUS-ROG-X13-tablet.patch
+  0020-asus-wmi-Modify-behaviour-of-Fn-F5-fan-key.patch
+
   # pull newer version from fedora repo
-  "sys-kernel_arch-sources-g14_files-0043-ALSA-hda-realtek-Fix-speakers-not-working-on-Asus-Fl.patch"
   "sys-kernel_arch-sources-g14_files-0047-asus-nb-wmi-Add-tablet_mode_sw-lid-flip.patch"
   "sys-kernel_arch-sources-g14_files-0048-asus-nb-wmi-fix-tablet_mode_sw_int.patch"
   "sys-kernel_arch-sources-g14_files-0049-ALSA-hda-realtek-Add-quirk-for-ASUS-M16-GU603H.patch"
@@ -42,39 +71,6 @@ source=(
   "sys-kernel_arch-sources-g14_files-9010-ACPI-PM-s2idle-Don-t-report-missing-devices-as-faili.patch"
   "sys-kernel_arch-sources-g14_files-9012-Improve-usability-for-amd-pstate.patch"
 
-  0001-acpi-proc-idle-skip-dummy-wait.patch
-  0001-ga502-snd.patch
-  0001-HID-amd_sfh-Add-keyguard-for-ASUS-ROG-X13-tablet.patch
-  0001-platform-x86-asus-wmi-Convert-all-attr-show-to-use-s.patch
-  0002-platform-x86-asus-wmi-Use-kobj_to_dev.patch
-  0003-platform-x86-asus-wmi-Document-the-dgpu_disable-sysf.patch
-  0004-platform-x86-asus-wmi-Document-the-egpu_enable-sysfs.patch
-  0005-platform-x86-asus-wmi-Document-the-panel_od-sysfs-at.patch
-  0006-platform-x86-asus-wmi-Refactor-disable_gpu-attribute.patch
-  0007-platform-x86-asus-wmi-Refactor-egpu_enable-attribute.patch
-  0008-platform-x86-asus-wmi-Refactor-panel_od-attribute.patch
-  0009-platform-x86-asus-wmi-Simplify-some-of-the-_check_pr.patch
-  0010-platform-x86-asus-wmi-Support-the-hardware-GPU-MUX-o.patch
-  0011-platform-x86-asus-wmi-Adjust-tablet-lidflip-handling.patch
-  0012-platform-x86-asus-wmi-Add-support-for-ROG-X13-tablet.patch
-  0013-platform-x86-asus-wmi-Simplify-tablet-mode-switch-pr.patch
-  0014-platform-x86-asus-wmi-Simplify-tablet-mode-switch-ha.patch
-  0015-sound-realtek-Add-pincfg-for-ASUS-G533Z.patch
-  0016-sound-realtek-Add-pincfg-for-ASUS-G513.patch
-  0017-asus-wmi-Implement-TUF-laptop-keyboard-LED-modes.patch
-  0018-asus-wmi-Implement-TUF-laptop-keyboard-power-states.patch
-  #0019-HID-amd_sfh-Add-keyguard-for-ASUS-ROG-X13-tablet.patch
-  0020-asus-wmi-Modify-behaviour-of-Fn-F5-fan-key.patch
-  0021-asus-wmi-Support-the-GPU-fan-on-TUF-laptops.patch
-  0001-s2idle-use-microsoft-guid.patch
-  0002-s2idle-use-microsoft-guid.patch
-  0003-s2idle-use-microsoft-guid.patch
-  0004-s2idle-use-microsoft-guid.patch
-  0005-s2idle-use-microsoft-guid.patch
-  0006-s2idle-use-microsoft-guid.patch
-  0007-s2idle-use-microsoft-guid.patch
-  0022-gpu-fan-rpm.patch
-  0023-acpi-x86-s2idle-Add-a-quirk-for-ASUS-ROG-Zephyrus-G1.patch
 )
 
 validpgpkeys=(
