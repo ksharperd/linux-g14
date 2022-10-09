@@ -2,7 +2,7 @@
 
 pkgbase=linux-g14
 pkgver=5.19.13.arch1
-pkgrel=1
+pkgrel=2
 pkgdesc='Linux'
 _srctag=v${pkgver%.*}-${pkgver##*.}
 url="https://gitlab.com/dragonn/linux-g14.git"
@@ -43,6 +43,7 @@ source=(
   0006-s2idle-use-microsoft-guid.patch
   0007-platform-x86-asus-wmi-Refactor-egpu_enable-attribute.patch
   0007-s2idle-use-microsoft-guid.patch
+  0008-s2idle-use-microsoft-guid.patch
   0008-platform-x86-asus-wmi-Refactor-panel_od-attribute.patch
   0009-platform-x86-asus-wmi-Simplify-some-of-the-_check_pr.patch
   0010-platform-x86-asus-wmi-Support-the-hardware-GPU-MUX-o.patch
@@ -54,23 +55,14 @@ source=(
   0018-asus-wmi-Implement-TUF-laptop-keyboard-power-states.patch
   #0019-HID-amd_sfh-Add-keyguard-for-ASUS-ROG-X13-tablet.patch
   0020-asus-wmi-Modify-behaviour-of-Fn-F5-fan-key.patch
+  0021-rog-x16-patch-test1.patch
+  0022-gv601r-tablet-mode-test.patch
+  0023-mediatek-bt-add-e0e2.patch
+  0024-pahole-124-fix.patch
 
-  # pull newer version from fedora repo
   "sys-kernel_arch-sources-g14_files-0047-asus-nb-wmi-Add-tablet_mode_sw-lid-flip.patch"
   "sys-kernel_arch-sources-g14_files-0048-asus-nb-wmi-fix-tablet_mode_sw_int.patch"
   "sys-kernel_arch-sources-g14_files-0049-ALSA-hda-realtek-Add-quirk-for-ASUS-M16-GU603H.patch"
-
-  # mediatek mt7921 bt/wifi patches
-
-
-  "sys-kernel_arch-sources-g14_files-8050-r8152-fix-spurious-wakeups-from-s0i3.patch"
-
-  "sys-kernel_arch-sources-g14_files-9004-HID-asus-Reduce-object-size-by-consolidating-calls.patch"
-  "sys-kernel_arch-sources-g14_files-9005-acpi-battery-Always-read-fresh-battery-state-on-update.patch"
-  
-  "sys-kernel_arch-sources-g14_files-9010-ACPI-PM-s2idle-Don-t-report-missing-devices-as-faili.patch"
-  "sys-kernel_arch-sources-g14_files-9012-Improve-usability-for-amd-pstate.patch"
-
 )
 
 validpgpkeys=(
