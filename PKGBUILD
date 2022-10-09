@@ -2,7 +2,7 @@
 
 pkgbase=linux-g14
 pkgver=5.19.13.arch1
-pkgrel=2
+pkgrel=3
 pkgdesc='Linux'
 _srctag=v${pkgver%.*}-${pkgver##*.}
 url="https://gitlab.com/dragonn/linux-g14.git"
@@ -95,6 +95,7 @@ sha256sums=('SKIP'
             '9866928fb441eb03dc273e194a78b8d6563d30389b7f1611201c9a1927628dc5'
             '7e575f72423e01b74716e1fc21a3364f4cac29366b48caa0cda3504f75071ad3'
             '349209cf1bb3a6701c4be5348f889ae116d6ae6205a5f3372d1150362ef8d153'
+            '333b5e1fcae0f604606a444a59c80dcc9892ee8a3b9272bc06ec81347898207a'
             '7057f33c63880a540f5dcba0945140f9dccb2a6de6715eb5853d65c5447c1736'
             'd6f06dfee9d7910208c3851e730ccb79bf349b5ea5f8ab74f994489c679c40e3'
             '83ff058305e6fc0920584bff9c8ffd2e48590e659652a7c8ae7fc4310b129ad3'
@@ -105,14 +106,13 @@ sha256sums=('SKIP'
             'b636fc36762bbd8d83a09bcb448d7c2ad176139068e15f162a3da01769a4c6e1'
             '6fe53b9f7423b441d1de6e229b656376515fe003e0c6a11c982f75fabbecb018'
             '6907a750183e1f06c4b15014f078bcd15cb4ea498fd9d4c5c4c4d1955dac69d3'
+            'c5966a6406f0e3afc512a2881f3298531ecdd8d94eac9a04a84f6773ddf4be3c'
+            '3aee783f2ccfb4118ecaad65f3198a50dac0ed71c7b2cda85bcf2bb0b4e89125'
+            '03fac5ec378d38ed31258aa0570a607a772257b94fa57a1595674c2bcc7b3627'
+            '96a1b46af08ce3d7982ad1161f4db06293a60eccb48807adb5103065b027f3d6'
             '15e912a66e4bbce1cf0450f1dc6610653df29df8dd6d5426f9c1b039490436c8'
             'e9e4b03b836e1a86a2a5dc70b0d5512348eb19742f83bee794a3ab7d91bd41cf'
-            '982a31e47d3d586789e1b3cdda25f75e3b71d810e7494202089b8f2cef7c0ef9'
-            'f47a5a5e329e410a0ae7d46b450707d5575a4deda5b3b58281f5eca14938fb21'
-            '544464bf0807b324120767d55867f03014a9fda4e1804768ca341be902d7ade4'
-            'f7a4bf6293912bfc4a20743e58a5a266be8c4dbe3c1862d196d3a3b45f2f7c90'
-            'e7bd53abc9fddc66790a2e63637b4e2b54ed541f41a2f0fb3aca91ea64ff90dc'
-            'f61452c84bc8b8e6907e26d1503be583aa0534516ea7d5607be315ab198c060b')
+            '982a31e47d3d586789e1b3cdda25f75e3b71d810e7494202089b8f2cef7c0ef9')
 
 # notable microarch levels:
 #
@@ -203,7 +203,7 @@ prepare() {
                   --disable CMDLINE_OVERRIDE
 
   # HACK: forcibly fixup CONFIG_CMDLINE here as using scripts/config mangles escaped quotes
-  sed -i 's#makepkgplaceholderyolo#ibt=off pm_debug_messages amd_pmc.enable_stb=1 amd_pmc.dyndbg=\\"+p\\" acpi.dyndbg=\\"file drivers/acpi/x86/s2idle.c +p\\"#' .config
+  sed -i 's#makepkgplaceholderyolo#ibt=off pm_debug_messages amd_pmc.dyndbg=\\"+p\\" acpi.dyndbg=\\"file drivers/acpi/x86/s2idle.c +p\\"#' .config
 
   # Note the double escaped quotes above, sed strips one; the final result in .config needs to contain single slash
   # escaped quotes (eg: `CONFIG_CMDLINE="foo.dyndbg=\"+p\""`) to avoid dyndbg parse errors at boot. This is impossible
