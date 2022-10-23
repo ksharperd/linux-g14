@@ -1,8 +1,8 @@
 # Maintainer: Jan Alexander Steffens (heftig) <jan.steffens@gmail.com>
 
 pkgbase=linux-g14
-pkgver=5.19.13.arch1
-pkgrel=3
+pkgver=6.0.2.arch1
+pkgrel=1
 pkgdesc='Linux'
 _srctag=v${pkgver%.*}-${pkgver##*.}
 url="https://gitlab.com/dragonn/linux-g14.git"
@@ -22,29 +22,29 @@ source=(
   config         # the main kernel config file
   "choose-gcc-optimization.sh"
 
-  "sys-kernel_arch-sources-g14_files-0004-5.15+--more-uarches-for-kernel.patch"::"https://raw.githubusercontent.com/graysky2/kernel_compiler_patch/master/more-uarches-for-kernel-5.15+.patch"
+  "sys-kernel_arch-sources-g14_files-0004-5.17+--more-uarches-for-kernel.patch"::"https://raw.githubusercontent.com/graysky2/kernel_compiler_patch/master/more-uarches-for-kernel-5.17+.patch"
   "sys-kernel_arch-sources-g14_files-0005-lru-multi-generational.patch"
 
   0001-acpi-proc-idle-skip-dummy-wait.patch
-  0001-asus-wmi-tuf-gpu-fan.patch
-  0001-asus-wmi-Expand-support-of-GPU-fan-to-read-RPM-and-l.patch
-  0001-HID-amd_sfh-Add-keyguard-for-ASUS-ROG-X13-tablet.patch
+  0001-ACPI-x86-s2idle-Move-_HID-handling-for-AMD-systems-i.patch
+  #
+  #
   0001-platform-x86-asus-wmi-Convert-all-attr-show-to-use-s.patch
-  0001-s2idle-use-microsoft-guid.patch
+  0002-ACPI-x86-s2idle-If-a-new-AMD-_HID-is-missing-assume-.patch
   0002-platform-x86-asus-wmi-Use-kobj_to_dev.patch
-  0002-s2idle-use-microsoft-guid.patch
+  0003-ACPI-x86-s2idle-Add-module-parameter-to-prefer-Micro.patch
   0003-platform-x86-asus-wmi-Document-the-dgpu_disable-sysf.patch
-  0003-s2idle-use-microsoft-guid.patch
+  0004-ACPI-x86-s2idle-Add-a-quirk-for-ASUS-TUF-Gaming-A17-.patch
   0004-platform-x86-asus-wmi-Document-the-egpu_enable-sysfs.patch
-  0004-s2idle-use-microsoft-guid.patch
+  0005-ACPI-x86-s2idle-Add-a-quirk-for-ASUS-ROG-Zephyrus-G1.patch
   0005-platform-x86-asus-wmi-Document-the-panel_od-sysfs-at.patch
-  0005-s2idle-use-microsoft-guid.patch
+  0006-ACPI-x86-s2idle-Add-a-quirk-for-Lenovo-Slim-7-Pro-14.patch
   0006-platform-x86-asus-wmi-Refactor-disable_gpu-attribute.patch
-  0006-s2idle-use-microsoft-guid.patch
+  0007-ACPI-x86-s2idle-Add-a-quirk-for-ASUSTeK-COMPUTER-INC.patch
   0007-platform-x86-asus-wmi-Refactor-egpu_enable-attribute.patch
-  0007-s2idle-use-microsoft-guid.patch
-  0008-s2idle-use-microsoft-guid.patch
+  0008-ACPI-x86-s2idle-Fix-a-NULL-pointer-dereference.patch
   0008-platform-x86-asus-wmi-Refactor-panel_od-attribute.patch
+  0009-ACPI-x86-s2idle-Add-another-ID-to-s2idle_dmi_table.patch
   0009-platform-x86-asus-wmi-Simplify-some-of-the-_check_pr.patch
   0010-platform-x86-asus-wmi-Support-the-hardware-GPU-MUX-o.patch
   0011-platform-x86-asus-wmi-Adjust-tablet-lidflip-handling.patch
@@ -53,12 +53,10 @@ source=(
   0014-platform-x86-asus-wmi-Simplify-tablet-mode-switch-ha.patch
   0017-asus-wmi-Implement-TUF-laptop-keyboard-LED-modes.patch
   0018-asus-wmi-Implement-TUF-laptop-keyboard-power-states.patch
-  #0019-HID-amd_sfh-Add-keyguard-for-ASUS-ROG-X13-tablet.patch
+  0019-HID-amd_sfh-Add-keyguard-for-ASUS-ROG-X13-tablet.patch
   0020-asus-wmi-Modify-behaviour-of-Fn-F5-fan-key.patch
-  0021-rog-x16-patch-test1.patch
-  0022-gv601r-tablet-mode-test.patch
-  0023-mediatek-bt-add-e0e2.patch
-  0024-pahole-124-fix.patch
+  0021-asus-wmi-Support-the-GPU-fan-on-TUF-laptops.patch
+  0001-asus-wmi-Expand-support-of-GPU-fan-to-read-RPM-and-l.patch
 
   "sys-kernel_arch-sources-g14_files-0047-asus-nb-wmi-Add-tablet_mode_sw-lid-flip.patch"
   "sys-kernel_arch-sources-g14_files-0048-asus-nb-wmi-fix-tablet_mode_sw_int.patch"
@@ -75,11 +73,9 @@ validpgpkeys=(
 sha256sums=('SKIP'
             '7dcbed3f72a2a84dd5b40bbe38c8fa2d82d1d68fcaa657f40163a6123a19886f'
             '278118011d7a2eeca9971ac97b31bf0c55ab55e99c662ab9ae4717b55819c9a2'
-            '380bcf40cc8396e97bd1d7f2577ab2ace51885858d3f155b1fb2dd5469efd00d'
-            'e0f9b3e968568552b7852a5ce41e7fa5b9b8784273c483a9b1372bc420758ff8'
+            'dea86a521603414a8c7bf9cf1f41090d5d6f8035ce31407449e25964befb1e50'
+            'de72d550b099df951a71172b8a9d250d0590d0b23ab47da9245a499d7ecd227b'
             '40e4c300be6681ab3b30042eb4bb5981081ce029b2bdd4773a38b4a9f65e943e'
-            '4246dff9cbaee0de807711824fbc056a836321bb800d3e6ddad18fabc86d3def'
-            '9efcef7aab8094ed3596cba872527d6e838c760ba4f4c5b7b1586a963b71d576'
             'f6f7c233d982be80eb6cd13ba8223d1989eca82107201b6bc4673ce840877aa5'
             'a51b11bd64915454981aeb0aa680efb508a24a6df552caa17cd01e31a776a7e5'
             'ab7f8697494e0969db63ff020aae244e2dc4ee52c06559878938bd042ee20a79'
@@ -107,6 +103,7 @@ sha256sums=('SKIP'
             '6fe53b9f7423b441d1de6e229b656376515fe003e0c6a11c982f75fabbecb018'
             '6907a750183e1f06c4b15014f078bcd15cb4ea498fd9d4c5c4c4d1955dac69d3'
             'c5966a6406f0e3afc512a2881f3298531ecdd8d94eac9a04a84f6773ddf4be3c'
+            'abd1d8def25f7fae0d5590c7fd36ea4dcc479d16d268615d8b3d95c8e8446d44'
             '3aee783f2ccfb4118ecaad65f3198a50dac0ed71c7b2cda85bcf2bb0b4e89125'
             '03fac5ec378d38ed31258aa0570a607a772257b94fa57a1595674c2bcc7b3627'
             '96a1b46af08ce3d7982ad1161f4db06293a60eccb48807adb5103065b027f3d6'
