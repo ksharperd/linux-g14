@@ -1,7 +1,7 @@
 # Maintainer: Jan Alexander Steffens (heftig) <jan.steffens@gmail.com>
 
 pkgbase=linux-g14
-pkgver=6.0.2.arch1
+pkgver=6.0.5.arch1
 pkgrel=1
 pkgdesc='Linux'
 _srctag=v${pkgver%.*}-${pkgver##*.}
@@ -57,6 +57,8 @@ source=(
   0020-asus-wmi-Modify-behaviour-of-Fn-F5-fan-key.patch
   0021-asus-wmi-Support-the-GPU-fan-on-TUF-laptops.patch
   0001-asus-wmi-Expand-support-of-GPU-fan-to-read-RPM-and-l.patch
+  0001-platform-x86-asus-wmi-Add-safety-checks-to-dgpu-egpu.patch
+  0001-platform-x86-asus-wmi-Add-support-for-ROG-X16-tablet.patch
 
   "sys-kernel_arch-sources-g14_files-0047-asus-nb-wmi-Add-tablet_mode_sw-lid-flip.patch"
   "sys-kernel_arch-sources-g14_files-0048-asus-nb-wmi-fix-tablet_mode_sw_int.patch"
@@ -71,28 +73,28 @@ validpgpkeys=(
 )
 
 sha256sums=('SKIP'
-            '7dcbed3f72a2a84dd5b40bbe38c8fa2d82d1d68fcaa657f40163a6123a19886f'
+            '05168cbbeb6378eec6c84fe3300cede4fa5cf6130c39fb8af95040529bd390a6'
             '278118011d7a2eeca9971ac97b31bf0c55ab55e99c662ab9ae4717b55819c9a2'
             'dea86a521603414a8c7bf9cf1f41090d5d6f8035ce31407449e25964befb1e50'
             'de72d550b099df951a71172b8a9d250d0590d0b23ab47da9245a499d7ecd227b'
             '40e4c300be6681ab3b30042eb4bb5981081ce029b2bdd4773a38b4a9f65e943e'
-            'f6f7c233d982be80eb6cd13ba8223d1989eca82107201b6bc4673ce840877aa5'
+            'eb4fb7f1458b421f3e90000786ad35fb322ffaa7b9c750349811726dd5d465f6'
             'a51b11bd64915454981aeb0aa680efb508a24a6df552caa17cd01e31a776a7e5'
-            'ab7f8697494e0969db63ff020aae244e2dc4ee52c06559878938bd042ee20a79'
+            'e77cfe4f291f40c9366b18c26f5d10bbf924e4e91bbcb0e366c8e1613b9b48bb'
             '02424be0d9a42d8b19a5ed0a3a108b35dc31a9e2938efa9cf81f52a682e39f63'
-            'c419173ff28d78bac07f386180065489618ccbcd14bf88298a68d8640ad10c43'
+            'a4e0c094e161b358d0ab306dc70f72663a034ae56ec748450cb7f288e540570a'
             '113289ef6a4e813bae02487a4cf961f821e000a195e25ff4ffcb56eedd42b12b'
-            'fe3a66bac3076918164bcb423851bca9e16ef870be1f6445214c370a4db68dc5'
+            '4a9f461db52dd2adaef07ab2ffef405ac8282c1f434a35f18788ab32b54cae8e'
             'f7b1f4d3c461f010c89507ff378df8232ea5d4bfcda600c5a06e8e09128d5291'
-            '751378e4e8e7d97025087e6b98cd25c6ca4d76b1cf18ffad194776f8824a9320'
+            'c017e520f1f03e16426208418e1b4e062464032edf5cf7ef4935caa40ecc3e53'
             '625e5f05b3fbdccedb1bf48b42422cd8de1f9bb3f621b37c569bd1081ba52e43'
-            '3d0e38901ae7fe4f242ebb6617b5f8745286f82dd6fa862a3275d78e44e57ebc'
+            'e0c3c433d0a4515264553fda4c8e3b3c169ecb479891a8d747fa8a1daf1678e5'
             '4eca79899c890d07f20b79534730d415853e1ec80b38b9b6a30301e5806961f3'
-            '9866928fb441eb03dc273e194a78b8d6563d30389b7f1611201c9a1927628dc5'
+            'ec095a0a730bfce0bd33b3430b5308b5f4dac4613d07775f36236c059c83bf26'
             '7e575f72423e01b74716e1fc21a3364f4cac29366b48caa0cda3504f75071ad3'
-            '349209cf1bb3a6701c4be5348f889ae116d6ae6205a5f3372d1150362ef8d153'
-            '333b5e1fcae0f604606a444a59c80dcc9892ee8a3b9272bc06ec81347898207a'
+            'b66e13b4080f84ff20e80295a4f8776912c3b9f08b80c294f65fc3ffb3ce72af'
             '7057f33c63880a540f5dcba0945140f9dccb2a6de6715eb5853d65c5447c1736'
+            '820ccf495e52d7d39c1e2c14369a5d0fd1902df4244ccb5d9486e9ba45c06a50'
             'd6f06dfee9d7910208c3851e730ccb79bf349b5ea5f8ab74f994489c679c40e3'
             '83ff058305e6fc0920584bff9c8ffd2e48590e659652a7c8ae7fc4310b129ad3'
             '2bbb9725cfdd834553ef30f81609bd9b6c4f6a71caf8da1c65eb413b68d3d98a'
@@ -101,12 +103,12 @@ sha256sums=('SKIP'
             '87d3df1c0eac4b7d301b2dc375f9e754429ca394c9ff09218a00ab1462627e24'
             'b636fc36762bbd8d83a09bcb448d7c2ad176139068e15f162a3da01769a4c6e1'
             '6fe53b9f7423b441d1de6e229b656376515fe003e0c6a11c982f75fabbecb018'
+            'd45e2ae1d21b1dc8e0de94a4fa58e9a53d72306843f87d3cc49f5f641399d8e3'
             '6907a750183e1f06c4b15014f078bcd15cb4ea498fd9d4c5c4c4d1955dac69d3'
-            'c5966a6406f0e3afc512a2881f3298531ecdd8d94eac9a04a84f6773ddf4be3c'
             'abd1d8def25f7fae0d5590c7fd36ea4dcc479d16d268615d8b3d95c8e8446d44'
-            '3aee783f2ccfb4118ecaad65f3198a50dac0ed71c7b2cda85bcf2bb0b4e89125'
-            '03fac5ec378d38ed31258aa0570a607a772257b94fa57a1595674c2bcc7b3627'
-            '96a1b46af08ce3d7982ad1161f4db06293a60eccb48807adb5103065b027f3d6'
+            '9efcef7aab8094ed3596cba872527d6e838c760ba4f4c5b7b1586a963b71d576'
+            '172dbc88d0a3cda78387f3c907fa4953c71cb1cb162f0b34f78b8b78924bc3d4'
+            'ddcd442b780bffde86c51373d6e24c77ecc890375cd0be361d2de9f26826f845'
             '15e912a66e4bbce1cf0450f1dc6610653df29df8dd6d5426f9c1b039490436c8'
             'e9e4b03b836e1a86a2a5dc70b0d5512348eb19742f83bee794a3ab7d91bd41cf'
             '982a31e47d3d586789e1b3cdda25f75e3b71d810e7494202089b8f2cef7c0ef9')
