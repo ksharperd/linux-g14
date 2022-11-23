@@ -1,7 +1,7 @@
 # Maintainer: Jan Alexander Steffens (heftig) <jan.steffens@gmail.com>
 
 pkgbase=linux-g14
-pkgver=6.0.5.arch1
+pkgver=6.0.9.arch1
 pkgrel=1
 pkgdesc='Linux'
 _srctag=v${pkgver%.*}-${pkgver##*.}
@@ -59,6 +59,7 @@ source=(
   0001-asus-wmi-Expand-support-of-GPU-fan-to-read-RPM-and-l.patch
   0001-platform-x86-asus-wmi-Add-safety-checks-to-dgpu-egpu.patch
   0001-platform-x86-asus-wmi-Add-support-for-ROG-X16-tablet.patch
+  0001-Revert-perf-x86-intel-Fix-unchecked-MSR-access-error.patch
 
   "sys-kernel_arch-sources-g14_files-0047-asus-nb-wmi-Add-tablet_mode_sw-lid-flip.patch"
   "sys-kernel_arch-sources-g14_files-0048-asus-nb-wmi-fix-tablet_mode_sw_int.patch"
