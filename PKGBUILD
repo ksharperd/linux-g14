@@ -1,7 +1,7 @@
 # Maintainer: Jan Alexander Steffens (heftig) <jan.steffens@gmail.com>
 
 pkgbase=linux-g14
-pkgver=6.0.9.arch1
+pkgver=6.0.11.arch1
 pkgrel=1
 pkgdesc='Linux'
 _srctag=v${pkgver%.*}-${pkgver##*.}
@@ -110,6 +110,7 @@ sha256sums=('SKIP'
             '9efcef7aab8094ed3596cba872527d6e838c760ba4f4c5b7b1586a963b71d576'
             '172dbc88d0a3cda78387f3c907fa4953c71cb1cb162f0b34f78b8b78924bc3d4'
             'ddcd442b780bffde86c51373d6e24c77ecc890375cd0be361d2de9f26826f845'
+            '6739a42bf9d233cb58ae9a69c3f78959175de695e2d4a7e66bb9984fcf5c0f7e'
             '15e912a66e4bbce1cf0450f1dc6610653df29df8dd6d5426f9c1b039490436c8'
             'e9e4b03b836e1a86a2a5dc70b0d5512348eb19742f83bee794a3ab7d91bd41cf'
             '982a31e47d3d586789e1b3cdda25f75e3b71d810e7494202089b8f2cef7c0ef9')
@@ -123,7 +124,7 @@ sha256sums=('SKIP'
 # 98, Intel Native
 # 99, AMD Native
 if [ -z ${_microarchitecture+x} ]; then
-  _microarchitecture=93
+  _microarchitecture=15
 fi
 
 export KBUILD_BUILD_HOST=archlinux
