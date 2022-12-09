@@ -1,10 +1,10 @@
 # Maintainer: Jan Alexander Steffens (heftig) <jan.steffens@gmail.com>
 
 pkgbase=linux-g14
-pkgver=6.0.12.rc3.arch1
+pkgver=6.0.12.arch1
 pkgrel=1
 pkgdesc='Linux'
-_pkgver=6.0.11.arch1
+_pkgver=6.0.12.arch1
 _srctag=v${_pkgver%.*}-${_pkgver##*.}
 url="https://gitlab.com/dragonn/linux-g14.git"
 arch=(x86_64)
@@ -23,7 +23,7 @@ source=(
   config         # the main kernel config file
   "choose-gcc-optimization.sh"
 
-  "patch-6.0.12-rc3.patch"
+  #"patch-6.0.12-rc3.patch"
 
   "sys-kernel_arch-sources-g14_files-0004-5.17+--more-uarches-for-kernel.patch"::"https://raw.githubusercontent.com/graysky2/kernel_compiler_patch/master/more-uarches-for-kernel-5.17+.patch"
   "sys-kernel_arch-sources-g14_files-0005-lru-multi-generational.patch"
@@ -80,7 +80,7 @@ sha256sums=('SKIP'
             '05168cbbeb6378eec6c84fe3300cede4fa5cf6130c39fb8af95040529bd390a6'
             '278118011d7a2eeca9971ac97b31bf0c55ab55e99c662ab9ae4717b55819c9a2'
 
-            '018ee9d53b3076dea1a3653c5b26b62b4f6a7d69ab8ec93dd9b5588dece14e81'
+            #'018ee9d53b3076dea1a3653c5b26b62b4f6a7d69ab8ec93dd9b5588dece14e81'
 
             'dea86a521603414a8c7bf9cf1f41090d5d6f8035ce31407449e25964befb1e50'
             'de72d550b099df951a71172b8a9d250d0590d0b23ab47da9245a499d7ecd227b'
