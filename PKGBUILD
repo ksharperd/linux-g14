@@ -1,8 +1,8 @@
 # Maintainer: Jan Alexander Steffens (heftig) <jan.steffens@gmail.com>
 
 pkgbase=linux-g14
-pkgver=6.0.11.arch1
-pkgrel=2
+pkgver=6.0.12.arch1
+pkgrel=1
 pkgdesc='Linux'
 _srctag=v${pkgver%.*}-${pkgver##*.}
 url="https://gitlab.com/dragonn/linux-g14.git"
@@ -63,6 +63,7 @@ source=(
   0023-v2-drm-amdgpu-sdma_v4_0-turn-off-SDMA-ring-buffer-in-the-s2idle-suspend.patch
   0024-V8-0-4-PCI-vmd-Enable-PCIe-ASPM-and-LTR-on-select-hardware.patch
   0025-amd-cezanne-s2idle-10ms.patch
+  0026-drm-amdgpu-make-display-pinning-more-flexible-v2.patch
 
   "sys-kernel_arch-sources-g14_files-0047-asus-nb-wmi-Add-tablet_mode_sw-lid-flip.patch"
   "sys-kernel_arch-sources-g14_files-0048-asus-nb-wmi-fix-tablet_mode_sw_int.patch"
