@@ -2,7 +2,7 @@
 
 pkgbase=linux-g14
 pkgver=6.0.12.arch1
-pkgrel=1
+pkgrel=2
 pkgdesc='Linux'
 _srctag=v${pkgver%.*}-${pkgver##*.}
 url="https://gitlab.com/dragonn/linux-g14.git"
@@ -64,6 +64,7 @@ source=(
   0024-V8-0-4-PCI-vmd-Enable-PCIe-ASPM-and-LTR-on-select-hardware.patch
   0025-amd-cezanne-s2idle-10ms.patch
   0026-drm-amdgpu-make-display-pinning-more-flexible-v2.patch
+  0027-mt76_-mt7921_-Disable-powersave-features-by-default.patch
 
   "sys-kernel_arch-sources-g14_files-0047-asus-nb-wmi-Add-tablet_mode_sw-lid-flip.patch"
   "sys-kernel_arch-sources-g14_files-0048-asus-nb-wmi-fix-tablet_mode_sw_int.patch"
