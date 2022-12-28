@@ -1,10 +1,10 @@
 # Maintainer: Jan Alexander Steffens (heftig) <jan.steffens@gmail.com>
 
 pkgbase=linux-g14
-pkgver=6.0.12.arch1
-pkgrel=2
+pkgver=6.1.1.arch1
+pkgrel=1
 pkgdesc='Linux'
-_pkgver=6.0.12.arch1
+_pkgver=6.1.1.arch1
 _srctag=v${_pkgver%.*}-${_pkgver##*.}
 url="https://gitlab.com/dragonn/linux-g14.git"
 arch=(x86_64)
@@ -23,49 +23,14 @@ source=(
   config         # the main kernel config file
   "choose-gcc-optimization.sh"
 
-  #"patch-6.0.12-rc3.patch"
-
   "sys-kernel_arch-sources-g14_files-0004-5.17+--more-uarches-for-kernel.patch"::"https://raw.githubusercontent.com/graysky2/kernel_compiler_patch/master/more-uarches-for-kernel-5.17+.patch"
-  "sys-kernel_arch-sources-g14_files-0005-lru-multi-generational.patch"
 
   0001-acpi-proc-idle-skip-dummy-wait.patch
-  0001-ACPI-x86-s2idle-Move-_HID-handling-for-AMD-systems-i.patch
-  #
-  #
-  0001-platform-x86-asus-wmi-Convert-all-attr-show-to-use-s.patch
-  0002-ACPI-x86-s2idle-If-a-new-AMD-_HID-is-missing-assume-.patch
-  0002-platform-x86-asus-wmi-Use-kobj_to_dev.patch
-  0003-ACPI-x86-s2idle-Add-module-parameter-to-prefer-Micro.patch
-  0003-platform-x86-asus-wmi-Document-the-dgpu_disable-sysf.patch
-  0004-ACPI-x86-s2idle-Add-a-quirk-for-ASUS-TUF-Gaming-A17-.patch
-  0004-platform-x86-asus-wmi-Document-the-egpu_enable-sysfs.patch
-  0005-ACPI-x86-s2idle-Add-a-quirk-for-ASUS-ROG-Zephyrus-G1.patch
-  0005-platform-x86-asus-wmi-Document-the-panel_od-sysfs-at.patch
-  0006-ACPI-x86-s2idle-Add-a-quirk-for-Lenovo-Slim-7-Pro-14.patch
-  0006-platform-x86-asus-wmi-Refactor-disable_gpu-attribute.patch
-  0007-ACPI-x86-s2idle-Add-a-quirk-for-ASUSTeK-COMPUTER-INC.patch
-  0007-platform-x86-asus-wmi-Refactor-egpu_enable-attribute.patch
-  0008-ACPI-x86-s2idle-Fix-a-NULL-pointer-dereference.patch
-  0008-platform-x86-asus-wmi-Refactor-panel_od-attribute.patch
-  0009-ACPI-x86-s2idle-Add-another-ID-to-s2idle_dmi_table.patch
-  0009-platform-x86-asus-wmi-Simplify-some-of-the-_check_pr.patch
-  0010-platform-x86-asus-wmi-Support-the-hardware-GPU-MUX-o.patch
-  0011-platform-x86-asus-wmi-Adjust-tablet-lidflip-handling.patch
-  0012-platform-x86-asus-wmi-Add-support-for-ROG-X13-tablet.patch
-  0013-platform-x86-asus-wmi-Simplify-tablet-mode-switch-pr.patch
-  0014-platform-x86-asus-wmi-Simplify-tablet-mode-switch-ha.patch
-  0017-asus-wmi-Implement-TUF-laptop-keyboard-LED-modes.patch
-  0018-asus-wmi-Implement-TUF-laptop-keyboard-power-states.patch
+
   0019-HID-amd_sfh-Add-keyguard-for-ASUS-ROG-X13-tablet.patch
-  0020-asus-wmi-Modify-behaviour-of-Fn-F5-fan-key.patch
-  0021-asus-wmi-Support-the-GPU-fan-on-TUF-laptops.patch
-  0001-asus-wmi-Expand-support-of-GPU-fan-to-read-RPM-and-l.patch
   0001-platform-x86-asus-wmi-Add-safety-checks-to-dgpu-egpu.patch
-  0001-platform-x86-asus-wmi-Add-support-for-ROG-X16-tablet.patch
   0001-Revert-perf-x86-intel-Fix-unchecked-MSR-access-error.patch
-  0023-v2-drm-amdgpu-sdma_v4_0-turn-off-SDMA-ring-buffer-in-the-s2idle-suspend.patch
   0024-V8-0-4-PCI-vmd-Enable-PCIe-ASPM-and-LTR-on-select-hardware.patch
-  0025-amd-cezanne-s2idle-10ms.patch
   0026-drm-amdgpu-make-display-pinning-more-flexible-v2.patch
   0027-mt76_-mt7921_-Disable-powersave-features-by-default.patch
 
@@ -82,55 +47,18 @@ validpgpkeys=(
 )
 
 sha256sums=('SKIP'
-            '05168cbbeb6378eec6c84fe3300cede4fa5cf6130c39fb8af95040529bd390a6'
+            '70cf3252ff877cb91ca7eba13439ae181e693513b09ff43e83c48d2b0b46d0f8'
             '278118011d7a2eeca9971ac97b31bf0c55ab55e99c662ab9ae4717b55819c9a2'
-
-            #'018ee9d53b3076dea1a3653c5b26b62b4f6a7d69ab8ec93dd9b5588dece14e81'
-
             'dea86a521603414a8c7bf9cf1f41090d5d6f8035ce31407449e25964befb1e50'
-            'de72d550b099df951a71172b8a9d250d0590d0b23ab47da9245a499d7ecd227b'
             '40e4c300be6681ab3b30042eb4bb5981081ce029b2bdd4773a38b4a9f65e943e'
-            'eb4fb7f1458b421f3e90000786ad35fb322ffaa7b9c750349811726dd5d465f6'
-            'a51b11bd64915454981aeb0aa680efb508a24a6df552caa17cd01e31a776a7e5'
-            'e77cfe4f291f40c9366b18c26f5d10bbf924e4e91bbcb0e366c8e1613b9b48bb'
-            '02424be0d9a42d8b19a5ed0a3a108b35dc31a9e2938efa9cf81f52a682e39f63'
-            'a4e0c094e161b358d0ab306dc70f72663a034ae56ec748450cb7f288e540570a'
-            '113289ef6a4e813bae02487a4cf961f821e000a195e25ff4ffcb56eedd42b12b'
-            '4a9f461db52dd2adaef07ab2ffef405ac8282c1f434a35f18788ab32b54cae8e'
-            'f7b1f4d3c461f010c89507ff378df8232ea5d4bfcda600c5a06e8e09128d5291'
-            'c017e520f1f03e16426208418e1b4e062464032edf5cf7ef4935caa40ecc3e53'
-            '625e5f05b3fbdccedb1bf48b42422cd8de1f9bb3f621b37c569bd1081ba52e43'
-            'e0c3c433d0a4515264553fda4c8e3b3c169ecb479891a8d747fa8a1daf1678e5'
-            '4eca79899c890d07f20b79534730d415853e1ec80b38b9b6a30301e5806961f3'
-            'ec095a0a730bfce0bd33b3430b5308b5f4dac4613d07775f36236c059c83bf26'
-            '7e575f72423e01b74716e1fc21a3364f4cac29366b48caa0cda3504f75071ad3'
-            'b66e13b4080f84ff20e80295a4f8776912c3b9f08b80c294f65fc3ffb3ce72af'
-            '7057f33c63880a540f5dcba0945140f9dccb2a6de6715eb5853d65c5447c1736'
-            '820ccf495e52d7d39c1e2c14369a5d0fd1902df4244ccb5d9486e9ba45c06a50'
-            'd6f06dfee9d7910208c3851e730ccb79bf349b5ea5f8ab74f994489c679c40e3'
-            '83ff058305e6fc0920584bff9c8ffd2e48590e659652a7c8ae7fc4310b129ad3'
-            '2bbb9725cfdd834553ef30f81609bd9b6c4f6a71caf8da1c65eb413b68d3d98a'
-            '92e63800f0ec71456345cd7152dac44996ea24e4bc24a3a5a07c6e8e29d4ab6e'
-            'c47962c06c85fcaa8c8cc5a9bbd8eff56968caeb4e777ef99f2bbda731398718'
-            '87d3df1c0eac4b7d301b2dc375f9e754429ca394c9ff09218a00ab1462627e24'
-            'b636fc36762bbd8d83a09bcb448d7c2ad176139068e15f162a3da01769a4c6e1'
-            '6fe53b9f7423b441d1de6e229b656376515fe003e0c6a11c982f75fabbecb018'
             'd45e2ae1d21b1dc8e0de94a4fa58e9a53d72306843f87d3cc49f5f641399d8e3'
-            '6907a750183e1f06c4b15014f078bcd15cb4ea498fd9d4c5c4c4d1955dac69d3'
-            'abd1d8def25f7fae0d5590c7fd36ea4dcc479d16d268615d8b3d95c8e8446d44'
-            '9efcef7aab8094ed3596cba872527d6e838c760ba4f4c5b7b1586a963b71d576'
             '172dbc88d0a3cda78387f3c907fa4953c71cb1cb162f0b34f78b8b78924bc3d4'
-            'ddcd442b780bffde86c51373d6e24c77ecc890375cd0be361d2de9f26826f845'
             '6739a42bf9d233cb58ae9a69c3f78959175de695e2d4a7e66bb9984fcf5c0f7e'
-
-            '7836244db0c94ebc3ab7ed6a749ebb04ec044f8cc804e7951b077dea8c629ca0'
             'f036ac8a49153f66d7d8638508cfe0b4a158d12faf30d2c671b04a6b7b606b3b'
-            'f312bc4da618ecac0da8b3be9e0405fc1987f75ae5205783e5b207b8cb1e944e'
             '949c025ea8b46168cd7c6f0dc6b9513905a8d94ad6ed11ba95de65f336ec62e3'
             'a691e7b22633fe0c458d140167d6d381b66149e05de3cb926b30a19fd43e78ce'
-
             '15e912a66e4bbce1cf0450f1dc6610653df29df8dd6d5426f9c1b039490436c8'
-            'e9e4b03b836e1a86a2a5dc70b0d5512348eb19742f83bee794a3ab7d91bd41cf'
+            '444f2d86de8c2177655b01596f939f99c2e7abfa8efad8a509e0a334f42dfa85'
             '982a31e47d3d586789e1b3cdda25f75e3b71d810e7494202089b8f2cef7c0ef9')
 
 # notable microarch levels:
