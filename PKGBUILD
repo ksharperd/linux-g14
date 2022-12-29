@@ -34,6 +34,7 @@ source=(
   0026-drm-amdgpu-make-display-pinning-more-flexible-v2.patch
   0027-mt76_-mt7921_-Disable-powersave-features-by-default.patch
 
+  "sys-kernel_arch-sources-g14_files-9909-amd-pstate-epp-v9.patch"
   "sys-kernel_arch-sources-g14_files-0047-asus-nb-wmi-Add-tablet_mode_sw-lid-flip.patch"
   "sys-kernel_arch-sources-g14_files-0048-asus-nb-wmi-fix-tablet_mode_sw_int.patch"
   "sys-kernel_arch-sources-g14_files-0049-ALSA-hda-realtek-Add-quirk-for-ASUS-M16-GU603H.patch"
@@ -57,6 +58,7 @@ sha256sums=('SKIP'
             'f036ac8a49153f66d7d8638508cfe0b4a158d12faf30d2c671b04a6b7b606b3b'
             '949c025ea8b46168cd7c6f0dc6b9513905a8d94ad6ed11ba95de65f336ec62e3'
             'a691e7b22633fe0c458d140167d6d381b66149e05de3cb926b30a19fd43e78ce'
+            '8272a6b8407bd7f99cf022712bb46081b9eadc4c80f6b510b9d925c49e751091'
             '15e912a66e4bbce1cf0450f1dc6610653df29df8dd6d5426f9c1b039490436c8'
             '444f2d86de8c2177655b01596f939f99c2e7abfa8efad8a509e0a334f42dfa85'
             '982a31e47d3d586789e1b3cdda25f75e3b71d810e7494202089b8f2cef7c0ef9')
