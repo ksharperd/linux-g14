@@ -1,0 +1,45 @@
+diff --git a/drivers/net/wireless/mediatek/mt76/dma.c b/drivers/net/wireless/mediatek/mt76/dma.c
+index fc24b35..76ad47d 100644
+--- a/drivers/net/wireless/mediatek/mt76/dma.c
++++ b/drivers/net/wireless/mediatek/mt76/dma.c
+@@ -580,24 +580,29 @@ mt76_dma_rx_fill(struct mt76_dev *dev, struct mt76_queue *q)
+ 
+ 		buf = page_frag_alloc(&q->rx_page, q->buf_size, GFP_ATOMIC);
+ 		if (!buf)
+-			break;
++			goto out;
+ 
+ 		addr = dma_map_single(dev->dma_dev, buf, len, DMA_FROM_DEVICE);
+-		if (unlikely(dma_mapping_error(dev->dma_dev, addr))) {
+-			skb_free_frag(buf);
+-			break;
+-		}
++		if (unlikely(dma_mapping_error(dev->dma_dev, addr)))
++			goto free;
+ 
+ 		qbuf.addr = addr + offset;
+ 		qbuf.len = len - offset;
+ 		qbuf.skip_unmap = false;
+-		if (mt76_dma_add_buf(dev, q, &qbuf, 1, 0, buf, t) < 0) {
+-			dma_unmap_single(dev->dma_dev, addr, len,
+-					 DMA_FROM_DEVICE);
+-			skb_free_frag(buf);
+-			break;
+-		}
++		if (mt76_dma_add_buf(dev, q, &qbuf, 1, 0, buf, t) < 0)
++			goto umap;
++
+ 		frames++;
++		continue;
++
++umap:
++		dma_unmap_single(dev->dma_dev, addr, len,
++				 DMA_FROM_DEVICE);
++free:
++		skb_free_frag(buf);
++out:
++		mt76_put_rxwi(dev, t);
++		break;
+ 	}
+ 
+ 	if (frames)
