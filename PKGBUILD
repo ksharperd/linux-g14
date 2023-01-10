@@ -1,10 +1,10 @@
 # Maintainer: Jan Alexander Steffens (heftig) <jan.steffens@gmail.com>
 
 pkgbase=linux-g14
-pkgver=6.1.2.arch1
+pkgver=6.1.4.arch1
 pkgrel=1
 pkgdesc='Linux'
-_pkgver=6.1.2.arch1
+_pkgver=6.1.4.arch1
 _srctag=v${_pkgver%.*}-${_pkgver##*.}
 url="https://gitlab.com/dragonn/linux-g14.git"
 arch=(x86_64)
